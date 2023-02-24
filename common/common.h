@@ -23,6 +23,10 @@
 
 #define VERSION "1.9.2"
 
+static inline uint32_t le16(const uint8_t *p) {
+	return p[0] | p[1] << 8;
+}
+
 static inline uint32_t le32(const uint8_t *p) {
 	return p[0] | p[1] << 8 | p[2] << 16 | p[3] << 24;
 }
@@ -184,10 +188,12 @@ typedef struct {
 // opcodes
 
 enum {
+	// TODO: remove
 	OP_AND = 0x74,
 	OP_OR,
 	OP_XOR,
-	OP_MUL,
+
+	OP_MUL = 0x77,
 	OP_DIV,
 	OP_ADD,
 	OP_SUB,
@@ -197,6 +203,8 @@ enum {
 	OP_NE,
 	OP_END, // End of expression
 };
+
+// TODO: remove
 enum {
 	OP_C0_INDEX = 1,
 	OP_C0_MOD,

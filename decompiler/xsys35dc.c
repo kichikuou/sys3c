@@ -55,31 +55,19 @@ static void version(void) {
 
 static Sco *sco_new(int page, const uint8_t *data, int len, int volume) {
 	char name[10];
-	sprintf(name, "%d.sco", page);
 	Sco *sco = calloc(1, sizeof(Sco));
 	sco->data = data;
 	sco->mark = calloc(1, len + 1);
-	sco->sco_name = name;
+	sprintf(name, "%d.sco", page);
+	sco->sco_name = strdup(name);
+	sprintf(name, "%d.adv", page);
+	sco->src_name = strdup(name);
 	sco->ald_volume = volume;
-	if (!memcmp(data, "S350", 4))
-		sco->version = SCO_S350;
-	else if (!memcmp(data, "S351", 4))
-		sco->version = SCO_S351;
-	else if (!memcmp(data, "153S", 4))
-		sco->version = SCO_153S;
-	else if (!memcmp(data, "S360", 4))
-		sco->version = SCO_S360;
-	else if (!memcmp(data, "S380", 4))
-		sco->version = SCO_S380;
-	else
-		error("%s: unknown SCO signature", sjis2utf(name));
-	sco->hdrsize = le32(data + 4);
-	sco->filesize = le32(data + 8);
-	sco->page = le32(data + 12);
-	int namelen = data[16] | data[17] << 8;
-	sco->src_name = strndup_((char *)data + 18, namelen);
+	sco->hdrsize = 2;
+	sco->filesize = le16(data) + 2 - 1;  // -1 for EOF character (\x1a)
+	sco->page = page;
 
-	if (len != sco->filesize) {
+	if (len < sco->filesize) {
 		error("%s: unexpected file size in SCO header (expected %d, got %d)",
 			  sjis2utf(name), len, sco->filesize);
 	}

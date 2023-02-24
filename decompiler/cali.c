@@ -53,9 +53,6 @@ static Cali *parse(const uint8_t **code, bool is_lhs) {
 			*code = p;
 			return *--top;
 
-		case OP_AND:
-		case OP_OR:
-		case OP_XOR:
 		case OP_MUL:
 		case OP_DIV:
 		case OP_ADD:
@@ -80,44 +77,10 @@ static Cali *parse(const uint8_t **code, bool is_lhs) {
 			}
 			break;
 
-		case 0xc0:
-			op = *p++;
-			if (op >= 0x40) {
-				*top++ = new_node(NODE_VARIABLE, op, NULL, NULL);
-				break;
-			}
-			switch (op) {
-			case OP_C0_INDEX:
-				{
-					int var = p[0] << 8 | p[1];
-					p += 2;
-					Cali *index = parse(&p, false);
-					*top++ = new_node(NODE_AREF, var, index, NULL);
-				}
-				break;
-
-			case OP_C0_MOD:
-			case OP_C0_LE:
-			case OP_C0_GE:
-				{
-					if (top - 2 < stack)
-						error_at(p, "stack underflow");
-					Cali *rhs = *--top;
-					Cali *lhs = *--top;
-					*top++ = new_node(NODE_OP, op, lhs, rhs);
-				}
-				break;
-
-			default:
-				error_at(p, "unknown code c0 %02x", op);
-				break;
-			}
-			break;
-
 		default:
 			if (op & 0x80) {
 				int var = op & 0x3f;
-				if (op > 0xc0)
+				if (op >= 0xc0)
 					var = var << 8 | *p++;
 				*top++ = new_node(NODE_VARIABLE, var, NULL, NULL);
 			} else {

@@ -179,28 +179,6 @@ static void read_hed(const char *path, Vector *sources, Map *dlls) {
 	}
 }
 
-static char *sconame(const char *advname) {
-	// If advname ends with ".adv", replace it with ".sco"
-	char *dot = strrchr(advname, '.');
-	if (dot) {
-		if (!strcmp(dot + 1, "adv")) {
-			char *s = strdup(advname);
-			strcpy(s + strlen(advname) - 3, "sco");
-			return s;
-		}
-		if (!strcasecmp(dot + 1, "ADV")) {
-			char *s = strdup(advname);
-			strcpy(s + strlen(advname) - 3, "SCO");
-			return s;
-		}
-	}
-	// Otherwise appends ".sco" to advname
-	char *s = malloc(strlen(advname) + 5);
-	strcpy(s, advname);
-	strcat(s, ".sco");
-	return s;
-}
-
 static void build(Vector *src_paths, Vector *variables, Map *dlls, const char *ald_basename, const char *ain_path) {
 	Map *srcs = new_map();
 	for (int i = 0; i < src_paths->len; i++) {
