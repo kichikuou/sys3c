@@ -53,7 +53,9 @@ static void version(void) {
 	puts("xsys35dc " VERSION);
 }
 
-Sco *sco_new(const char *name, const uint8_t *data, int len, int volume) {
+static Sco *sco_new(int page, const uint8_t *data, int len, int volume) {
+	char name[10];
+	sprintf(name, "%d.sco", page);
 	Sco *sco = calloc(1, sizeof(Sco));
 	sco->data = data;
 	sco->mark = calloc(1, len + 1);
@@ -182,7 +184,7 @@ int main(int argc, char *argv[]) {
 		AldEntry *e = scos->data[i];
 		if (!e)
 			continue;
-		Sco *sco = sco_new(e->name, e->data, e->size, e->volume);
+		Sco *sco = sco_new(i + 1, e->data, e->size, e->volume);
 		scos->data[i] = sco;
 		if (seq) {
 			char buf[16];

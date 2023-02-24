@@ -59,7 +59,7 @@ static Vector *read_alds(int *pargc, char **pargv[]) {
 	Vector *ald = NULL;
 	for (int i = 0; i < argc; i++) {
 		const char *dot = strrchr(argv[i], '.');
-		if (!dot || strcasecmp(dot, ".ald"))
+		if (!dot || strcasecmp(dot, ".dat"))
 			break;
 		ald = ald_read(ald, argv[i]);
 		*pargc -= 1;
@@ -83,11 +83,6 @@ static AldEntry *find_entry(Vector *ald, const char *num_or_name) {
 		return ald->data[idx-1];
 	}
 
-	for (int i = 0; i < ald->len; i++) {
-		AldEntry *e = ald->data[i];
-		if (e && !strcasecmp(num_or_name, sjis2utf(e->name)))
-			return e;
-	}
 	fprintf(stderr, "ald: No entry for '%s'\n", num_or_name);
 	return NULL;
 }
@@ -96,7 +91,7 @@ static void write_manifest(Vector *ald, FILE *fp) {
 	for (int i = 0; i < ald->len; i++) {
 		AldEntry *e = ald->data[i];
 		if (e)
-			fprintf(fp, "%d,%d,%s\n", e->volume, i + 1, sjis2utf(e->name));
+			fprintf(fp, "%d,%d,%d.out\n", e->volume, i + 1, i + 1);
 	}
 }
 
@@ -114,14 +109,11 @@ static int do_list(int argc, char *argv[]) {
 	Vector *ald = new_vec();
 	for (int i = 1; i < argc; i++)
 		ald_read(ald, argv[i]);
-	char buf[30];
 	for (int i = 0; i < ald->len; i++) {
 		AldEntry *e = ald->data[i];
 		if (!e)
 			continue;
-		struct tm *t = localtime(&e->timestamp);
-		strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", t);
-		printf("%4d %2d  %s  %8d  %s\n", i + 1, e->volume, buf, e->size, sjis2utf(e->name));
+		printf("%4d %2d  %8d\n", i + 1, e->volume, e->size);
 	}
 	return 0;
 }
@@ -154,8 +146,6 @@ static void add_file(Vector *ald, int volume, int no, const char *path) {
 	fclose(fp);
 
 	AldEntry *e = calloc(1, sizeof(AldEntry));
-	e->name = utf2sjis_sub(basename_utf8(path), '?');
-	e->timestamp = sbuf.st_mtime;
 	e->data = data;
 	e->size = sbuf.st_size;
 	e->volume = volume;
@@ -261,27 +251,12 @@ static void help_extract(void) {
 }
 
 static void extract_entry(AldEntry *e, const char *directory) {
-	const char *utf_name = sjis2utf(e->name);
-	puts(utf_name);
-	FILE *fp = checked_fopen(path_join(directory, utf_name), "wb");
+	char name[20];
+	sprintf(name, "%d.out", e->id);
+	puts(name);
+	FILE *fp = checked_fopen(path_join(directory, name), "wb");
 	if (e->size > 0 && fwrite(e->data, e->size, 1, fp) != 1)
-		error("%s: %s", sjis2utf(e->name), strerror(errno));
-
-	fflush(fp);
-#ifdef _WIN32
-	struct _utimbuf times = {
-		.actime = e->timestamp,
-		.modtime = e->timestamp
-	};
-	_futime(_fileno(fp), &times);
-#else
-	struct timespec times[2] = {
-		[0].tv_nsec = UTIME_OMIT,
-		[1].tv_sec = e->timestamp
-	};
-	futimens(fileno(fp), times);
-#endif
-
+		error("%s: %s", name, strerror(errno));
 	fclose(fp);
 }
 
@@ -411,10 +386,6 @@ static void help_compare(void) {
 }
 
 static bool compare_entry(int page, AldEntry *e1, AldEntry *e2) {
-	if (strcasecmp(e1->name, e2->name)) {
-		printf("Entry %d: names differ, %s != %s\n", page, sjis2utf(e1->name), sjis2utf(e2->name));
-		return true;
-	}
 	if (e1->size == e2->size && !memcmp(e1->data, e2->data, e1->size))
 		return false;
 
@@ -423,7 +394,7 @@ static bool compare_entry(int page, AldEntry *e1, AldEntry *e2) {
 		if (e1->data[i] != e2->data[i])
 			break;
 	}
-	printf("%s (%d): differ at %05x\n", sjis2utf(e1->name), page, i);
+	printf("page %d: differ at %05x\n", page, i);
 	return true;
 }
 
@@ -440,26 +411,22 @@ static int do_compare(int argc, char *argv[]) {
 	bool differs = false;
 	for (int i = 0; i < ald1->len && i < ald2->len; i++) {
 		if (ald1->data[i] && ald2->data[i]) {
-			differs |= compare_entry(i, ald1->data[i], ald2->data[i]);
+			differs |= compare_entry(i + 1, ald1->data[i], ald2->data[i]);
 		} else if (ald1->data[i]) {
-			AldEntry *e = ald1->data[i];
-			printf("%s (%d) only exists in %s\n", sjis2utf(e->name), i, aldfile1);
+			printf("page %d only exists in %s\n", i + 1, aldfile1);
 			differs = true;
 		} else if (ald2->data[i]) {
-			AldEntry *e = ald2->data[i];
-			printf("%s (%d) only exists in %s\n", sjis2utf(e->name), i, aldfile2);
+			printf("page %d only exists in %s\n", i + 1, aldfile2);
 			differs = true;
 		}
 	}
 
 	for (int i = ald2->len; i < ald1->len; i++) {
-		AldEntry *e = ald1->data[i];
-		printf("%s (%d) only exists in %s\n", sjis2utf(e->name), i, aldfile1);
+		printf("page %d only exists in %s\n", i + 1, aldfile1);
 		differs = true;
 	}
 	for (int i = ald1->len; i < ald2->len; i++) {
-		AldEntry *e = ald2->data[i];
-		printf("%s (%d) only exists in %s\n", sjis2utf(e->name), i, aldfile2);
+		printf("page %d only exists in %s\n", i + 1, aldfile2);
 		differs = true;
 	}
 	return differs ? 1 : 0;

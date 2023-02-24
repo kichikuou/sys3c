@@ -227,8 +227,6 @@ static void build(Vector *src_paths, Vector *variables, Map *dlls, const char *a
 		Sco *sco = compile(compiler, source, i);
 		AldEntry *e = calloc(1, sizeof(AldEntry));
 		e->volume = sco->ald_volume;
-		e->name = utf2sjis_sub(sconame(basename_utf8(srcs->keys->data[i])), '?');
-		e->timestamp = time(NULL);
 		e->data = sco->buf->buf;
 		e->size = sco->buf->len;
 		vec_push(ald, e);

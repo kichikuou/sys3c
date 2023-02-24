@@ -131,8 +131,7 @@ typedef int (*HashKeyCompare)(const void *k1, const void *k2);
 
 typedef struct {
 	HashItem *table;
-	uint32_t size;
-	uint32_t occupied;
+	uint32_t size;	uint32_t occupied;
 	HashFunc hash;
 	HashKeyCompare compare;
 } HashMap;
@@ -146,8 +145,7 @@ HashItem *hash_iterate(HashMap *m, HashItem *item);
 // ald.c
 
 typedef struct {
-	const char *name;  // in SJIS
-	time_t timestamp;
+	int id;      // 1-based
 	const uint8_t *data;
 	int size;
 	int volume;  // volume id (1 for *A.ALD, 2 for *B.ALD, ...)

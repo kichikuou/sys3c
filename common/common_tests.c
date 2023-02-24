@@ -16,12 +16,10 @@
  *
 */
 
-void ald_test(void);
 void sjisutf_test(void);
 void util_test(void);
 
 int main() {
-	ald_test();
 	sjisutf_test();
 	util_test();
 }
