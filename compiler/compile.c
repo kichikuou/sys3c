@@ -76,15 +76,7 @@ static void variable(char *id, bool create) {
 	int var = lookup_var(id, create);
 	if (compiling && var < 0)
 		error_at(input - strlen(id), "Undefined variable '%s'", id);
-	if (consume('[')) {
-		emit(out, 0xc0);
-		emit(out, OP_C0_INDEX);
-		emit_word_be(out, var);
-		expr();
-		expect(']');
-	} else {
-		emit_var(out, var);
-	}
+	emit_var(out, var);
 }
 
 static void number(void) {
@@ -132,10 +124,6 @@ static void expr_mul(void) {
 		} else if (consume('/')) {
 			expr_prim();
 			emit(out, OP_DIV);
-		} else if (consume('%')) {
-			expr_prim();
-			emit(out, 0xc0);
-			emit(out, OP_C0_MOD);
 		} else {
 			break;
 		}
@@ -158,44 +146,19 @@ static void expr_add(void) {
 	}
 }
 
-// bit ::= add ('&' add | '|' add | '^' add)*
-static void expr_bit(void) {
-	expr_add();
-	for (;;) {
-		if (consume('&')) {
-			expr_add();
-			emit(out, OP_AND);
-		} else if (consume('|')) {
-			expr_add();
-			emit(out, OP_OR);
-		} else if (consume('^')) {
-			expr_add();
-			emit(out, OP_XOR);
-		} else {
-			break;
-		}
-	}
-}
-
-// compare ::= bit ('<' bit | '>' bit | '<=' bit | '>=' bit)*
+// compare ::= add ('<' add | '>' add | '<=' add | '>=' add)*
 static void expr_compare(void) {
-	expr_bit();
+	expr_add();
 	for (;;) {
 		int op = 0;
 		if (consume('<')) {
 			op = OP_LT;
-			if (consume('='))
-				op = OP_C0_LE;
 		} else if (consume('>')) {
 			op = OP_GT;
-			if (consume('='))
-				op = OP_C0_GE;
 		}
 		if (!op)
 			break;
-		expr_bit();
-		if (op == OP_C0_LE || op == OP_C0_GE)
-			emit(out, 0xc0);
+		expr_add();
 		emit(out, op);
 	}
 }
@@ -269,7 +232,7 @@ static void add_label(void) {
 	l->addr = current_address(out);
 
 	while (l->hole_addr)
-		l->hole_addr = swap_dword(out, l->hole_addr, l->addr);
+		l->hole_addr = swap_word(out, l->hole_addr, l->addr);
 }
 
 static Label *label(void) {
@@ -278,11 +241,11 @@ static Label *label(void) {
 		return NULL;
 	Label *l = lookup_label(id);
 	if (!l->addr) {
-		emit_dword(out, l->hole_addr);
-		l->hole_addr = current_address(out) - 4;
+		emit_word(out, l->hole_addr);
+		l->hole_addr = current_address(out) - 2;
 	} else {
 		assert(!l->hole_addr);
-		emit_dword(out, l->addr);
+		emit_word(out, l->addr);
 	}
 	return l;
 }
@@ -430,79 +393,6 @@ static void number_array(void) {
 	}
 }
 
-static void dll_arguments(DLLFunc *f) {
-	bool need_comma = false;
-	for (int i = 0; i < f->argc; i++) {
-		switch (f->argtypes[i]) {
-		case HEL_pword:
-		case HEL_int:
-		case HEL_IString:
-			if (need_comma)
-				expect(',');
-			expr();
-			need_comma = true;
-			break;
-		case HEL_ISurface:
-		case HEL_IWinMsg:
-		case HEL_ITimer:
-		case HEL_IUI:
-		case HEL_ISys3xDIB:
-		case HEL_ISys3xCG:
-		case HEL_ISys3xStringTable:
-		case HEL_ISys3xSystem:
-		case HEL_ISys3xMusic:
-		case HEL_ISys3xMsgString:
-		case HEL_ISys3xInputDevice:
-		case HEL_ISys3x:
-			emit_number(out, 0);
-			emit(out, OP_END);
-			break;
-		case HEL_IConstString:
-			if (need_comma)
-				expect(',');
-			expect('"');
-			compile_string(out, '"', false, false);
-			emit(out, 0);
-			need_comma = true;
-			break;
-		default:
-			error("argtype %d not implemented", f->argtypes[i]);
-		}
-	}
-	expect(':');
-}
-
-static int hel_index(const char *dllname) {
-	for (int i = 0; i < compiler->dlls->keys->len; i++) {
-		Vector *funcs = compiler->dlls->vals->data[i];
-		if (funcs->len > 0 && !strcmp(compiler->dlls->keys->data[i], dllname))
-			return i;
-	}
-	return -1;
-}
-
-static void dll_call(void) {
-	const char *dot = strchr(input, '.');
-	assert(dot);
-	const char *dllname = strndup_(input, dot - input);
-	int dll_index = hel_index(dllname);
-	if (dll_index < 0)
-		error_at(input, "unknown DLL name '%s'", dllname);
-	emit_dword(out, dll_index);
-	Vector *funcs = compiler->dlls->vals->data[dll_index];
-	input = dot + 1;
-	const char *funcname = get_identifier();
-	for (int i = 0; i < funcs->len; i++) {
-		DLLFunc *f = funcs->data[i];
-		if (!strcmp(f->name, funcname)) {
-			emit_dword(out, i);
-			dll_arguments(f);
-			return;
-		}
-	}
-	error_at(dot + 1, "unknown DLL function '%s'", funcname);
-}
-
 // Compile command arguments. Directives:
 //  e: expression
 //  n: number (ascii digits)
@@ -618,7 +508,7 @@ static void conditional(void) {
 	expr();
 	expect(':');
 	int hole = current_address(out);
-	emit_dword(out, 0);
+	emit_word(out, 0);
 
 	if (branch_end_stack) {
 		stack_push(branch_end_stack, hole);
@@ -627,23 +517,7 @@ static void conditional(void) {
 
 	commands();
 	expect('}');
-	if (config.sys_ver >= SYSTEM38 && !config.disable_else) {
-		emit(out, '@'); // Label jump
-		emit_dword(out, 0);
-		swap_dword(out, hole, current_address(out));
-		hole = current_address(out) - 4;
-		if (consume_keyword("else")) {
-			if (consume_keyword("if")) {
-				expect('{');
-				conditional();
-			} else {
-				expect('{');
-				commands();
-				expect('}');
-			}
-		}
-	}
-	swap_dword(out, hole, current_address(out));
+	swap_word(out, hole, current_address(out));
 }
 
 // while-loop ::= '<@' expr ':' commands '>'
@@ -653,15 +527,15 @@ static void while_loop(void) {
 	expr();
 	expect(':');
 	int end_hole = current_address(out);
-	emit_dword(out, 0);
+	emit_word(out, 0);
 
 	commands();
 
 	expect('>');
 	emit(out, '>');
-	emit_dword(out, loop_addr);
+	emit_word(out, loop_addr);
 
-	swap_dword(out, end_hole, current_address(out));
+	swap_word(out, end_hole, current_address(out));
 }
 
 // for-loop ::= '<' var ',' expr ',' expr ',' expr ',' expr ':' commands '>'
@@ -682,7 +556,7 @@ static void for_loop(void) {
 	emit(out, 0x01);
 
 	int end_hole = current_address(out);
-	emit_dword(out, 0);
+	emit_word(out, 0);
 
 	// Copy the opcode for the variable.
 	for (int i = var_begin; i < var_end; i++)
@@ -700,9 +574,9 @@ static void for_loop(void) {
 
 	expect('>');
 	emit(out, '>');
-	emit_dword(out, loop_addr);
+	emit_word(out, loop_addr);
 
-	swap_dword(out, end_hole, current_address(out));
+	swap_word(out, end_hole, current_address(out));
 }
 
 static void pragma(void) {
@@ -728,13 +602,6 @@ static void pragma(void) {
 	}
 }
 
-static int subcommand_num(void) {
-	int n = get_number();
-	emit(out, n);
-	consume(',');
-	return n;
-}
-
 static bool command(void) {
 	skip_whitespaces();
 	if (out && compiler->dbg_info)
@@ -751,23 +618,7 @@ static bool command(void) {
 		break;
 
 	case '\'': // Message
-		switch (config.sys_ver) {
-		case SYSTEM39:
-			if (use_ain_message()) {
-				emit_command(out, COMMAND_ainMsg);
-				compile_message(compiler->msg_buf);
-				emit_dword(out, compiler->msg_count++);
-				break;
-			}
-			// fall through
-		case SYSTEM38:
-			emit_command(out, COMMAND_msg);
-			compile_message(out);
-			break;
-		default:
-			compile_string(out, '\'', config.sys_ver == SYSTEM35, true);
-			break;
-		}
+		compile_string(out, '\'', config.sys_ver == SYSTEM35, true);
 		break;
 
 	case '!':  // Assign
@@ -781,7 +632,7 @@ static bool command(void) {
 	case '}':
 		if (branch_end_stack && branch_end_stack->len > 0) {
 			expect('}');
-			swap_dword(out, stack_top(branch_end_stack), current_address(out));
+			swap_word(out, stack_top(branch_end_stack), current_address(out));
 			stack_pop(branch_end_stack);
 		} else {
 			return false;
@@ -806,7 +657,7 @@ static bool command(void) {
 	case '\\': // Label call
 		emit(out, cmd);
 		if (consume('0'))
-			emit_dword(out, 0);  // Return
+			emit_word(out, 0);  // Return
 		else {
 			Label *l = label();
 			if (l)
@@ -838,8 +689,6 @@ static bool command(void) {
 		return false;
 
 	case ']':  // Menu
-		if (config.sys_ver >= SYSTEM38)
-			emit_command(out, COMMAND_menu);
 		emit(out, cmd);
 		break;
 
@@ -886,335 +735,29 @@ static bool command(void) {
 		break;
 
 	case 'A': break;
-	case 'B':
-		switch (subcommand_num()) {
-		case 0:
-			arguments("e"); break;
-		case 1:
-		case 2:
-		case 3:
-		case 4:
-			arguments("eeeeee"); break;
-		case 10:
-		case 11:
-			arguments("vv"); break;
-		case 12:
-		case 13:
-		case 14:
-			arguments("v"); break;
-		case 21:
-		case 22:
-		case 23:
-		case 24:
-		case 31:
-		case 32:
-		case 33:
-		case 34:
-			arguments("evv"); break;
-		default:
-			goto unknown_command;
-		}
-		break;
-	case CMD2('C', 'B'): arguments("eeeee"); break;
-	case CMD2('C', 'C'): arguments("eeeeee"); break;
-	case CMD2('C', 'D'): arguments("eeeeeeeeee"); break;
-	case CMD2('C', 'E'): arguments("eeeeeeeee"); break;
-	case CMD2('C', 'F'): arguments("eeeee"); break;
-	case CMD2('C', 'K'): arguments("neeeeeeee"); break;
-	case CMD2('C', 'L'): arguments("eeeee"); break;
-	case CMD2('C', 'M'): arguments("eeeeeeeee"); break;
-	case CMD2('C', 'P'): arguments("eee"); break;
-	case CMD2('C', 'S'): arguments("eeeeeee"); break;
-	case CMD2('C', 'T'): arguments("vee"); break;
-	case CMD2('C', 'U'): arguments("eeeeee"); break;
-	case CMD2('C', 'V'): arguments("eeeeee"); break;
-	case CMD2('C', 'X'): arguments("eeeeeeee"); break;
-	case CMD2('C', 'Y'): arguments("eeeee"); break;
-	case CMD2('C', 'Z'): arguments("eeeeeee"); break;
-	case CMD2('D', 'C'): arguments("eee"); break;
-	case CMD2('D', 'F'): arguments("vee"); break;
-	case CMD2('D', 'I'): arguments("evv"); break;
-	case CMD2('D', 'R'): arguments("v"); break;
-	case CMD2('D', 'S'): arguments("vvee"); break;
-	case CMD2('E', 'C'): arguments("e"); break;
-	case CMD2('E', 'G'): arguments("evvvv"); break;
-	case CMD2('E', 'M'): arguments("evee"); break;
-	case CMD2('E', 'N'): arguments("veeee"); break;
-	case CMD2('E', 'S'): arguments("eeeeee"); break;
+	case 'B': arguments("neeeeee"); break;
+	case 'E': arguments("eeeeee"); break;
 	case 'F': arguments("nee"); break;
-	case 'G':
-		{
-			int op = current_address(out);
-			emit(out, 0);
-			expr();
-			if (consume(',')) {
-				set_byte(out, op, 1);
-				expr();
-			}
-			consume(':');
-		}
-		break;
-	case CMD2('G', 'S'): arguments("ev"); break;
-	case CMD2('G', 'X'): arguments("ee"); break;
+	case 'G': arguments("e"); break;
 	case 'H': arguments("ne"); break;
-	case CMD2('I', 'C'): arguments("ev"); break;
-	case CMD2('I', 'E'): arguments("ee"); break;
-	case CMD2('I', 'G'): arguments("veee"); break;
-	case CMD2('I', 'K'): arguments("n"); break;
-	case CMD2('I', 'M'): arguments("vv"); break;
-	case CMD2('I', 'X'): arguments("v"); break;
-	case CMD2('I', 'Y'): arguments("e"); break;
-	case CMD2('I', 'Z'): arguments("ee"); break;
-	case 'J':
-		switch (subcommand_num()) {
-		case 0:
-		case 1:
-		case 2:
-		case 3:
-			arguments("ee"); break;
-		case 4:
-			arguments(""); break;
-		default:
-			goto unknown_command;
-		}
-		break;
-	case CMD2('K', 'I'): arguments("vee"); break;
-	case CMD2('K', 'K'): arguments("e"); break;
-	case CMD2('K', 'N'): arguments("v"); break;
-	case CMD2('K', 'P'): arguments("v"); break;
-	case CMD2('K', 'Q'): arguments("ve"); break;
-	case CMD2('K', 'R'): arguments("v"); break;
-	case CMD2('K', 'W'): arguments("ve"); break;
-	case CMD2('L', 'C'): arguments("ees"); break;
-	case CMD2('L', 'D'): arguments("e"); break;
-	case CMD2('L', 'E'): arguments("nsee"); break;
-	case CMD3('L', 'H', 'D'): arguments("ne"); break;
-	case CMD3('L', 'H', 'G'): arguments("ne"); break;
-	case CMD3('L', 'H', 'M'): arguments("ne"); break;
-	case CMD3('L', 'H', 'S'): arguments("ne"); break;
-	case CMD3('L', 'H', 'W'): arguments("ne"); break;
-	case CMD3('L', 'X', 'C'): arguments("e"); break;
-	case CMD3('L', 'X', 'G'): arguments("ess"); break;
-	case CMD3('L', 'X', 'L'): arguments("eee"); break;
-	case CMD3('L', 'X', 'O'): arguments("eee"); break;
-	case CMD3('L', 'X', 'P'): arguments("eee"); break;
-	case CMD3('L', 'X', 'R'): arguments("eve"); break;
-	case CMD3('L', 'X', 'S'): arguments("evv"); break;
-	case CMD3('L', 'X', 'W'): arguments("eve"); break;
-	case CMD3('L', 'X', 'X'): arguments("eev"); break;
-	case CMD2('L', 'L'): arguments("neee"); break;
-	case CMD2('L', 'P'): arguments("eve"); break;
-	case CMD2('L', 'T'): arguments("ev"); break;
-	case CMD2('M', 'A'): arguments("ee"); break;
-	case CMD2('M', 'C'): arguments("ee"); break;
-	case CMD2('M', 'D'): arguments("eee"); break;
-	case CMD2('M', 'E'): arguments("eeeee"); break;
-	case CMD2('M', 'F'): arguments("veee"); break;
-	case CMD2('M', 'G'): arguments("ne"); break;
-	case CMD2('M', 'H'): arguments("eee"); break;
-	case CMD2('M', 'I'): arguments("ees"); break;
-	case CMD2('M', 'J'): arguments("eeeee"); break;
-	case CMD2('M', 'L'): arguments("ve"); break;
-	case CMD2('M', 'M'): arguments("ee"); break;
-	case CMD2('M', 'N'): arguments("nev"); break;
-	case CMD2('M', 'P'): arguments("ee"); break;
-	case CMD2('M', 'S'): arguments("es"); break;
-	case CMD2('M', 'T'): arguments("s"); break;
-	case CMD2('M', 'V'): arguments("e"); break;
-	case CMD2('M', 'Z'): arguments("neee"); break;
-	case CMD2('N', '+'): arguments("vee"); break;
-	case CMD2('N', '-'): arguments("vee"); break;
-	case CMD2('N', '*'): arguments("vee"); break;
-	case CMD2('N', '/'): arguments("vee"); break;
-	case CMD2('N', '>'): arguments("veev"); break;
-	case CMD2('N', '<'): arguments("veev"); break;
-	case CMD2('N', '='): arguments("veev"); break;
-	case CMD2('N', '\\'): arguments("ve"); break;
-	case CMD2('N', '&'): arguments("vev"); break;
-	case CMD2('N', '|'): arguments("vev"); break;
-	case CMD2('N', '^'): arguments("vev"); break;
-	case CMD2('N', '~'): arguments("ve"); break;
-	case CMD2('N', 'B'): arguments("vve"); break;
-	case CMD2('N', 'C'): arguments("ve"); break;
-	case CMD2('N', 'I'): arguments("veee"); break;
-	case CMD2('N', 'O'): arguments("nvve"); break;
-	case CMD2('N', 'P'): arguments("vvev"); break;
-	case CMD2('N', 'R'): arguments("ev"); break;
-	case CMD2('N', 'T'): arguments("s"); break;
-	case CMD3('N', 'D', '+'): arguments("eee"); break;
-	case CMD3('N', 'D', '-'): arguments("eee"); break;
-	case CMD3('N', 'D', '*'): arguments("eee"); break;
-	case CMD3('N', 'D', '/'): arguments("eee"); break;
-	case CMD3('N', 'D', 'A'): arguments("ee"); break;
-	case CMD3('N', 'D', 'C'): arguments("ee"); break;
-	case CMD3('N', 'D', 'D'): arguments("ve"); break;
-	case CMD3('N', 'D', 'H'): arguments("ee"); break;
-	case CMD3('N', 'D', 'M'): arguments("ee"); break;
-	case CMD2('P', 'C'): arguments("e"); break;
-	case CMD2('P', 'D'): arguments("e"); break;
-	case CMD2('P', 'F'): // fall through
-	case CMD2('P', 'W'):
-		switch (subcommand_num()) {
-		case 0:
-		case 1:
-			arguments("e"); break;
-		case 2:
-		case 3:
-			arguments("ee"); break;
-		default:
-			goto unknown_command;
-		}
-		break;
-	case CMD2('P', 'G'): arguments("vee"); break;
-	case CMD2('P', 'N'): arguments("e"); break;
-	case CMD2('P', 'P'): arguments("vee"); break;
-	case CMD2('P', 'S'): arguments("eeee"); break;
-	case CMD2('P', 'T'):
-		switch (subcommand_num()) {
-		case 0:
-			arguments("vee"); break;
-		case 1:
-			arguments("vvvee"); break;
-		case 2:
-			arguments("vvee"); break;
-		default:
-			goto unknown_command;
-		}
-		break;
-	case CMD2('Q', 'C'): arguments("ee"); break;
-	case CMD2('Q', 'D'): arguments("e"); break;
-	case CMD2('Q', 'E'): arguments("nsee"); break;
-	case CMD2('Q', 'P'): arguments("eve"); break;
+	case 'I': arguments("eeeeee"); break;
+	case 'J': arguments("ee"); break;
+	case 'K': arguments("n"); break;
+	case 'L': arguments("e"); break;
+	case 'M': arguments("s"); break;
+	case 'N': arguments("nee"); break;
+	case 'O': arguments("ee"); break;
+	case 'P': arguments("eeee"); break;
+	case 'Q': arguments("e"); break;
 	case 'R': break;
-	case CMD2('S', 'C'): arguments("v"); break;
-	case CMD2('S', 'G'):
-		switch (subcommand_num()) {
-		case 0:
-		case 1:
-		case 2:
-		case 3:
-		case 4:
-			arguments("e"); break;
-		case 5:
-		case 6:
-		case 7:
-		case 8:
-			arguments("ee"); break;
-		default:
-			goto unknown_command;
-		}
-		break;
-	case CMD2('S', 'I'): arguments("nv"); break;
-	case CMD2('S', 'L'): arguments("e"); break;
-	case CMD2('S', 'M'): arguments("e"); break;
-	case CMD2('S', 'O'): arguments("v"); break;
-	case CMD2('S', 'P'): arguments("ee"); break;
-	case CMD2('S', 'Q'): arguments("eee"); break;
-	case CMD2('S', 'R'): arguments(config.sys_ver == SYSTEM35 || config.old_SR ? "ev" : "nv"); break;
-	case CMD2('S', 'S'): arguments("e"); break;
-	case CMD2('S', 'T'): arguments("e"); break;
-	case CMD2('S', 'U'): arguments("vv"); break;
-	case CMD2('S', 'V'): arguments("ee"); break;
-	case CMD2('S', 'W'): arguments("veee"); break;
-	case CMD2('S', 'X'):
-		subcommand_num();  // device
-		switch (subcommand_num()) {
-		case 1:
-			arguments("eee"); break;
-		case 2:
-		case 4:
-			arguments("v"); break;
-		case 3:
-			break;
-		default:
-			goto unknown_command;
-		}
-		break;
+	case 'S': arguments("n"); break;
 	case 'T': arguments("ee"); break;
-	case CMD2('U', 'C'): arguments("ne"); break;
-	case CMD2('U', 'D'): arguments("e"); break;
-	case CMD2('U', 'G'): arguments("ee"); break;
-	case CMD2('U', 'P'):
-		switch (subcommand_num()) {
-		case 0:
-			arguments("ee"); break;
-		case 1:
-			arguments("se"); break;
-		case 2:
-		case 3:
-			arguments("ss"); break;
-		default:
-			goto unknown_command;
-		}
-		break;
-	case CMD2('U', 'R'): arguments("v"); break;
-	case CMD2('U', 'S'): arguments("ee"); break;
-	case CMD2('V', 'A'): arguments("neee"); break;
-	case CMD2('V', 'B'): arguments("eeeeeee"); break;
-	case CMD2('V', 'C'): arguments("eeeeeee"); break;
-	case CMD2('V', 'E'): arguments("eeeeee"); break;
-	case CMD2('V', 'F'): arguments(""); break;
-	case CMD2('V', 'G'): arguments("eeee"); break;
-	case CMD2('V', 'H'): arguments("eeeeee"); break;
-	case CMD3('V', 'I', 'C'): arguments("eeee"); break;
-	case CMD3('V', 'I', 'P'): arguments("eeee"); break;
-	case CMD2('V', 'J'): arguments("eeee"); break;
-	case CMD2('V', 'P'): arguments("eeeeee"); break;
-	case CMD2('V', 'R'): arguments("eev"); break;
-	case CMD2('V', 'S'): arguments("eeeee"); break;
-	case CMD2('V', 'T'): arguments("eeeeeeeeee"); break;
-	case CMD2('V', 'V'): arguments("ee"); break;
-	case CMD2('V', 'W'): arguments("eev"); break;
-	case CMD2('V', 'X'): arguments("eeee"); break;
-	case CMD2('V', 'Z'): arguments("nee"); break;
-	case CMD2('W', 'V'): arguments("eeee"); break;
-	case CMD2('W', 'W'): arguments("eee"); break;
-	case CMD2('W', 'X'): arguments("eeee"); break;
-	case CMD2('W', 'Z'): arguments("ne"); break;
-	case 'X': arguments("e"); break;
+	case 'U': arguments("ee"); break;
+	case 'V': arguments("ee"); break;
+	case 'W': arguments("eee"); break;
+	case 'X': arguments("n"); break;
 	case 'Y': arguments("ee"); break;
-	case CMD2('Z', 'A'): arguments("ne"); break;
-	case CMD2('Z', 'B'): arguments("e"); break;
-	case CMD2('Z', 'C'): arguments("ee"); break;
-	case CMD2('Z', 'D'): arguments("ne"); break;
-	case CMD2('Z', 'E'): arguments("e"); break;
-	case CMD2('Z', 'F'): arguments("e"); break;
-	case CMD2('Z', 'G'): arguments("v"); break;
-	case CMD2('Z', 'H'): arguments("e"); break;
-	case CMD2('Z', 'I'): arguments("ee"); break;
-	case CMD2('Z', 'K'): arguments("ees"); break;
-	case CMD2('Z', 'L'): arguments("e"); break;
-	case CMD2('Z', 'M'): arguments("e"); break;
-	case CMD2('Z', 'R'): arguments("ev"); break;
-	case CMD2('Z', 'S'): arguments("e"); break;
-	case CMD2('Z', 'T'):
-		switch (subcommand_num()) {
-		case 2:
-		case 3:
-		case 4:
-		case 5:
-			arguments("v"); break;
-		case 0:
-		case 1:
-		case 20:
-		case 21:
-			arguments("e"); break;
-		case 10:
-			arguments("eee"); break;
-		case 11:
-			arguments("ev"); break;
-		default:
-			goto unknown_command;
-		}
-		break;
-	case CMD2('Z', 'U'):
-		get_number();
-		expect(':');
-		if (!compiling)
-			warn_at(command_top, "Warning: The ZU command is deprecated. Now it is not needed.");
-		break;
-	case CMD2('Z', 'W'): arguments("e"); break;
-	case CMD2('Z', 'Z'): arguments("ne"); break;
+	case 'Z': arguments("ee"); break;
 
 	case COMMAND_IF:
 		expect('{');
@@ -1228,166 +771,6 @@ static bool command(void) {
 	case COMMAND_PRAGMA:
 		pragma();
 		break;
-
-	case COMMAND_TOC: arguments(""); break;
-	case COMMAND_TOS: arguments(""); break;
-	case COMMAND_TPC: arguments("e"); break;
-	case COMMAND_TPS: arguments("e"); break;
-	case COMMAND_TOP: arguments(""); break;
-	case COMMAND_TPP: arguments(""); break;
-	case COMMAND_inc: arguments("v"); break;
-	case COMMAND_dec: arguments("v"); break;
-	case COMMAND_TAA: arguments("e"); break;
-	case COMMAND_TAB: arguments("v"); break;
-	case COMMAND_wavLoad: arguments("ee"); break;
-	case COMMAND_wavPlay: arguments("ee"); break;
-	case COMMAND_wavStop: arguments("e"); break;
-	case COMMAND_wavUnload: arguments("e"); break;
-	case COMMAND_wavIsPlay: arguments("ev"); break;
-	case COMMAND_wavFade: arguments("eeee"); break;
-	case COMMAND_wavIsFade: arguments("ev"); break;
-	case COMMAND_wavStopFade: arguments("e"); break;
-	case COMMAND_trace: arguments("z"); break;
-	case COMMAND_wav3DSetPos: arguments("eeee"); break;
-	case COMMAND_wav3DCommit: arguments(""); break;
-	case COMMAND_wav3DGetPos: arguments("evvv"); break;
-	case COMMAND_wav3DSetPosL: arguments("eee"); break;
-	case COMMAND_wav3DGetPosL: arguments("vvv"); break;
-	case COMMAND_wav3DFadePos: arguments("eeeee"); break;
-	case COMMAND_wav3DIsFadePos: arguments("ev"); break;
-	case COMMAND_wav3DStopFadePos: arguments("e"); break;
-	case COMMAND_wav3DFadePosL: arguments("eeee"); break;
-	case COMMAND_wav3DIsFadePosL: arguments("v"); break;
-	case COMMAND_wav3DStopFadePosL: arguments(""); break;
-	case COMMAND_sndPlay: arguments("ee"); break;
-	case COMMAND_sndStop: arguments(""); break;
-	case COMMAND_sndIsPlay: arguments("v"); break;
-	case COMMAND_msg: arguments("z"); break;
-	case COMMAND_newHH: arguments("ne"); break;
-	case COMMAND_newLC: arguments("eez"); break;
-	case COMMAND_newLE: arguments("nzee"); break;
-	case COMMAND_newLXG: arguments("ezz"); break;
-	case COMMAND_newMI: arguments("eez"); break;
-	case COMMAND_newMS: arguments("ez"); break;
-	case COMMAND_newMT: arguments("z"); break;
-	case COMMAND_newNT: arguments("z"); break;
-	case COMMAND_newQE: arguments("nzee"); break;
-	case COMMAND_newUP:
-		switch (subcommand_num()) {
-		case 0:
-			arguments("ee"); break;
-		case 1:
-			arguments("ze"); break;
-		case 2:
-		case 3:
-			arguments("zz"); break;
-		default:
-			goto unknown_command;
-		}
-		break;
-	case COMMAND_newF: arguments("nee"); break;
-	case COMMAND_wavWaitTime: arguments("ee"); break;
-	case COMMAND_wavGetPlayPos: arguments("ev"); break;
-	case COMMAND_wavWaitEnd: arguments("e"); break;
-	case COMMAND_wavGetWaveTime: arguments("ev"); break;
-	case COMMAND_menuSetCbkSelect: arguments("F"); break;
-	case COMMAND_menuSetCbkCancel: arguments("F"); break;
-	case COMMAND_menuClearCbkSelect: arguments(""); break;
-	case COMMAND_menuClearCbkCancel: arguments(""); break;
-	case COMMAND_wav3DSetMode: arguments("ee"); break;
-	case COMMAND_grCopyStretch: arguments("eeeeeeeee"); break;
-	case COMMAND_grFilterRect: arguments("eeeee"); break;
-	case COMMAND_iptClearWheelCount: arguments(""); break;
-	case COMMAND_iptGetWheelCount: arguments("vv"); break;
-	case COMMAND_menuGetFontSize: arguments("v"); break;
-	case COMMAND_msgGetFontSize: arguments("v"); break;
-	case COMMAND_strGetCharType: arguments("eev"); break;
-	case COMMAND_strGetLengthASCII: arguments("ev"); break;
-	case COMMAND_sysWinMsgLock: arguments(""); break;
-	case COMMAND_sysWinMsgUnlock: arguments(""); break;
-	case COMMAND_aryCmpCount: arguments("veev"); break;
-	case COMMAND_aryCmpTrans: arguments("veeeev"); break;
-	case COMMAND_grBlendColorRect: arguments("eeeeeeeee"); break;
-	case COMMAND_grDrawFillCircle: arguments("eeee"); break;
-	case COMMAND_MHH: arguments("eee"); break;
-	case COMMAND_menuSetCbkInit: arguments("F"); break;
-	case COMMAND_menuClearCbkInit: arguments(""); break;
-	case COMMAND_sysOpenShell: arguments("z"); break;
-	case COMMAND_sysAddWebMenu: arguments("zz"); break;
-	case COMMAND_iptSetMoveCursorTime: arguments("e"); break;
-	case COMMAND_iptGetMoveCursorTime: arguments("v"); break;
-	case COMMAND_grBlt: arguments("eeeeee"); break;
-	case COMMAND_LXWT: arguments("ez"); break;
-	case COMMAND_LXWS: arguments("ee"); break;
-	case COMMAND_LXWE: arguments("ee"); break;
-	case COMMAND_LXWH: arguments("ene"); break;
-	case COMMAND_LXWHH: arguments("ene"); break;
-	case COMMAND_sysGetOSName: arguments("e"); break;
-	case COMMAND_patchEC: arguments("e"); break;
-	case COMMAND_mathSetClipWindow: arguments("eeee"); break;
-	case COMMAND_mathClip: arguments("vvvvvv"); break;
-	case COMMAND_LXF: arguments("ezz"); break;
-	case COMMAND_strInputDlg: arguments("zeev"); break;
-	case COMMAND_strCheckASCII: arguments("ev"); break;
-	case COMMAND_strCheckSJIS: arguments("ev"); break;
-	case COMMAND_strMessageBox: arguments("z"); break;
-	case COMMAND_strMessageBoxStr: arguments("e"); break;
-	case COMMAND_grCopyUseAMapUseA: arguments("eeeeeee"); break;
-	case COMMAND_grSetCEParam: arguments("ee"); break;
-	case COMMAND_grEffectMoveView: arguments("eeee"); break;
-	case COMMAND_cgSetCacheSize: arguments("e"); break;
-	case COMMAND_dllCall: dll_call(); break;
-	case COMMAND_gaijiSet: arguments("ee"); break;
-	case COMMAND_gaijiClearAll: arguments(""); break;
-	case COMMAND_menuGetLatestSelect: arguments("v"); break;
-	case COMMAND_lnkIsLink: arguments("eev"); break;
-	case COMMAND_lnkIsData: arguments("eev"); break;
-	case COMMAND_fncSetTable: arguments("eF"); break;
-	case COMMAND_fncSetTableFromStr: arguments("eev"); break;
-	case COMMAND_fncClearTable: arguments("e"); break;
-	case COMMAND_fncCall: arguments("e"); break;
-	case COMMAND_fncSetReturnCode: arguments("e"); break;
-	case COMMAND_fncGetReturnCode: arguments("v"); break;
-	case COMMAND_msgSetOutputFlag: arguments("e"); break;
-	case COMMAND_saveDeleteFile: arguments("ev"); break;
-	case COMMAND_wav3DSetUseFlag: arguments("e"); break;
-	case COMMAND_wavFadeVolume: arguments("eeee"); break;
-	case COMMAND_patchEMEN: arguments("e"); break;
-	case COMMAND_wmenuEnableMsgSkip: arguments("e"); break;
-	case COMMAND_winGetFlipFlag: arguments("v"); break;
-	case COMMAND_cdGetMaxTrack: arguments("v"); break;
-	case COMMAND_dlgErrorOkCancel: arguments("zv"); break;
-	case COMMAND_menuReduce: arguments("e"); break;
-	case COMMAND_menuGetNumof: arguments("v"); break;
-	case COMMAND_menuGetText: arguments("ee"); break;
-	case COMMAND_menuGoto: arguments("ee"); break;
-	case COMMAND_menuReturnGoto: arguments("ee"); break;
-	case COMMAND_menuFreeShelterDIB: arguments(""); break;
-	case COMMAND_msgFreeShelterDIB: arguments(""); break;
-	case COMMAND_ainH: // fall through
-	case COMMAND_ainHH:
-		emit(compiler->msg_buf, 0);
-		emit_dword(out, compiler->msg_count++);
-		arguments("ne");
-		break;
-	case COMMAND_ainX:
-		emit(compiler->msg_buf, 0);
-		emit_dword(out, compiler->msg_count++);
-		arguments("e");
-		break;
-	case COMMAND_dataSetPointer: arguments("F"); break;
-	case COMMAND_dataGetWORD: arguments("ve"); break;
-	case COMMAND_dataGetString: arguments("ee"); break;
-	case COMMAND_dataSkipWORD: arguments("e"); break;
-	case COMMAND_dataSkipString: arguments("e"); break;
-	case COMMAND_varGetNumof: arguments("v"); break;
-	case COMMAND_patchG0: arguments("e"); break;
-	case COMMAND_regReadString: arguments("eeev"); break;
-	case COMMAND_fileCheckExist: arguments("ev"); break;
-	case COMMAND_timeCheckCurDate: arguments("eeev"); break;
-	case COMMAND_dlgManualProtect: arguments("oo"); break;
-	case COMMAND_fileCheckDVD: arguments("oeeov"); break;
-	case COMMAND_sysReset: arguments(""); break;
 
 	default:
 		goto unknown_command;

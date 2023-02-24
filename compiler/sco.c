@@ -122,7 +122,7 @@ void emit_number(Buffer *b, int n) {
 		n -= 0x3fff;
 		addop++;
 	}
-	if (n <= 0x33) {
+	if (n <= 0x36) {
 		emit(b, n + 0x40);
 	} else {
 		emit_word_be(b, n);
@@ -134,34 +134,13 @@ void emit_number(Buffer *b, int n) {
 void emit_command(Buffer *b, int cmd) {
 	for (int n = cmd; n; n >>= 8)
 		emit(b, n & 0xff);
-	if (cmd == COMMAND_TOC)  // Only this command has '\0'
-		emit(b, 0);
 }
 
 void sco_init(Buffer *b, const char *src_name_utf8, int pageno) {
-	const char *src_name = to_output_encoding(src_name_utf8);
-	int namelen = strlen(src_name);
-	if (namelen >= 1024)
-		error("file name too long: %s", src_name);
-	int hdrsize = (18 + namelen + 15) & ~0xf;
-
-	// SCO header
-	switch (config.sco_ver) {
-	case SCO_S350: emit_string(b, "S350"); break;
-	case SCO_S351: emit_string(b, "S351"); break;
-	case SCO_153S: emit_string(b, "153S"); break;
-	case SCO_S360: emit_string(b, "S360"); break;
-	case SCO_S380: emit_string(b, "S380"); break;
-	}
-	emit_dword(b, hdrsize);
-	emit_dword(b, 0);  // File size (to be filled by sco_finalize)
-	emit_dword(b, pageno);
-	emit_word(b, namelen);
-	emit_string(b, src_name);
-	while (b->len < hdrsize)
-		emit(b, 0);
+	emit_word(b, 0);  // File size (to be filled by sco_finalize)
 }
 
 void sco_finalize(Buffer *b) {
-	swap_dword(b, 8, b->len);
+	emit(b, 0x1a);  // EOF
+	swap_word(b, 0, b->len - 2);
 }

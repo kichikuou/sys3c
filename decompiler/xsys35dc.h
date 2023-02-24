@@ -20,7 +20,6 @@
 typedef struct {
 	const uint8_t *data;
 	uint8_t *mark;
-	ScoVer version;
 	uint32_t hdrsize;
 	uint32_t filesize;
 	uint32_t page;

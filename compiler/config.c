@@ -23,26 +23,24 @@
 Config config = {
 	.ain_version = 1,
 	.sys_ver = SYSTEM39,
-	.sco_ver = SCO_S380,
 	.utf8 = true,
 };
 
 typedef struct {
 	const char *opt_val;
 	SysVer sys_ver;
-	ScoVer sco_ver;
 } SysVerOptValue;
 
 static const SysVerOptValue sys_ver_opt_values[] = {
-	{"3.5", SYSTEM35, SCO_S351},
-	{"3.6", SYSTEM36, SCO_S360},
-	{"3.8", SYSTEM38, SCO_S380},
-	{"3.9", SYSTEM39, SCO_S380},
-	{"S350", SYSTEM35, SCO_S350},
-	{"S351", SYSTEM35, SCO_S351},
-	{"153S", SYSTEM36, SCO_153S},
-	{"S360", SYSTEM36, SCO_S360},
-	{"S380", SYSTEM39, SCO_S380},
+	{"3.5", SYSTEM35},
+	{"3.6", SYSTEM36},
+	{"3.8", SYSTEM38},
+	{"3.9", SYSTEM39},
+	{"S350", SYSTEM35},
+	{"S351", SYSTEM35},
+	{"153S", SYSTEM36},
+	{"S360", SYSTEM36},
+	{"S380", SYSTEM39},
 	{NULL, 0, 0},
 };
 
@@ -58,7 +56,6 @@ void set_sys_ver(const char *ver) {
 	for (const SysVerOptValue *v = sys_ver_opt_values; v->opt_val; v++) {
 		if (!strcmp(ver, v->opt_val)) {
 			config.sys_ver = v->sys_ver;
-			config.sco_ver = v->sco_ver;
 			return;
 		}
 	}
@@ -67,7 +64,7 @@ void set_sys_ver(const char *ver) {
 
 static const char *get_sys_ver(void) {
 	for (const SysVerOptValue *v = sys_ver_opt_values; v->opt_val; v++) {
-		if (config.sys_ver == v->sys_ver && config.sco_ver == v->sco_ver)
+		if (config.sys_ver == v->sys_ver)
 			return v->opt_val;
 	}
 	assert("cannot happen");

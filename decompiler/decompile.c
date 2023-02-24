@@ -251,7 +251,7 @@ static void data_block(const uint8_t *end) {
 		return;
 	}
 
-	bool should_expand = current_sco()->version <= SCO_S351;
+	bool should_expand = true;
 	bool prefer_string = false;
 
 	while (dc.p < end) {
@@ -704,13 +704,7 @@ static void arguments(const char *sig) {
 		case 'z':
 			{
 				uint8_t terminator = *sig == 'z' ? 0 : ':';
-				if (current_sco()->version <= SCO_S360) {
-					dc.p = dc_put_string((const char *)dc.p, terminator, 0);
-				} else {
-					dc_putc('"');
-					dc.p = dc_put_string((const char *)dc.p, terminator, STRING_ESCAPE);
-					dc_putc('"');
-				}
+				dc.p = dc_put_string((const char *)dc.p, terminator, 0);
 			}
 			break;
 		case 'o':  // obfuscated string
@@ -1059,15 +1053,6 @@ static void write_config(const char *path, const char *ald_basename) {
 			fputs("disable_ain_message = true\n", fp);
 		if (dc.disable_ain_variable)
 			fputs("disable_ain_variable = true\n", fp);
-	} else {
-		Sco *sco = dc.scos->data[0];
-		switch (sco->version) {
-		case SCO_S350: fputs("sys_ver = S350\n", fp); break;
-		case SCO_S351: fputs("sys_ver = 3.5\n", fp); break;
-		case SCO_153S: fputs("sys_ver = 153S\n", fp); break;
-		case SCO_S360: fputs("sys_ver = 3.6\n", fp); break;
-		case SCO_S380: fputs("sys_ver = 3.8\n", fp); break;
-		}
 	}
 
 	fprintf(fp, "encoding = %s\n", config.utf8_output ? "utf8" : "sjis");

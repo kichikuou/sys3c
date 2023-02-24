@@ -294,175 +294,8 @@ void compile_bare_string(Buffer *b) {
 
 #define ISKEYWORD(s, len, kwd) ((len) == sizeof(kwd) - 1 && !memcmp((s), (kwd), (len)))
 
-static int lower_case_command(const char *s, int len) {
-#define LCCMD(cmd) if (ISKEYWORD(s, len, #cmd)) return COMMAND_ ## cmd
-	LCCMD(inc);
-	LCCMD(dec);
-	LCCMD(wavLoad);
-	LCCMD(wavPlay);
-	LCCMD(wavStop);
-	LCCMD(wavUnload);
-	LCCMD(wavIsPlay);
-	LCCMD(wavFade);
-	LCCMD(wavIsFade);
-	LCCMD(wavStopFade);
-	LCCMD(trace);
-	LCCMD(wav3DSetPos);
-	LCCMD(wav3DCommit);
-	LCCMD(wav3DGetPos);
-	LCCMD(wav3DSetPosL);
-	LCCMD(wav3DGetPosL);
-	LCCMD(wav3DFadePos);
-	LCCMD(wav3DIsFadePos);
-	LCCMD(wav3DStopFadePos);
-	LCCMD(wav3DFadePosL);
-	LCCMD(wav3DIsFadePosL);
-	LCCMD(wav3DStopFadePosL);
-	LCCMD(sndPlay);
-	LCCMD(sndStop);
-	LCCMD(sndIsPlay);
-	LCCMD(msg);
-	LCCMD(wavWaitTime);
-	LCCMD(wavGetPlayPos);
-	LCCMD(wavWaitEnd);
-	LCCMD(wavGetWaveTime);
-	LCCMD(menuSetCbkSelect);
-	LCCMD(menuSetCbkCancel);
-	LCCMD(menuClearCbkSelect);
-	LCCMD(menuClearCbkCancel);
-	LCCMD(wav3DSetMode);
-	LCCMD(grCopyStretch);
-	LCCMD(grFilterRect);
-	LCCMD(iptClearWheelCount);
-	LCCMD(iptGetWheelCount);
-	LCCMD(menuGetFontSize);
-	LCCMD(msgGetFontSize);
-	LCCMD(strGetCharType);
-	LCCMD(strGetLengthASCII);
-	LCCMD(sysWinMsgLock);
-	LCCMD(sysWinMsgUnlock);
-	LCCMD(aryCmpCount);
-	LCCMD(aryCmpTrans);
-	LCCMD(grBlendColorRect);
-	LCCMD(grDrawFillCircle);
-	LCCMD(menuSetCbkInit);
-	LCCMD(menuClearCbkInit);
-	LCCMD(menu);
-	LCCMD(sysOpenShell);
-	LCCMD(sysAddWebMenu);
-	LCCMD(iptSetMoveCursorTime);
-	LCCMD(iptGetMoveCursorTime);
-	LCCMD(grBlt);
-	LCCMD(sysGetOSName);
-	LCCMD(patchEC);
-	LCCMD(mathSetClipWindow);
-	LCCMD(mathClip);
-	LCCMD(strInputDlg);
-	LCCMD(strCheckASCII);
-	LCCMD(strCheckSJIS);
-	LCCMD(strMessageBox);
-	LCCMD(strMessageBoxStr);
-	LCCMD(grCopyUseAMapUseA);
-	LCCMD(grSetCEParam);
-	LCCMD(grEffectMoveView);
-	LCCMD(cgSetCacheSize);
-	LCCMD(gaijiSet);
-	LCCMD(gaijiClearAll);
-	LCCMD(menuGetLatestSelect);
-	LCCMD(lnkIsLink);
-	LCCMD(lnkIsData);
-	LCCMD(fncSetTable);
-	LCCMD(fncSetTableFromStr);
-	LCCMD(fncClearTable);
-	LCCMD(fncCall);
-	LCCMD(fncSetReturnCode);
-	LCCMD(fncGetReturnCode);
-	LCCMD(msgSetOutputFlag);
-	LCCMD(saveDeleteFile);
-	LCCMD(wav3DSetUseFlag);
-	LCCMD(wavFadeVolume);
-	LCCMD(patchEMEN);
-	LCCMD(wmenuEnableMsgSkip);
-	LCCMD(winGetFlipFlag);
-	LCCMD(cdGetMaxTrack);
-	LCCMD(dlgErrorOkCancel);
-	LCCMD(menuReduce);
-	LCCMD(menuGetNumof);
-	LCCMD(menuGetText);
-	LCCMD(menuGoto);
-	LCCMD(menuReturnGoto);
-	LCCMD(menuFreeShelterDIB);
-	LCCMD(msgFreeShelterDIB);
-	LCCMD(dataSetPointer);
-	LCCMD(dataGetWORD);
-	LCCMD(dataGetString);
-	LCCMD(dataSkipWORD);
-	LCCMD(dataSkipString);
-	LCCMD(varGetNumof);
-	LCCMD(patchG0);
-	LCCMD(regReadString);
-	LCCMD(fileCheckExist);
-	LCCMD(timeCheckCurDate);
-	LCCMD(dlgManualProtect);
-	LCCMD(fileCheckDVD);
-	LCCMD(sysReset);
-	return 0;
-#undef LCCMD
-}
-
-static int replace_command(int cmd) {
-	switch (cmd) {
-	case CMD3('T', 'A', 'A'): return COMMAND_TAA;
-	case CMD3('T', 'A', 'B'): return COMMAND_TAB;
-	}
-
-	if (config.sys_ver < SYSTEM38)
-		return cmd;
-
-	switch (cmd) {
-	case CMD3('T', 'O', 'C'): return COMMAND_TOC;
-	case CMD3('T', 'O', 'S'): return COMMAND_TOS;
-	case CMD3('T', 'P', 'C'): return COMMAND_TPC;
-	case CMD3('T', 'P', 'S'): return COMMAND_TPS;
-	case CMD3('T', 'O', 'P'): return COMMAND_TOP;
-	case CMD3('T', 'P', 'P'): return COMMAND_TPP;
-	case CMD2('H', 'H'): return use_ain_message() ? COMMAND_ainHH : COMMAND_newHH;
-	case CMD2('L', 'C'): return COMMAND_newLC;
-	case CMD2('L', 'E'): return COMMAND_newLE;
-	case CMD3('L', 'X', 'G'): return COMMAND_newLXG;
-	case CMD2('M', 'I'): return COMMAND_newMI;
-	case CMD2('M', 'S'): return COMMAND_newMS;
-	case CMD2('M', 'T'): return COMMAND_newMT;
-	case CMD2('N', 'T'): return COMMAND_newNT;
-	case CMD2('Q', 'E'): return COMMAND_newQE;
-	case CMD2('U', 'P'): return COMMAND_newUP;
-	case 'F': return COMMAND_newF;
-	case 'H': return use_ain_message() ? COMMAND_ainH : cmd;
-	case CMD3('M', 'H', 'H'): return COMMAND_MHH;
-	case CMD2(COMMAND_LXWx, 'T'): return COMMAND_LXWT;
-	case CMD2(COMMAND_LXWx, 'S'): return COMMAND_LXWS;
-	case CMD2(COMMAND_LXWx, 'E'): return COMMAND_LXWE;
-	case CMD2(COMMAND_LXWx, 'H'): return COMMAND_LXWH;
-	case CMD3(COMMAND_LXWx, 'H', 'H'): return COMMAND_LXWHH;
-	case CMD3('L', 'X', 'F'): return COMMAND_LXF;
-	case 'X': return use_ain_message() ? COMMAND_ainX : cmd;
-	default: return cmd;
-	}
-}
-
 int get_command(Buffer *b) {
 	const char *command_top = input;
-
-	// DLL call?
-	if (config.sys_ver == SYSTEM39 && isalpha(*input)) {
-		const char *p = input + 1;
-		while (isalnum(*p))
-			p++;
-		if (*p == '.') {
-			emit_command(b, COMMAND_dllCall);
-			return COMMAND_dllCall;
-		}
-	}
 
 	if (!*input || *input == '}' || *input == '>')
 		return *input;
@@ -471,29 +304,8 @@ int get_command(Buffer *b) {
 	if (isupper(*input)) {
 		int cmd = *input++;
 		if (isupper(*input))
-			cmd |= *input++ << 8;
-		if (isupper(*input))
-			cmd |= *input++ << 16;
+			error_at(command_top, "Unknown command %.2s", command_top);
 
-		if (cmd == CMD3('L', 'X', 'W') && isupper(*input)) {
-			cmd = COMMAND_LXWx | *input++ << 8;
-			if (isupper(*input))
-				cmd |= *input++ << 16;
-		}
-
-		if (isupper(*input))
-			error_at(command_top, "Unknown command %.4s", command_top);
-
-		if (cmd == 'N' && strchr("+-*/><=\\&|^~", *input))
-			cmd |= *input++ << 8;
-		if (cmd == CMD2('N', 'D') && strchr("+-*/", *input))
-			cmd |= *input++ << 16;
-
-		// Do not generate code for the deprecated 'ZU' command.
-		if (cmd == CMD2('Z', 'U'))
-			return cmd;
-
-		cmd = replace_command(cmd);
 		emit_command(b, cmd);
 		return cmd;
 	}
@@ -507,11 +319,6 @@ int get_command(Buffer *b) {
 			return COMMAND_CONST;
 		if (ISKEYWORD(command_top, len, "pragma"))
 			return COMMAND_PRAGMA;
-		int cmd = lower_case_command(command_top, len);
-		if (cmd) {
-			emit_command(b, cmd);
-			return cmd;
-		}
 		error_at(command_top, "Unknown command %.*s", len, command_top);
 	}
 	return *input++;

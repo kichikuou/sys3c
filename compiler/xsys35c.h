@@ -32,7 +32,6 @@ typedef struct {
 	uint32_t ain_version;
 
 	SysVer sys_ver;
-	ScoVer sco_ver;
 	const char *hed;
 	const char *var_list;
 

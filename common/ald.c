@@ -60,7 +60,7 @@ void ald_write(Vector *entries, int volume, FILE *fp) {
 	}
 
 	write_ptr((ptr_count + 2) * 2, &sector, fp);
-	write_ptr(entries->len * 2, &sector, fp);
+	write_ptr(entries->len * 2 + 1, &sector, fp);
 	for (int i = 0; i < entries->len; i++) {
 		AldEntry *entry = entries->data[i];
 		if (entry && entry->volume == volume)
@@ -78,6 +78,7 @@ void ald_write(Vector *entries, int volume, FILE *fp) {
 			link[vol]++;
 		fputc(link[vol], fp);
 	}
+	fputc(0x1a, fp);  // EOF
 	pad(fp);
 
 	for (int i = 0; i < entries->len; i++) {

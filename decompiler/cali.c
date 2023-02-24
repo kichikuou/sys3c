@@ -111,16 +111,10 @@ static int precedence(int op) {
 	switch (op) {
 	case OP_MUL:    return 4;
 	case OP_DIV:    return 4;
-	case OP_C0_MOD: return 4;
 	case OP_ADD:    return 3;
 	case OP_SUB:    return 3;
-	case OP_AND:    return 2;
-	case OP_OR:     return 2;
-	case OP_XOR:    return 2;
 	case OP_LT:     return 1;
 	case OP_GT:     return 1;
-	case OP_C0_LE:  return 1;
-	case OP_C0_GE:  return 1;
 	case OP_EQ:     return 0;
 	case OP_NE:     return 0;
 	case OP_END:    return 0;
@@ -164,9 +158,6 @@ void print_cali_prec(Cali *node, int out_prec, Vector *variables, FILE *out) {
 				fputc('(', out);
 			print_cali_prec(node->lhs, prec, variables, out);
 			switch (node->val) {
-			case OP_AND:   fputs(" & ", out); break;
-			case OP_OR:    fputs(" | ", out); break;
-			case OP_XOR:   fputs(" ^ ", out); break;
 			case OP_MUL:   fputs(" * ", out); break;
 			case OP_DIV:   fputs(" / ", out); break;
 			case OP_ADD:   fputs(" + ", out); break;
@@ -175,9 +166,6 @@ void print_cali_prec(Cali *node, int out_prec, Vector *variables, FILE *out) {
 			case OP_LT:    fputs(" < ", out); break;
 			case OP_GT:    fputs(" > ", out); break;
 			case OP_NE:    fputs(" \\ ", out); break;
-			case OP_C0_MOD:fputs(" % ", out); break;
-			case OP_C0_LE: fputs(" <= ", out); break;
-			case OP_C0_GE: fputs(" >= ", out); break;
 			case OP_END:   fputs(" $ ", out); break;
 			default:
 				error("BUG: unknown operator %d", node->val);
