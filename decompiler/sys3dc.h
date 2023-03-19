@@ -109,6 +109,6 @@ void decompile(Vector *scos, Ain *ain, const char *outdir, const char *ald_basen
 noreturn void error_at(const uint8_t *pos, char *fmt, ...);
 void warning_at(const uint8_t *pos, char *fmt, ...);
 
-// xsys35dc.c
+// sys3dc.c
 void convert_to_utf8(FILE *fp);
 const char *to_utf8(const char *s);

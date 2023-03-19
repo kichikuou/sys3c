@@ -15,7 +15,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
 */
-#include "xsys35c.h"
+#include "sys3c.h"
 #include <assert.h>
 #include <string.h>
 

@@ -15,7 +15,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
 */
-#include "xsys35dc.h"
+#include "sys3dc.h"
 #include <errno.h>
 #include <getopt.h>
 #include <stdlib.h>
@@ -36,7 +36,7 @@ static const struct option long_options[] = {
 };
 
 static void usage(void) {
-	puts("Usage: xsys35dc [options] aldfile(s) [ainfile]");
+	puts("Usage: sys3dc [options] aldfile(s) [ainfile]");
 	puts("Options:");
 	puts("    -a, --address             Prefix each line with address");
 	puts("    -d, --aindump             Dump System39.ain file");
@@ -50,7 +50,7 @@ static void usage(void) {
 }
 
 static void version(void) {
-	puts("xsys35dc " VERSION);
+	puts("sys3dc " VERSION);
 }
 
 static Sco *sco_new(int page, const uint8_t *data, int len, int volume) {

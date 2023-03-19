@@ -1,37 +1,37 @@
-= xsys35c(1)
+= sys3c(1)
 :doctype: manpage
-:manmanual: xsys35c manual
-:mansource: xsys35c
+:manmanual: sys3c manual
+:mansource: sys3c
 
 == Name
-xsys35c - System 3.x compiler
+sys3c - System 3.x compiler
 
 == Synopsis
 [verse]
-*xsys35c* [_options_]
-*xsys35c* [_options_] --project _cfgfile_
-*xsys35c* [_options_] --hed _hedfile_
-*xsys35c* [_options_] _advfile_...
-*xsys35c* [_options_] --init
+*sys3c* [_options_]
+*sys3c* [_options_] --project _cfgfile_
+*sys3c* [_options_] --hed _hedfile_
+*sys3c* [_options_] _advfile_...
+*sys3c* [_options_] --init
 
 == Description
-`xsys35c` is a compiler for AliceSoft's System 3.x game engine.
+`sys3c` is a compiler for AliceSoft's System 3.x game engine.
 
-*xsys35c* [_options_]::
-  If none of `--project`, `--hed` nor ADV files are specified, `xsys35c` reads
-  configuration from `xsys35c.cfg` in current directory.
+*sys3c* [_options_]::
+  If none of `--project`, `--hed` nor ADV files are specified, `sys3c` reads
+  configuration from `sys3c.cfg` in current directory.
 
-*xsys35c* [_options_] --project _cfgfile_::
+*sys3c* [_options_] --project _cfgfile_::
   This form runs a compile based on the configuration file _cfgfile_.
 
-*xsys35c* [_options_] --hed _hedfile_::
+*sys3c* [_options_] --hed _hedfile_::
   This form compiless files specified in the compile header file _hedfile_.
 
-*xsys35c* [_options_] _advfile_...::
+*sys3c* [_options_] _advfile_...::
   This form compiles the source files listed in the command line.
 
-*xsys35c* [_options_] --init::
-  This form creates a new xsys35c project in current directory.
+*sys3c* [_options_] --init::
+  This form creates a new sys3c project in current directory.
 
 == Options
 *-a, --ain*=_file_::
@@ -51,13 +51,13 @@ xsys35c - System 3.x compiler
   Read compile header file _file_.
 
 *-h, --help*::
-  Display help message about `xsys35c` and exit.
+  Display help message about `sys3c` and exit.
 
 *-I, --init*::
   Creates a new project in current directory. This includes a project
   configuration file, a compile header file, and a sample source file. Other
   command line options are reflected in the project settings. For example,
-  *xsys35c --init --sys-ver=3.8* will generate a project that targets System
+  *sys3c --init --sys-ver=3.8* will generate a project that targets System
   3.8.
 
 *-p, --project*=_file_::
@@ -75,17 +75,17 @@ xsys35c - System 3.x compiler
   Read list of variables from _file_.
 
 *-v, --version*::
-  Display the `xsys35c` version number and exit.
+  Display the `sys3c` version number and exit.
 
 == Project configuration file
-The project configuration file (`xsys35c.cfg`) specifies a compile header file
+The project configuration file (`sys3c.cfg`) specifies a compile header file
 and the other options used to compile the project. Here is an example
 configuration file:
 
   sys_ver = 3.9
   hed = comp.hed
 
-This instructs `xsys35c` to compile for System 3.9 using the compile header
+This instructs `sys3c` to compile for System 3.9 using the compile header
 `comp.hed`.
 
 Relative paths in configuration file are resolved based on the directory of the
@@ -115,12 +115,12 @@ function declaration (`.hel`) files, and DLL files that should be loaded in
 runtime (because they are indirectly used by other DLLs).
 
 == Source file
-`xsys35c` accepts System 3.x source (`.adv`) files, in the same language that
+`sys3c` accepts System 3.x source (`.adv`) files, in the same language that
 the official System 3.x SDK accepts.
 
 Explaining the System 3.x language is beyond the scope of this document; please
 refer to the official SDK documentation. Another good way to learn about the
-language is to decompile an existing game with xref:xsys35dc.adoc[*xsys35dc(1)*],
+language is to decompile an existing game with xref:sys3dc.adoc[*sys3dc(1)*],
 and look at the generated source files.
 
 == DLL function declaration file
@@ -129,4 +129,4 @@ argument types) exported by a DLL, in a format similar to a C function
 declaration. You probably won't need to modify this file, or create your own.
 
 == See also
-xref:xsys35dc.adoc[*xsys35dc(1)*], xref:ald.adoc[*ald(1)*]
+xref:sys3dc.adoc[*sys3dc(1)*], xref:ald.adoc[*ald(1)*]

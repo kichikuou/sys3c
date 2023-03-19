@@ -15,7 +15,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
 */
-#include "xsys35c.h"
+#include "sys3c.h"
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
@@ -113,7 +113,7 @@ void load_config(FILE *fp, const char *cfg_dir) {
 
 int init_project(const char *project, const char *hed, const char *ald_basename) {
 	if (!project)
-		project = "xsys35c.cfg";
+		project = "sys3c.cfg";
 	if (!hed)
 		hed = "sources.hed";
 

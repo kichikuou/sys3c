@@ -1,7 +1,7 @@
 = vsp(1)
 :doctype: manpage
-:manmanual: xsys35c manual
-:mansource: xsys35c
+:manmanual: sys3c manual
+:mansource: sys3c
 
 == Name
 vsp, pms, qnt - utilities for VSP, PMS, QNT images

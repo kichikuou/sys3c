@@ -15,7 +15,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
 */
-#include "xsys35c.h"
+#include "sys3c.h"
 #include <assert.h>
 #include <ctype.h>
 #include <stdlib.h>
@@ -386,7 +386,7 @@ static void number_array(void) {
 		if (n > 0xffff)
 			error_at(top, "number constant out of range: %d", n);
 
-		if (consume('b'))  // byte constant (xsys35c extension)
+		if (consume('b'))  // byte constant (sys3c extension)
 			emit(out, n);
 		else
 			emit_word(out, n);

@@ -9,14 +9,14 @@ fi
 
 bindir="$1"
 
-${bindir}/xsys35c -p testdata/source/xsys35c.cfg -o testdata/actual
+${bindir}/sys3c -p testdata/source/sys3c.cfg -o testdata/actual
 if [ -f testdata/regression_test.ald ]; then
     ${bindir}/ald compare testdata/regression_test.ald testdata/actualSA.ALD
 else
     cp testdata/actualSA.ALD testdata/regression_test.ald
 fi
 rm -rf testdata/decompiled
-${bindir}/xsys35dc -o testdata/decompiled testdata/actualSA.ALD
+${bindir}/sys3dc -o testdata/decompiled testdata/actualSA.ALD
 diff -uN --strip-trailing-cr testdata/source testdata/decompiled
 
 

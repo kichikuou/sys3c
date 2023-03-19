@@ -15,7 +15,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
 */
-#include "xsys35c.h"
+#include "sys3c.h"
 #include <ctype.h>
 #include <errno.h>
 #include <getopt.h>
@@ -45,7 +45,7 @@ static const struct option long_options[] = {
 };
 
 static void usage(void) {
-	puts("Usage: xsys35c [options] file...");
+	puts("Usage: sys3c [options] file...");
 	puts("Options:");
 	puts("    -a, --ain <file>          Write .ain output to <file> (default: " DEFAULT_OUTPUT_AIN ")");
 	puts("    -o, --ald <name>          Write output to <name>SA.ALD, <name>SB.ALD, ... (default: " DEFAULT_ALD_BASENAME ")");
@@ -54,7 +54,7 @@ static void usage(void) {
 	puts("    -Eu, --encoding=utf8      Set input coding system to UTF-8 (default)");
 	puts("    -i, --hed <file>          Read compile header (.hed) from <file>");
 	puts("    -h, --help                Display this message and exit");
-	puts("    -I, --init                Create a new xsys35c project");
+	puts("    -I, --init                Create a new sys3c project");
 	puts("    -p, --project <file>      Read project configuration from <file>");
 	puts("    -s, --sys-ver <ver>       Target System version (3.5|3.6|3.8|3.9(default))");
 	puts("    -u, --unicode             Generate Unicode output (can only be run on xsystem35)");
@@ -63,7 +63,7 @@ static void usage(void) {
 }
 
 static void version(void) {
-	puts("xsys35c " VERSION);
+	puts("sys3c " VERSION);
 }
 
 static char *next_line(char **buf) {
@@ -306,7 +306,7 @@ int main(int argc, char *argv[]) {
 		load_config(fp, dirname_utf8(project));
 		fclose(fp);
 	} else if (!hed && argc == 0) {
-		FILE *fp = fopen("xsys35c.cfg", "r");
+		FILE *fp = fopen("sys3c.cfg", "r");
 		if (fp) {
 			load_config(fp, NULL);
 			fclose(fp);
@@ -339,7 +339,7 @@ int main(int argc, char *argv[]) {
 		vec_push(srcs, argv[i]);
 
 	if (srcs->len == 0)
-		error("xsys35c: No source file specified.");
+		error("sys3c: No source file specified.");
 
 	Vector *vars = var_list ? read_var_list(var_list) : NULL;
 

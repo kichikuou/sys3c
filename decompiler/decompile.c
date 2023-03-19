@@ -15,7 +15,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
 */
-#include "xsys35dc.h"
+#include "sys3dc.h"
 #include <assert.h>
 #include <ctype.h>
 #include <stdarg.h>
@@ -1005,7 +1005,7 @@ char *missing_adv_name(int page) {
 static void create_adv_for_missing_sco(const char *outdir, int page) {
 	dc.out = checked_fopen(path_join(outdir, missing_adv_name(page)), "w+");
 
-	// Set ald_volume to zero so that xsys35c will not generate ALD for this.
+	// Set ald_volume to zero so that sys3c will not generate ALD for this.
 	fprintf(dc.out, "pragma ald_volume 0:\n");
 
 	for (HashItem *i = hash_iterate(dc.functions, NULL); i; i = hash_iterate(dc.functions, i)) {
@@ -1040,7 +1040,7 @@ static void write_config(const char *path, const char *ald_basename) {
 			fprintf(fp, "ain_version = %d\n", dc.ain->version);
 	}
 
-	fputs("hed = xsys35dc.hed\n", fp);
+	fputs("hed = sys3dc.hed\n", fp);
 	fputs("variables = variables.txt\n", fp);
 	if (dc.disable_else)
 		fputs("disable_else = true\n", fp);
@@ -1166,8 +1166,8 @@ void decompile(Vector *scos, Ain *ain, const char *outdir, const char *ald_basen
 	if (config.verbose)
 		puts("Generating config files...");
 
-	write_config(path_join(outdir, "xsys35c.cfg"), ald_basename);
-	write_hed(path_join(outdir, "xsys35dc.hed"), ain ? ain->dlls : NULL);
+	write_config(path_join(outdir, "sys3c.cfg"), ald_basename);
+	write_hed(path_join(outdir, "sys3dc.hed"), ain ? ain->dlls : NULL);
 	write_variables(path_join(outdir, "variables.txt"));
 	if (ain && ain->dlls)
 		write_hels(ain->dlls, outdir);

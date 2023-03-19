@@ -52,5 +52,5 @@ jobs:
     - name: Upload artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: xsys35c${{ matrix.archive-suffix }}
+        name: sys3c${{ matrix.archive-suffix }}
         path: artifacts

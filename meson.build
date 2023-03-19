@@ -1,4 +1,4 @@
-project('xsys35c', 'c')
+project('sys3c', 'c')
 fs = import('fs')
 
 is_windows = host_machine.system() == 'windows'
@@ -61,10 +61,10 @@ compiler_srcs = [
 libcompiler = static_library('compiler', compiler_srcs, dependencies : common)
 compiler = declare_dependency(link_with : libcompiler)
 
-xsys35c_srcs = [
-  'compiler/xsys35c.c'
+sys3c_srcs = [
+  'compiler/sys3c.c'
 ]
-xsys35c = executable('xsys35c', xsys35c_srcs, dependencies : [common, compiler], install : true)
+sys3c = executable('sys3c', sys3c_srcs, dependencies : [common, compiler], install : true)
 
 compiler_tests_srcs = [
   'compiler/compile_test.c',
@@ -80,14 +80,14 @@ test('compiler_tests', compiler_tests, workdir : meson.current_source_dir())
 # decompiler
 #
 
-xsys35dc_srcs = [
+sys3dc_srcs = [
   'decompiler/ain.c',
   'decompiler/cali.c',
   'decompiler/decompile.c',
   'decompiler/preprocess.c',
-  'decompiler/xsys35dc.c',
+  'decompiler/sys3dc.c',
 ]
-xsys35dc = executable('xsys35dc', xsys35dc_srcs, dependencies : common, install : true)
+sys3dc = executable('sys3dc', sys3dc_srcs, dependencies : common, install : true)
 
 #
 # tools
@@ -112,7 +112,7 @@ test('regression_test',
   bash,
   args : ['./regression_test.sh', meson.current_build_dir()],
   workdir : meson.current_source_dir(),
-  depends : [xsys35c, xsys35dc, dri, alk, vsp, pms, qnt])
+  depends : [sys3c, sys3dc, dri, alk, vsp, pms, qnt])
 
 #
 # docs
@@ -123,8 +123,8 @@ docs = [
   ['docs/alk.adoc', ['alk.1']],
   ['docs/unicode.adoc', []],
   ['docs/vsp.adoc', ['vsp.1', 'pms.1', 'qnt.1']],
-  ['docs/xsys35c.adoc', ['xsys35c.1']],
-  ['docs/xsys35dc.adoc', ['xsys35dc.1']],
+  ['docs/sys3c.adoc', ['sys3c.1']],
+  ['docs/sys3dc.adoc', ['sys3dc.1']],
 ]
 
 asciidoctor = find_program('asciidoctor', required : false)

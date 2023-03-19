@@ -3,7 +3,7 @@
 ; This source file must be compiled with "Unicode mode", by running the
 ; following command:
 ;
-;   xsys35c --unicode m17n.adv
+;   sys3c --unicode m17n.adv
 ;
 ; See docs/unicode.md for more information.
 

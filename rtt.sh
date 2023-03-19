@@ -43,8 +43,8 @@ Exit() {
 	exit $1
 }
 
-$bin/xsys35dc -a -o "$out" "$@" || Exit 1
-$bin/xsys35c -p "$out"/xsys35c.cfg || Exit 1
+$bin/sys3dc -a -o "$out" "$@" || Exit 1
+$bin/sys3c -p "$out"/sys3c.cfg || Exit 1
 
 for file in "$@"; do
 	[[ "$file" == -* ]] && continue

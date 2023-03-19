@@ -46,7 +46,7 @@ The following games cannot be decompiled or compiled yet:
 - None (Let me know if you find a title that does not (de)compile!)
 
 ## Download
-Prebuilt Windows executables can be found [here](https://github.com/kichikuou/xsys35c/releases).
+Prebuilt Windows executables can be found [here](https://github.com/kichikuou/sys3c/releases).
 
 ## Build & Install
 First install the dependencies (corresponding Debian package in parentheses):
@@ -60,8 +60,8 @@ meson build
 ninja -C build
 ```
 This creates the following executables under the `build` directory:
-- `xsys35c` -- System 3.x compiler
-- `xsys35dc` -- System 3.x decompiler
+- `sys3c` -- System 3.x compiler
+- `sys3dc` -- System 3.x decompiler
 - `ald` -- ALD archive utility
 - `alk` -- ALK archive utility
 - `vsp` -- VSP image utility
@@ -78,33 +78,33 @@ running meson.
 ## Basic Workflow
 Here are the steps for decompiling a game, editing the source, and compiling back to the scenario file.
 
-First, decompile the game by giving the scenario file (`*SA.ALD`) to `xsys35dc`.
+First, decompile the game by giving the scenario file (`*SA.ALD`) to `sys3dc`.
 ```
-xsys35dc -o decompiled fooSA.ALD
+sys3dc -o decompiled fooSA.ALD
 ```
 If the game has a `System39.ain` file, provide it too to the command line:
 ```
-xsys35dc -o decompiled fooSA.ALD System39.ain
+sys3dc -o decompiled fooSA.ALD System39.ain
 ```
 
 The decompiled source files will be generated in the `decompiled` directory. Edit them as you like.
 
 Once you've finished editing the source files, you can compile them back to the .ALD (and .ain if any) using the following command:
 ```
-xsys35c -p decompiled/xsys35c.cfg -o foo -a System39.ain
+sys3c -p decompiled/sys3c.cfg -o foo -a System39.ain
 ```
 
-Alternatively, you can use `xsys35c` and `xsys35dc` from
+Alternatively, you can use `sys3c` and `sys3dc` from
 [Visual Studio Code](https://code.visualstudio.com/). See
 [`vscode-system3x`](https://github.com/kichikuou/vscode-system3x).
 
 ## Unicode mode
-Using the "Unicode mode" of xsys35c and [xsystem35](https://github.com/kichikuou/xsystem35-sdl2) (an open source implementation of System 3.x), you can translate games into many languages that are not supported by original System 3.x. See [docs/unicode.adoc](docs/unicode.adoc) for more information.
+Using the "Unicode mode" of sys3c and [xsystem35](https://github.com/kichikuou/xsystem35-sdl2) (an open source implementation of System 3.x), you can translate games into many languages that are not supported by original System 3.x. See [docs/unicode.adoc](docs/unicode.adoc) for more information.
 
 ## Command Documentations
 Here are the manuals for the commands:
-- [docs/xsys35c.adoc](docs/xsys35c.adoc)
-- [docs/xsys35dc.adoc](docs/xsys35dc.adoc)
+- [docs/sys3c.adoc](docs/sys3c.adoc)
+- [docs/sys3dc.adoc](docs/sys3dc.adoc)
 - [docs/ald.adoc](docs/ald.adoc)
 - [docs/alk.adoc](docs/alk.adoc)
 - [docs/vsp.adoc](docs/vsp.adoc) (see this for `pms` and `qnt` commands too)
