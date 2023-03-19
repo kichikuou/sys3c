@@ -170,7 +170,7 @@ int main(int argc, char *argv[]) {
 	if (outdir && make_dir(outdir) != 0 && errno != EEXIST)
 		error("cannot create directory %s: %s", outdir, strerror(errno));
 
-	decompile(scos, NULL /* ain */, outdir, adisk_name);
+	decompile(scos, outdir, adisk_name);
 
 	return 0;
 }

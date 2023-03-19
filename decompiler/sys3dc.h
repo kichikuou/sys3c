@@ -59,20 +59,6 @@ typedef struct {
 	uint16_t *argv;
 } Function;
 
-typedef struct {
-	const char *filename;
-	uint32_t version;
-	Map *dlls;           // dllname -> Vector<DLLFunc>
-	HashMap *functions;  // Function -> Function (itself)
-	Vector *variables;
-	Vector *messages;
-} Ain;
-
-Ain *ain_read(const char *path);
-void ain_dump(Ain *ain);
-void write_hels(Map *dlls, const char *dir);
-HashMap *new_function_hash(void);
-
 // cali.c
 
 typedef struct Cali {
@@ -92,7 +78,7 @@ void print_cali(Cali *node, Vector *variables, FILE *out);
 
 // preprocess.c
 
-void preprocess(Vector *scos, Ain *ain);
+void preprocess(Vector *scos);
 
 // decompile.c
 
@@ -105,7 +91,7 @@ typedef struct {
 
 extern Config config;
 
-void decompile(Vector *scos, Ain *ain, const char *outdir, const char *adisk_name);
+void decompile(Vector *scos, const char *outdir, const char *adisk_name);
 noreturn void error_at(const uint8_t *pos, char *fmt, ...);
 void warning_at(const uint8_t *pos, char *fmt, ...);
 

@@ -28,8 +28,6 @@ typedef enum {
 
 typedef struct {
 	const char *adisk_name;
-	const char *output_ain;
-	uint32_t ain_version;
 
 	SysVer sys_ver;
 	const char *hed;
@@ -39,8 +37,6 @@ typedef struct {
 	bool unicode;
 	bool utf8;
 	bool disable_else;
-	bool disable_ain_message;
-	bool disable_ain_variable;
 	bool old_SR;
 } Config;
 extern Config config;
@@ -48,9 +44,6 @@ extern Config config;
 void set_sys_ver(const char *ver);
 void load_config(FILE *fp, const char *cfg_dir);
 int init_project(const char *project, const char *hed, const char *adisk_name);
-static inline bool use_ain_message(void) {
-	return config.sys_ver == SYSTEM39 && !config.disable_ain_message;
-}
 
 static inline const char *to_output_encoding(const char *str_utf8) {
 	return config.unicode ? str_utf8 : utf2sjis_sub(str_utf8, '?');
@@ -147,10 +140,6 @@ Compiler *new_compiler(Vector *src_paths, Vector *variables, Map *dlls);
 void preprocess(Compiler *comp, const char *source, int pageno);
 void preprocess_done(Compiler *comp);
 Sco *compile(Compiler *comp, const char *source, int pageno);
-
-// ain.c
-
-void ain_write(Compiler *compiler, FILE *fp);
 
 // hel.c
 

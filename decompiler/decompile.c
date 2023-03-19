@@ -34,7 +34,6 @@ static inline void annotate(uint8_t* mark, int type) {
 
 typedef struct {
 	Vector *scos;
-	Ain *ain;
 	Vector *variables;
 	HashMap *functions; // Function -> Function (itself)
 	FILE *out;
@@ -44,8 +43,6 @@ typedef struct {
 	int indent;
 
 	bool disable_else;
-	bool disable_ain_message;
-	bool disable_ain_variable;
 	bool old_SR;
 } Decompiler;
 
@@ -412,9 +409,6 @@ static Function *get_function(uint16_t page, uint32_t addr) {
 	Function *f = hash_get(dc.functions, &key);
 	if (f)
 		return f;
-
-	if (dc.ain && dc.ain->functions)
-		warning_at(dc.p, "function %d:%d is not found in System39.ain", page, addr);
 
 	f = calloc(1, sizeof(Function));
 	if (page < dc.scos->len && dc.scos->data[page]) {
@@ -1034,11 +1028,6 @@ static void write_config(const char *path, const char *adisk_name) {
 	FILE *fp = checked_fopen(path, "w+");
 	if (adisk_name)
 		fprintf(fp, "adisk_name = %s\n", adisk_name);
-	if (dc.ain) {
-		fprintf(fp, "output_ain = %s\n", dc.ain->filename);
-		if (dc.ain->version != 1)
-			fprintf(fp, "ain_version = %d\n", dc.ain->version);
-	}
 
 	fputs("hed = sys3dc.hed\n", fp);
 	fputs("variables = variables.txt\n", fp);
@@ -1047,14 +1036,6 @@ static void write_config(const char *path, const char *adisk_name) {
 	if (dc.old_SR)
 		fputs("old_SR = true\n", fp);
 
-	if (dc.ain) {
-		fputs("sys_ver = 3.9\n", fp);
-		if (dc.disable_ain_message)
-			fputs("disable_ain_message = true\n", fp);
-		if (dc.disable_ain_variable)
-			fputs("disable_ain_variable = true\n", fp);
-	}
-
 	fprintf(fp, "encoding = %s\n", config.utf8_output ? "utf8" : "sjis");
 	if (config.utf8_input)
 		fprintf(fp, "unicode = true\n");
@@ -1062,7 +1043,7 @@ static void write_config(const char *path, const char *adisk_name) {
 	fclose(fp);
 }
 
-static void write_hed(const char *path, Map *dlls) {
+static void write_hed(const char *path) {
 	FILE *fp = checked_fopen(path, "w+");
 	fputs("#SYSTEM35\n", fp);
 	for (int i = 0; i < dc.scos->len; i++) {
@@ -1070,13 +1051,6 @@ static void write_hed(const char *path, Map *dlls) {
 		fprintf(fp, "%s\n", sco ? sco->src_name : missing_adv_name(i));
 	}
 
-	if (dlls && dlls->keys->len) {
-		fputs("\n#DLLHeader\n", fp);
-		for (int i = 0; i < dlls->keys->len; i++) {
-			Vector *funcs = dlls->vals->data[i];
-			fprintf(fp, "%s.%s\n", (char *)dlls->keys->data[i], funcs->len ? "HEL" : "DLL");
-		}
-	}
 	if (!config.utf8_input && config.utf8_output)
 		convert_to_utf8(fp);
 	fclose(fp);
@@ -1116,18 +1090,26 @@ void warning_at(const uint8_t *pos, char *fmt, ...) {
 	fputc('\n', stderr);
 }
 
-void decompile(Vector *scos, Ain *ain, const char *outdir, const char *adisk_name) {
+static uint32_t FunctionHash(const Function *f) {
+	return ((f->page * 16777619) ^ f->addr) * 16777619;
+}
+static int FunctionCompare(const Function *f1, const Function *f2) {
+	return f1->page == f2->page && f1->addr == f2->addr ? 0 : 1;
+}
+static HashMap *new_function_hash(void) {
+	return new_hash((HashFunc)FunctionHash, (HashKeyCompare)FunctionCompare);
+}
+
+void decompile(Vector *scos, const char *outdir, const char *adisk_name) {
 	memset(&dc, 0, sizeof(dc));
 	dc.scos = scos;
-	dc.ain = ain;
-	dc.variables = (ain && ain->variables) ? ain->variables : new_vec();
-	dc.functions = (ain && ain->functions) ? ain->functions : new_function_hash();
-	dc.disable_ain_variable = ain && !ain->variables;
+	dc.variables = new_vec();
+	dc.functions = new_function_hash();
 
 	// Preprocess
 	if (config.verbose)
 		puts("Preprocessing...");
-	preprocess(scos, ain);
+	preprocess(scos);
 
 	// Analyze
 	bool done = false;
@@ -1167,10 +1149,8 @@ void decompile(Vector *scos, Ain *ain, const char *outdir, const char *adisk_nam
 		puts("Generating config files...");
 
 	write_config(path_join(outdir, "sys3c.cfg"), adisk_name);
-	write_hed(path_join(outdir, "sys3dc.hed"), ain ? ain->dlls : NULL);
+	write_hed(path_join(outdir, "sys3dc.hed"));
 	write_variables(path_join(outdir, "variables.txt"));
-	if (ain && ain->dlls)
-		write_hels(ain->dlls, outdir);
 
 	if (config.verbose)
 		puts("Done!");

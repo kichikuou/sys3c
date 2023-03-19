@@ -25,11 +25,9 @@
 #include <time.h>
 
 #define DEFAULT_ADISK_NAME "ADISK.DAT"
-#define DEFAULT_OUTPUT_AIN "System39.ain"
 
 static const char short_options[] = "a:E:ghi:Io:p:s:uV:v";
 static const struct option long_options[] = {
-	{ "ain",       required_argument, NULL, 'a' },
 	{ "ald",       required_argument, NULL, 'o' },
 	{ "debug",     no_argument,       NULL, 'g' },
 	{ "encoding",  required_argument, NULL, 'E' },
@@ -47,7 +45,6 @@ static const struct option long_options[] = {
 static void usage(void) {
 	puts("Usage: sys3c [options] file...");
 	puts("Options:");
-	puts("    -a, --ain <file>          Write .ain output to <file> (default: " DEFAULT_OUTPUT_AIN ")");
 	puts("    -o, --ald <name>          Write output to <name> (default: " DEFAULT_ADISK_NAME ")");
 	puts("    -g, --debug               Generate debug information");
 	puts("    -Es, --encoding=sjis      Set input coding system to SJIS");
@@ -179,7 +176,7 @@ static void read_hed(const char *path, Vector *sources, Map *dlls) {
 	}
 }
 
-static void build(Vector *src_paths, Vector *variables, Map *dlls, const char *adisk_name, const char *ain_path) {
+static void build(Vector *src_paths, Vector *variables, Map *dlls, const char *adisk_name) {
 	Map *srcs = new_map();
 	for (int i = 0; i < src_paths->len; i++) {
 		char *path = src_paths->data[i];
@@ -212,12 +209,6 @@ static void build(Vector *src_paths, Vector *variables, Map *dlls, const char *a
 			ald_mask |= 1 << e->volume;
 	}
 
-	if (config.sys_ver == SYSTEM39) {
-		FILE *fp = checked_fopen(ain_path, "wb");
-		ain_write(compiler, fp);
-		fclose(fp);
-	}
-
 	for (int i = 1; i <= 26; i++) {
 		if (!(ald_mask & 1 << i))
 			continue;
@@ -248,7 +239,6 @@ int main(int argc, char *argv[]) {
 
 	const char *project = NULL;
 	const char *adisk_name = NULL;
-	const char *output_ain = NULL;
 	const char *hed = NULL;
 	const char *var_list = NULL;
 	bool init_mode = false;
@@ -256,9 +246,6 @@ int main(int argc, char *argv[]) {
 	int opt;
 	while ((opt = getopt_long(argc, argv, short_options, long_options, NULL)) != -1) {
 		switch (opt) {
-		case 'a':
-			output_ain = optarg;
-			break;
 		case 'E':
 			switch (optarg[0]) {
 			case 's': case 'S': config.utf8 = false; break;
@@ -330,11 +317,6 @@ int main(int argc, char *argv[]) {
 			: project ? path_join(dirname_utf8(project), DEFAULT_ADISK_NAME)
 			: DEFAULT_ADISK_NAME;
 	}
-	if (!output_ain) {
-		output_ain = config.output_ain ? config.output_ain
-			: project ? path_join(dirname_utf8(project), DEFAULT_OUTPUT_AIN)
-			: DEFAULT_OUTPUT_AIN;
-	}
 
 	Vector *srcs = new_vec();
 	Map *dlls = new_map();
@@ -349,6 +331,6 @@ int main(int argc, char *argv[]) {
 
 	Vector *vars = var_list ? read_var_list(var_list) : NULL;
 
-	build(srcs, vars, dlls, adisk_name, output_ain);
+	build(srcs, vars, dlls, adisk_name);
 	return 0;
 }

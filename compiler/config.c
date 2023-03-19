@@ -21,8 +21,7 @@
 #include <string.h>
 
 Config config = {
-	.ain_version = 1,
-	.sys_ver = SYSTEM39,
+	.sys_ver = SYSTEM35,
 	.utf8 = true,
 };
 
@@ -41,7 +40,7 @@ static const SysVerOptValue sys_ver_opt_values[] = {
 	{"153S", SYSTEM36},
 	{"S360", SYSTEM36},
 	{"S380", SYSTEM39},
-	{NULL, 0, 0},
+	{NULL, 0},
 };
 
 static bool to_bool(const char *s) {
@@ -75,7 +74,6 @@ void load_config(FILE *fp, const char *cfg_dir) {
 	char line[256];
 	while (fgets(line, sizeof(line), fp)) {
 		char val[256];
-		int intval;
 		if (sscanf(line, "sys_ver = %s", val)) {
 			set_sys_ver(val);
 		} else if (sscanf(line, "encoding = %s", val)) {
@@ -91,18 +89,10 @@ void load_config(FILE *fp, const char *cfg_dir) {
 			config.var_list = path_join(cfg_dir, val);
 		} else if (sscanf(line, "disable_else = %s", val)) {
 			config.disable_else = to_bool(val);
-		} else if (sscanf(line, "disable_ain_message = %s", val)) {
-			config.disable_ain_message = to_bool(val);
-		} else if (sscanf(line, "disable_ain_variable = %s", val)) {
-			config.disable_ain_variable = to_bool(val);
 		} else if (sscanf(line, "old_SR = %s", val)) {
 			config.old_SR = to_bool(val);
 		} else if (sscanf(line, "adisk_name = %s", val)) {
 			config.adisk_name = path_join(cfg_dir, val);
-		} else if (sscanf(line, "output_ain = %s", val)) {
-			config.output_ain = path_join(cfg_dir, val);
-		} else if (sscanf(line, "ain_version = %d", &intval)) {
-			config.ain_version = intval;
 		} else if (sscanf(line, "unicode = %s", val)) {
 			config.unicode = to_bool(val);
 		} else if (sscanf(line, "debug = %s", val)) {

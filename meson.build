@@ -49,7 +49,6 @@ test('common_tests', common_tests, workdir : meson.current_source_dir())
 #
 
 compiler_srcs = [
-  'compiler/ain.c',
   'compiler/compile.c',
   'compiler/config.c',
   'compiler/debuginfo.c',
@@ -81,7 +80,6 @@ test('compiler_tests', compiler_tests, workdir : meson.current_source_dir())
 #
 
 sys3dc_srcs = [
-  'decompiler/ain.c',
   'decompiler/cali.c',
   'decompiler/decompile.c',
   'decompiler/preprocess.c',
