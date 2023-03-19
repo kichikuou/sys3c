@@ -97,8 +97,8 @@ void load_config(FILE *fp, const char *cfg_dir) {
 			config.disable_ain_variable = to_bool(val);
 		} else if (sscanf(line, "old_SR = %s", val)) {
 			config.old_SR = to_bool(val);
-		} else if (sscanf(line, "ald_basename = %s", val)) {
-			config.ald_basename = path_join(cfg_dir, val);
+		} else if (sscanf(line, "adisk_name = %s", val)) {
+			config.adisk_name = path_join(cfg_dir, val);
 		} else if (sscanf(line, "output_ain = %s", val)) {
 			config.output_ain = path_join(cfg_dir, val);
 		} else if (sscanf(line, "ain_version = %d", &intval)) {
@@ -111,7 +111,7 @@ void load_config(FILE *fp, const char *cfg_dir) {
 	}
 }
 
-int init_project(const char *project, const char *hed, const char *ald_basename) {
+int init_project(const char *project, const char *hed, const char *adisk_name) {
 	if (!project)
 		project = "sys3c.cfg";
 	if (!hed)
@@ -122,8 +122,8 @@ int init_project(const char *project, const char *hed, const char *ald_basename)
 	if (!config.utf8)
 		fputs("encoding = sjis\n", fp);
 	fprintf(fp, "hed = %s\n", hed);
-	if (ald_basename)
-		fprintf(fp, "ald_basename = %s\n", ald_basename);
+	if (adisk_name)
+		fprintf(fp, "adisk_name = %s\n", adisk_name);
 	if (config.unicode)
 		fputs("unicode = true\n", fp);
 	if (config.debug)

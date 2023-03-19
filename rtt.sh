@@ -7,7 +7,7 @@
 #
 
 usage() {
-	echo 'Usage: rtt.sh [options] <aldfile(s)> [<ainfile>]'
+	echo 'Usage: rtt.sh [options] <drifile(s)>'
 	echo 'Options:'
 	echo '    -C <directory>  Find executables in <directory> (default: ./build)'
 	echo '    -h              Display this message and exit'
@@ -49,8 +49,8 @@ $bin/sys3c -p "$out"/sys3c.cfg || Exit 1
 for file in "$@"; do
 	[[ "$file" == -* ]] && continue
 	base=$(basename "$file")
-	if [[ "$file" == *.ALD ]]; then
-		$bin/ald compare "$file" "$out"/"$base" || Exit 1
+	if [[ "$file" == *.DAT ]]; then
+		$bin/dri compare "$file" "$out"/"$base" || Exit 1
 	else
 		cmp "$file" "$out"/"$base" || Exit 1
 	fi

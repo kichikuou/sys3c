@@ -24,7 +24,7 @@
 #include <string.h>
 #include <time.h>
 
-#define DEFAULT_ALD_BASENAME "out"
+#define DEFAULT_ADISK_NAME "ADISK.DAT"
 #define DEFAULT_OUTPUT_AIN "System39.ain"
 
 static const char short_options[] = "a:E:ghi:Io:p:s:uV:v";
@@ -48,7 +48,7 @@ static void usage(void) {
 	puts("Usage: sys3c [options] file...");
 	puts("Options:");
 	puts("    -a, --ain <file>          Write .ain output to <file> (default: " DEFAULT_OUTPUT_AIN ")");
-	puts("    -o, --ald <name>          Write output to <name>SA.ALD, <name>SB.ALD, ... (default: " DEFAULT_ALD_BASENAME ")");
+	puts("    -o, --ald <name>          Write output to <name> (default: " DEFAULT_ADISK_NAME ")");
 	puts("    -g, --debug               Generate debug information");
 	puts("    -Es, --encoding=sjis      Set input coding system to SJIS");
 	puts("    -Eu, --encoding=utf8      Set input coding system to UTF-8 (default)");
@@ -179,7 +179,7 @@ static void read_hed(const char *path, Vector *sources, Map *dlls) {
 	}
 }
 
-static void build(Vector *src_paths, Vector *variables, Map *dlls, const char *ald_basename, const char *ain_path) {
+static void build(Vector *src_paths, Vector *variables, Map *dlls, const char *adisk_name, const char *ain_path) {
 	Map *srcs = new_map();
 	for (int i = 0; i < src_paths->len; i++) {
 		char *path = src_paths->data[i];
@@ -222,7 +222,13 @@ static void build(Vector *src_paths, Vector *variables, Map *dlls, const char *a
 		if (!(ald_mask & 1 << i))
 			continue;
 		char ald_path[PATH_MAX+1];
-		snprintf(ald_path, sizeof(ald_path), "%sS%c.ALD", ald_basename, 'A' + i - 1);
+		strncpy(ald_path, adisk_name, PATH_MAX);
+		if (i != 1) {
+			char *base = basename_utf8(ald_path);
+			if (toupper(*base) != 'A')
+				error("cannot determine output filename");
+			*base += i - 1;
+		}
 		FILE *fp = checked_fopen(ald_path, "wb");
 		ald_write(ald, i, fp);
 		fclose(fp);
@@ -230,7 +236,7 @@ static void build(Vector *src_paths, Vector *variables, Map *dlls, const char *a
 
 	if (config.debug) {
 		char symbols_path[PATH_MAX+1];
-		snprintf(symbols_path, sizeof(symbols_path), "%sSA.ALD.symbols", ald_basename);
+		snprintf(symbols_path, sizeof(symbols_path), "%s.symbols", adisk_name);
 		FILE *fp = checked_fopen(symbols_path, "wb");
 		debug_info_write(compiler->dbg_info, compiler, fp);
 		fclose(fp);
@@ -241,7 +247,7 @@ int main(int argc, char *argv[]) {
 	init(&argc, &argv);
 
 	const char *project = NULL;
-	const char *ald_basename = NULL;
+	const char *adisk_name = NULL;
 	const char *output_ain = NULL;
 	const char *hed = NULL;
 	const char *var_list = NULL;
@@ -273,7 +279,7 @@ int main(int argc, char *argv[]) {
 			init_mode = true;
 			break;
 		case 'o':
-			ald_basename = optarg;
+			adisk_name = optarg;
 			break;
 		case 'p':
 			project = optarg;
@@ -299,7 +305,7 @@ int main(int argc, char *argv[]) {
 	argv += optind;
 
 	if (init_mode)
-		return init_project(project, hed, ald_basename);
+		return init_project(project, hed, adisk_name);
 
 	if (project) {
 		FILE *fp = checked_fopen(project, "r");
@@ -319,10 +325,10 @@ int main(int argc, char *argv[]) {
 		hed = config.hed;
 	if (!var_list && config.var_list)
 		var_list = config.var_list;
-	if (!ald_basename) {
-		ald_basename = config.ald_basename ? config.ald_basename
-			: project ? path_join(dirname_utf8(project), DEFAULT_ALD_BASENAME)
-			: DEFAULT_ALD_BASENAME;
+	if (!adisk_name) {
+		adisk_name = config.adisk_name ? config.adisk_name
+			: project ? path_join(dirname_utf8(project), DEFAULT_ADISK_NAME)
+			: DEFAULT_ADISK_NAME;
 	}
 	if (!output_ain) {
 		output_ain = config.output_ain ? config.output_ain
@@ -343,6 +349,6 @@ int main(int argc, char *argv[]) {
 
 	Vector *vars = var_list ? read_var_list(var_list) : NULL;
 
-	build(srcs, vars, dlls, ald_basename, output_ain);
+	build(srcs, vars, dlls, adisk_name, output_ain);
 	return 0;
 }

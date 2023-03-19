@@ -16,6 +16,7 @@
  *
 */
 #include "sys3dc.h"
+#include <ctype.h>
 #include <errno.h>
 #include <getopt.h>
 #include <stdlib.h>
@@ -25,7 +26,6 @@
 static const char short_options[] = "adE:ho:sVv";
 static const struct option long_options[] = {
 	{ "address",  no_argument,       NULL, 'a' },
-	{ "aindump",  no_argument,       NULL, 'd' },
 	{ "encoding", required_argument, NULL, 'E' },
 	{ "help",     no_argument,       NULL, 'h' },
 	{ "outdir",   required_argument, NULL, 'o' },
@@ -36,10 +36,9 @@ static const struct option long_options[] = {
 };
 
 static void usage(void) {
-	puts("Usage: sys3dc [options] aldfile(s) [ainfile]");
+	puts("Usage: sys3dc [options] aldfile(s)");
 	puts("Options:");
 	puts("    -a, --address             Prefix each line with address");
-	puts("    -d, --aindump             Dump System39.ain file");
 	puts("    -Es, --encoding=sjis      Output files in SJIS encoding");
 	puts("    -Eu, --encoding=utf8      Output files in UTF-8 encoding (default)");
 	puts("    -h, --help                Display this message and exit");
@@ -97,7 +96,6 @@ int main(int argc, char *argv[]) {
 	init(&argc, &argv);
 
 	const char *outdir = NULL;
-	bool aindump = false;
 	bool seq = false;
 
 	int opt;
@@ -105,9 +103,6 @@ int main(int argc, char *argv[]) {
 		switch (opt) {
 		case 'a':
 			config.address = true;
-			break;
-		case 'd':
-			aindump = true;
 			break;
 		case 'E':
 			switch (optarg[0]) {
@@ -145,27 +140,12 @@ int main(int argc, char *argv[]) {
 	}
 
 	Vector *scos = NULL;
-	Ain *ain = NULL;
-	const char *ald_basename = NULL;
+	const char *adisk_name = NULL;
 	for (int i = 0; i < argc; i++) {
-		int len = strlen(argv[i]);
-		if (len >= 4 && !strcasecmp(argv[i] + len - 4, ".ain")) {
-			ain = ain_read(argv[i]);
-			continue;
-		}
 		scos = ald_read(scos, argv[i]);
-		if (len >= 6 && !strcasecmp(argv[i] + len - 6, "sa.ald")) {
-			char *s = strdup(argv[i]);
-			s[len - 6] = '\0';
-			ald_basename = basename_utf8(s);
-		}
-	}
-
-	if (aindump) {
-		if (!ain)
-			error("ain file is not specified");
-		ain_dump(ain);
-		return 0;
+		char *basename = basename_utf8(argv[i]);
+		if (toupper(basename[0]) == 'A')
+			adisk_name = basename;
 	}
 
 	for (int i = 0; i < scos->len; i++) {
@@ -190,7 +170,7 @@ int main(int argc, char *argv[]) {
 	if (outdir && make_dir(outdir) != 0 && errno != EEXIST)
 		error("cannot create directory %s: %s", outdir, strerror(errno));
 
-	decompile(scos, ain, outdir, ald_basename);
+	decompile(scos, NULL /* ain */, outdir, adisk_name);
 
 	return 0;
 }

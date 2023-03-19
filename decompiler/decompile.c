@@ -1028,12 +1028,12 @@ static void create_adv_for_missing_sco(const char *outdir, int page) {
 	fclose(dc.out);
 }
 
-static void write_config(const char *path, const char *ald_basename) {
+static void write_config(const char *path, const char *adisk_name) {
 	if (dc.scos->len == 0)
 		return;
 	FILE *fp = checked_fopen(path, "w+");
-	if (ald_basename)
-		fprintf(fp, "ald_basename = %s\n", ald_basename);
+	if (adisk_name)
+		fprintf(fp, "adisk_name = %s\n", adisk_name);
 	if (dc.ain) {
 		fprintf(fp, "output_ain = %s\n", dc.ain->filename);
 		if (dc.ain->version != 1)
@@ -1116,7 +1116,7 @@ void warning_at(const uint8_t *pos, char *fmt, ...) {
 	fputc('\n', stderr);
 }
 
-void decompile(Vector *scos, Ain *ain, const char *outdir, const char *ald_basename) {
+void decompile(Vector *scos, Ain *ain, const char *outdir, const char *adisk_name) {
 	memset(&dc, 0, sizeof(dc));
 	dc.scos = scos;
 	dc.ain = ain;
@@ -1166,7 +1166,7 @@ void decompile(Vector *scos, Ain *ain, const char *outdir, const char *ald_basen
 	if (config.verbose)
 		puts("Generating config files...");
 
-	write_config(path_join(outdir, "sys3c.cfg"), ald_basename);
+	write_config(path_join(outdir, "sys3c.cfg"), adisk_name);
 	write_hed(path_join(outdir, "sys3dc.hed"), ain ? ain->dlls : NULL);
 	write_variables(path_join(outdir, "variables.txt"));
 	if (ain && ain->dlls)

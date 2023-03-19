@@ -27,7 +27,7 @@ typedef enum {
 } SysVer;
 
 typedef struct {
-	const char *ald_basename;
+	const char *adisk_name;
 	const char *output_ain;
 	uint32_t ain_version;
 
@@ -47,7 +47,7 @@ extern Config config;
 
 void set_sys_ver(const char *ver);
 void load_config(FILE *fp, const char *cfg_dir);
-int init_project(const char *project, const char *hed, const char *ald_basename);
+int init_project(const char *project, const char *hed, const char *adisk_name);
 static inline bool use_ain_message(void) {
 	return config.sys_ver == SYSTEM39 && !config.disable_ain_message;
 }
