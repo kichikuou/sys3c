@@ -39,7 +39,7 @@ static void test(const char *name, const char *source,
 	vec_push(src_names, (char *)name);
 	Vector *variables = new_vec();
 	vec_push(variables, "V");
-	Compiler *compiler = new_compiler(src_names, variables, NULL);
+	Compiler *compiler = new_compiler(src_names, variables);
 	preprocess(compiler, source, 0);
 
 	compiler->msg_count = 0;

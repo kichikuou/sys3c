@@ -103,14 +103,6 @@ int get_command(Buffer *b);
 // compile.c
 
 typedef struct {
-	const char *name;
-	bool resolved;
-	uint16_t page;
-	uint32_t addr;
-	Vector *params;
-} Function;
-
-typedef struct {
 	Buffer *buf;
 	int ald_volume;
 } Sco;
@@ -121,8 +113,6 @@ typedef struct {
 	Vector *src_paths;
 	Vector *variables;
 	HashMap *symbols;   // variables and constants
-	HashMap *functions;
-	Map *dlls;
 	Buffer *msg_buf;
 	int msg_count;
 	Sco *scos;
@@ -136,7 +126,7 @@ typedef struct {
 	bool is_function;
 } Label;
 
-Compiler *new_compiler(Vector *src_paths, Vector *variables, Map *dlls);
+Compiler *new_compiler(Vector *src_paths, Vector *variables);
 void preprocess(Compiler *comp, const char *source, int pageno);
 void preprocess_done(Compiler *comp);
 Sco *compile(Compiler *comp, const char *source, int pageno);

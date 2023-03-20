@@ -125,10 +125,10 @@ static Vector *read_var_list(const char *path) {
 	return vars;
 }
 
-static void read_hed(const char *path, Vector *sources, Map *dlls) {
+static void read_hed(const char *path, Vector *sources) {
 	char *buf = read_file(path);
 	char *dir = dirname_utf8(path);
-	enum { INITIAL, SYSTEM35, DLLHeader } section = INITIAL;
+	enum { INITIAL, SYSTEM35 } section = INITIAL;
 
 	char *line;
 	while ((line = next_line(&buf)) != NULL) {
@@ -138,8 +138,6 @@ static void read_hed(const char *path, Vector *sources, Map *dlls) {
 			trim_right(line);
 			if (!strcmp("#SYSTEM35", line))
 				section = SYSTEM35;
-			else if (!strcmp("#DLLHeader", line))
-				section = DLLHeader;
 			else
 				error("%s: unknown section %s", path, line);
 			continue;
@@ -157,33 +155,18 @@ static void read_hed(const char *path, Vector *sources, Map *dlls) {
 		case SYSTEM35:
 			vec_push(sources, path_join(dir, line));
 			break;
-		case DLLHeader:
-			{
-				char *dot = strchr(line, '.');
-				if (dot && !strcasecmp(dot + 1, "dll")) {
-					*dot = '\0';
-					map_put(dlls, line, new_vec());
-				} else {
-					char *hel_text = read_file(path_join(dir, line));
-					Vector *funcs = parse_hel(hel_text, line);
-					if (dot)
-						*dot = '\0';
-					map_put(dlls, line, funcs);
-				}
-			}
-			break;
 		}
 	}
 }
 
-static void build(Vector *src_paths, Vector *variables, Map *dlls, const char *adisk_name) {
+static void build(Vector *src_paths, Vector *variables, const char *adisk_name) {
 	Map *srcs = new_map();
 	for (int i = 0; i < src_paths->len; i++) {
 		char *path = src_paths->data[i];
 		map_put(srcs, path, read_file(path));
 	}
 
-	Compiler *compiler = new_compiler(srcs->keys, variables, dlls);
+	Compiler *compiler = new_compiler(srcs->keys, variables);
 
 	if (config.debug)
 		compiler->dbg_info = new_debug_info(srcs);
@@ -319,9 +302,8 @@ int main(int argc, char *argv[]) {
 	}
 
 	Vector *srcs = new_vec();
-	Map *dlls = new_map();
 	if (hed)
-		read_hed(hed, srcs, dlls);
+		read_hed(hed, srcs);
 
 	for (int i = 0; i < argc; i++)
 		vec_push(srcs, argv[i]);
@@ -331,6 +313,6 @@ int main(int argc, char *argv[]) {
 
 	Vector *vars = var_list ? read_var_list(var_list) : NULL;
 
-	build(srcs, vars, dlls, adisk_name);
+	build(srcs, vars, adisk_name);
 	return 0;
 }

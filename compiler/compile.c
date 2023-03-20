@@ -250,156 +250,12 @@ static Label *label(void) {
 	return l;
 }
 
-// defun ::= '**' name (var (',' var)*)? ':'
-static void defun(void) {
-	const char *top = input;
-	char *name = get_label();
-
-	if (!compiling) {
-		// First pass - create a function record and store parameter info
-		if (hash_get(compiler->functions, name))
-			error_at(top, "function '%s' redefined", name);
-		Function *func = calloc(1, sizeof(Function));
-		func->name = name;
-		func->params = new_vec();
-
-		bool needs_comma = false;
-		while (!consume(':')) {
-			if (needs_comma)
-				expect(',');
-			needs_comma = true;
-			vec_push(func->params, get_identifier());
-		}
-		hash_put(compiler->functions, name, func);
-		return;
-	}
-
-	// Second pass - resolve function address
-	Function *func = hash_get(compiler->functions, name);
-	assert(func);
-	assert(!func->resolved);
-
-	const int page = input_page + 1;
-	const uint32_t addr = current_address(out);
-	while (func->addr) {
-		if (func->page == page) {
-			func->page = swap_word(out, func->addr, page);
-			func->addr = swap_dword(out, func->addr + 2, addr);
-		} else {
-			Buffer *sco = compiler->scos[func->page - 1].buf;
-			assert(sco);
-			uint8_t *p = sco->buf + func->addr;
-			func->page = p[0] | p[1] << 8;
-			func->addr = p[2] | p[3] << 8 | p[4] << 16 | p[5] << 24;
-			p[0] = page & 0xff;
-			p[1] = page >> 8;
-			p[2] = addr & 0xff;
-			p[3] = addr >> 8 & 0xff;
-			p[4] = addr >> 16 & 0xff;
-			p[5] = addr >> 24 & 0xff;
-		}
-	}
-	func->page = page;
-	func->addr = addr;
-	func->resolved = true;
-
-	// Check if all parameters are defined as variables.
-	for (int i = 0; i < func->params->len; i++) {
-		if (i != 0)
-			expect(',');
-		char *id = get_identifier();
-		if (lookup_var(id, false) < 0)
-			error_at(input - strlen(id), "Undefined variable '%s'", id);
-	}
-	expect(':');
-}
-
-//    funcall ::= '~' name (var (',' var)*)? ':'
-//     return ::= '~0' ',' expr ':'
-// get-retval ::= '~~' ',' var ':'
-static void funcall(void) {
-	if (consume('~')) {
-		emit(out, '~');
-		emit_word(out, 0xffff);
-		variable(get_identifier(), false);
-		emit(out, OP_END);
-		expect(':');
-		return;
-	}
-	const char *top = input;
-	char *name = get_label();
-	if (!strcmp(name, "0")) {
-		emit(out, '~');
-		emit_word(out, 0);
-		expect(',');
-		expr();
-		expect(':');
-		return;
-	}
-	if (!compiling) {
-		// First pass - skip parameters
-		bool needs_comma = false;
-		while (!consume(':')) {
-			if (needs_comma)
-				expect(',');
-			needs_comma = true;
-			expr();
-		}
-		return;
-	}
-
-	// Second pass
-	Function *func = hash_get(compiler->functions, name);
-	if (!func)
-		error_at(top, "undefined function '%s'", name);
-	for (int i = 0; i < func->params->len; i++) {
-		emit(out, '!');
-		int var = lookup_var(func->params->data[i], false);
-		emit_var(out, var);
-		if (i == 0)
-			consume(',');
-		else
-			expect(',');
-		expr();
-	}
-	expect(':');
-
-	emit(out, '~');
-	emit_word(out, func->page);
-	emit_dword(out, func->addr);
-	if (!func->resolved) {
-		func->page = input_page + 1;
-		func->addr = current_address(out) - 6;
-	}
-}
-
-// numarray ::= '[' ']' | '[' number (',' number)* ']'
-static void number_array(void) {
-	bool first = true;
-	while (!consume(']')) {
-		if (!first)
-			expect(',');
-		first = false;
-
-		const char *top = input;
-		int n = get_number();
-		if (n > 0xffff)
-			error_at(top, "number constant out of range: %d", n);
-
-		if (consume('b'))  // byte constant (sys3c extension)
-			emit(out, n);
-		else
-			emit_word(out, n);
-	}
-}
-
 // Compile command arguments. Directives:
 //  e: expression
 //  n: number (ascii digits)
 //  s: string (colon-terminated)
 //  v: variable
 //  z: string (zero-terminated)
-//  F: function name
 static void arguments(const char *sig) {
 	if (*sig == 'n') {
 		emit(out, get_number());
@@ -408,7 +264,6 @@ static void arguments(const char *sig) {
 	}
 
 	while (*sig) {
-		const char *top = input;
 		switch (*sig) {
 		case 'e':
 			expr();
@@ -444,22 +299,6 @@ static void arguments(const char *sig) {
 		case 'v':
 			variable(get_identifier(), false);
 			emit(out, OP_END);
-			break;
-		case 'F':
-			{
-				char *name = get_label();
-				if (compiling) {
-					Function *func = hash_get(compiler->functions, name);
-					if (!func)
-						error_at(top, "undefined function '%s'", name);
-					emit_word(out, func->page);
-					emit_dword(out, func->addr);
-					if (!func->resolved) {
-						func->page = input_page + 1;
-						func->addr = current_address(out) - 6;
-					}
-				}
-			}
 			break;
 		default:
 			error("BUG: invalid arguments() template : %c", *sig);
@@ -639,13 +478,9 @@ static bool command(void) {
 		}
 		break;
 
-	case '*':  // Label or function definition
-		if (consume('*')) {
-			defun();
-		} else {
-			add_label();
-			expect(':');
-		}
+	case '*':  // Label
+		add_label();
+		expect(':');
 		break;
 
 	case '@':  // Label jump
@@ -708,14 +543,6 @@ static bool command(void) {
 		}
 		break;
 
-	case '#':  // Data table address
-		emit(out, cmd);
-		label();
-		expect(',');
-		expr();
-		expect(':');
-		break;
-
 	case '_':  // Label address as data
 		label();
 		expect(':');
@@ -726,12 +553,8 @@ static bool command(void) {
 		emit(out, 0);
 		break;
 
-	case '[':  // Data
-		number_array();
-		break;
-
-	case '~':  // Function call
-		funcall();
+	case '[':  // Verb-obj
+		error("not implemented");
 		break;
 
 	case 'A': break;
@@ -804,13 +627,11 @@ static void toplevel(void) {
 		error_at(input, "unexpected '%c'", *input);
 }
 
-Compiler *new_compiler(Vector *src_paths, Vector *variables, Map *dlls) {
+Compiler *new_compiler(Vector *src_paths, Vector *variables) {
 	Compiler *comp = calloc(1, sizeof(Compiler));
 	comp->src_paths = src_paths;
 	comp->variables = variables ? variables : new_vec();
 	comp->symbols = new_string_hash();
-	comp->functions = new_string_hash();
-	comp->dlls = dlls ? dlls : new_map();
 	comp->scos = calloc(src_paths->len, sizeof(Sco));
 
 	for (int i = 0; i < comp->variables->len; i++)
