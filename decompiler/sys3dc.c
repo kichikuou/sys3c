@@ -63,7 +63,7 @@ static Sco *sco_new(int page, const uint8_t *data, int len, int volume) {
 	sco->src_name = strdup(name);
 	sco->ald_volume = volume;
 	sco->hdrsize = 2;
-	sco->filesize = le16(data) + 2 - 1;  // -1 for EOF character (\x1a)
+	sco->filesize = len;  // `*(uint16_t*)data` is filesize, but don't trust it.
 	sco->page = page;
 
 	if (len < sco->filesize) {

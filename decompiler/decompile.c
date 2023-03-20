@@ -449,7 +449,7 @@ static void decompile_page(int page) {
 	if (config.utf8_input && page == 0 && !memcmp(dc.p, "ZU\x41\x7f", 4))
 		dc.p += 4;
 
-	while (dc.p < sco->data + sco->filesize) {
+	while (dc.p < sco->data + sco->filesize && *dc.p != 0x1a) {
 		int topaddr = dc.p - sco->data;
 		uint8_t mark = sco->mark[dc.p - sco->data];
 		while (branch_end_stack->len > 0 && stack_top(branch_end_stack) == topaddr) {
