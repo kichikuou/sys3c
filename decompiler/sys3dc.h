@@ -37,26 +37,13 @@ enum {
 	  FOR_START,        // on '!'
 	  ELSE,             // on '@'
 	  ELSE_IF,          // on '@'
-	  FUNCALL_TOP,      // on '!'
 	  TYPE_MASK   = 0x7,
 
 	  // Flags
 	  CODE        = 1 << 4,
 	  DATA        = 1 << 5,
 	  LABEL       = 1 << 6,
-	  FUNC_TOP    = 1 << 7,
 };
-
-// ain.c
-
-typedef struct {
-	const char *name;
-	Vector *aliases; // Used if a single address has multiple global labels
-	uint16_t page;  // one-based numbering
-	uint32_t addr;
-	int argc;  // -1 for unknown
-	uint16_t *argv;
-} Function;
 
 // cali.c
 
