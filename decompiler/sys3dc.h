@@ -38,7 +38,6 @@ enum {
 	  ELSE,             // on '@'
 	  ELSE_IF,          // on '@'
 	  FUNCALL_TOP,      // on '!'
-	  DATA_TABLE,
 	  TYPE_MASK   = 0x7,
 
 	  // Flags
@@ -75,10 +74,6 @@ typedef struct Cali {
 // The returned node is valid until next parse_cali() call.
 Cali *parse_cali(const uint8_t **code, bool is_lhs);
 void print_cali(Cali *node, Vector *variables, FILE *out);
-
-// preprocess.c
-
-void preprocess(Vector *scos);
 
 // decompile.c
 

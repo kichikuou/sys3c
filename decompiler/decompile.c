@@ -281,48 +281,6 @@ static void data_block(const uint8_t *end) {
 	}
 }
 
-static void data_table_addr(void) {
-	uint32_t addr = le32(dc.p);
-	dc.p += 4;
-	dc_printf("L_%05x", addr);
-	dc_puts(", ");
-	cali(false);
-	dc_putc(':');
-
-	uint8_t *mark = mark_at(dc.page, addr);
-	uint8_t old_mark = *mark;
-	annotate(mark, DATA_TABLE | LABEL);
-	if (*mark != old_mark)
-		current_sco()->analyzed = false;
-}
-
-static bool data_table(void) {
-	Sco *sco = current_sco();
-	uint32_t pos = dc.p - sco->data;
-	uint32_t first_data = sco->filesize;
-	while (pos < first_data) {
-		uint32_t addr = le32(&sco->data[pos]);
-		pos += 4;
-		if (addr < sco->hdrsize || addr >= sco->filesize)
-			return false;
-		if (pos <= addr && addr < first_data)
-			first_data = addr;
-		if (sco->mark[pos])
-			break;
-	}
-
-	for (; dc.p < sco->data + pos; dc.p += 4) {
-		uint32_t addr = le32(dc.p);
-		indent();
-		dc_printf("_L_%05x:\n", addr);
-		if ((sco->mark[addr] & (DATA | LABEL)) != (DATA | LABEL)) {
-			sco->mark[addr] |= DATA | LABEL;
-			sco->analyzed = false;
-		}
-	}
-	return true;
-}
-
 static uint8_t *get_surrounding_else(Vector *branch_end_stack) {
 	if (branch_end_stack->len == 0)
 		return NULL;
@@ -479,10 +437,6 @@ static void analyze_args(Function *func, uint32_t topaddr_candidate, uint32_t fu
 	// Count the number of preceding variable assignments.
 	int argc = 0;
 	for (int addr = topaddr_candidate; addr < funcall_addr; addr++) {
-		// Clear DATA mark that may have been incorrectly set by the
-		// scan_for_data_tables heuristic.
-		sco->mark[addr] &= ~DATA;
-
 		if (sco->mark[addr]) {
 			assert(sco->data[addr] == '!');
 			argc++;
@@ -780,11 +734,6 @@ static void decompile_page(int page) {
 			dc_printf("*L_%05x:\n", dc.p - sco->data);
 		}
 
-		if ((mark & TYPE_MASK) == DATA_TABLE) {
-			if (data_table())
-				continue;
-			mark |= DATA;
-		}
 		if (mark & DATA) {
 			const uint8_t *data_end = dc.p + 1;
 			for (; data_end < sco->data + sco->filesize; data_end++) {
@@ -936,10 +885,6 @@ static void decompile_page(int page) {
 			}
 			break;
 
-		case '#':  // Data table address
-			data_table_addr();
-			break;
-
 		case '~':  // Function call
 			funcall(funcall_top_candidate);
 			break;
@@ -947,7 +892,7 @@ static void decompile_page(int page) {
 		case 'A': break;
 		case 'B': arguments("neeeeee"); break;
 		case 'E': arguments("eeeeee"); break;
-		case 'F': arguments("nee"); break;
+		case 'F': break;
 		case 'G': arguments("e"); break;
 		case 'H': arguments("ne"); break;
 		case 'I': arguments("eeeeee"); break;
@@ -1105,11 +1050,6 @@ void decompile(Vector *scos, const char *outdir, const char *adisk_name) {
 	dc.scos = scos;
 	dc.variables = new_vec();
 	dc.functions = new_function_hash();
-
-	// Preprocess
-	if (config.verbose)
-		puts("Preprocessing...");
-	preprocess(scos);
 
 	// Analyze
 	bool done = false;

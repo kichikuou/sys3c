@@ -82,7 +82,6 @@ test('compiler_tests', compiler_tests, workdir : meson.current_source_dir())
 sys3dc_srcs = [
   'decompiler/cali.c',
   'decompiler/decompile.c',
-  'decompiler/preprocess.c',
   'decompiler/sys3dc.c',
 ]
 sys3dc = executable('sys3dc', sys3dc_srcs, dependencies : common, install : true)

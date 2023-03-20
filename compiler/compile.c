@@ -737,7 +737,7 @@ static bool command(void) {
 	case 'A': break;
 	case 'B': arguments("neeeeee"); break;
 	case 'E': arguments("eeeeee"); break;
-	case 'F': arguments("nee"); break;
+	case 'F': break;
 	case 'G': arguments("e"); break;
 	case 'H': arguments("ne"); break;
 	case 'I': arguments("eeeeee"); break;
