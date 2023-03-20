@@ -204,80 +204,11 @@ static void label(void) {
 	*mark |= LABEL;
 }
 
-static bool is_string_data(const uint8_t *begin, const uint8_t *end, bool should_expand) {
-	if (*begin == '\0' && begin + 1 == end)
-		return true;
-	for (const uint8_t *p = begin; p < end;) {
-		if (*p == '\0')
-			return p - begin >= 2;
-		if (config.utf8_input) {
-			const uint8_t *next;
-			if (*p <= 0x7f) {
-				next = p + 1;
-			} else if (p[0] <= 0xdf) {
-				next = p + 2;
-			} else if (p[0] <= 0xef) {
-				next = p + 3;
-			} else if (p[0] <= 0xf7) {
-				next = p + 4;
-			} else {
-				return false;
-			}
-			if (next > end)
-				return false;
-			while (++p < next) {
-				if (!UTF8_TRAIL_BYTE(*p))
-					return false;
-			}
-		} else {
-			if (is_valid_sjis(p[0], p[1]))
-				p += 2;
-			else if (isprint(*p) || (should_expand && is_compacted_sjis(*p)))
-				p++;
-			else
-				break;
-		}
-	}
-	return false;
-}
-
-static void data_block(const uint8_t *end) {
-	if (!dc.out) {
-		dc.p = end;
-		return;
-	}
-
-	bool should_expand = true;
-	bool prefer_string = false;
-
-	while (dc.p < end) {
-		indent();
-		if (is_string_data(dc.p, end, should_expand) ||
-			(*dc.p == '\0' && (prefer_string || is_string_data(dc.p + 1, end, should_expand)))) {
-			dc_putc('"');
-			unsigned flags = STRING_ESCAPE | (should_expand ? STRING_EXPAND : 0);
-			dc.p = dc_put_string((const char *)dc.p, '\0', flags);
-			dc_puts("\"\n");
-			prefer_string = true;
-			continue;
-		}
-		prefer_string = false;
-
-		dc_putc('[');
-		const char *sep = "";
-		for (; dc.p < end && !is_string_data(dc.p, end, should_expand); dc.p += 2) {
-			if (dc.p + 1 == end) {
-				warning_at(dc.p, "data block with odd number of bytes");
-				dc_printf("%s%db", sep, dc.p[0]);
-				dc.p++;
-				break;
-			} else {
-				dc_printf("%s%d", sep, dc.p[0] | dc.p[1] << 8);
-			}
-			sep = ", ";
-		}
-		dc_puts("]\n");
-	}
+static void verb_obj(void) {
+	uint8_t verb = *dc.p++;
+	uint8_t obj = *dc.p++;
+	label();
+	dc_printf(", %d, %d:", verb, obj);
 }
 
 static uint8_t *get_surrounding_else(Vector *branch_end_stack) {
@@ -464,15 +395,6 @@ static void decompile_page(int page) {
 			dc_printf("*L_%05x:\n", dc.p - sco->data);
 		}
 
-		if (mark & DATA) {
-			const uint8_t *data_end = dc.p + 1;
-			for (; data_end < sco->data + sco->filesize; data_end++) {
-				if (sco->mark[data_end - sco->data] & ~DATA)
-					break;
-			}
-			data_block(data_end);
-			continue;
-		}
 		if ((mark & TYPE_MASK) == ELSE_IF && !dc.disable_else) {
 			assert(*dc.p == '@');
 			assert(dc.p[5] == '{');
@@ -500,7 +422,7 @@ static void decompile_page(int page) {
 			dc.indent--;
 		indent();
 		if (*dc.p == 0 || *dc.p == 0x20 || *dc.p > 0x80) {
-			uint8_t *mark_at_string_start = &sco->mark[dc.p - sco->data];
+			sco->mark[dc.p - sco->data] |= CODE;
 			dc_putc('\'');
 			const uint8_t *begin = dc.p;
 			while (*dc.p == 0x20 || *dc.p > 0x80) {
@@ -510,14 +432,6 @@ static void decompile_page(int page) {
 			}
 			dc_put_string_n((const char *)begin, dc.p - begin, STRING_ESCAPE | STRING_EXPAND);
 			dc_puts("'\n");
-			if (*dc.p == '\0') {
-				// String data in code area. This happens when the author
-				// accidentally use double quotes instead of single quotes.
-				*mark_at_string_start |= DATA;
-				dc.p++;
-			} else {
-				*mark_at_string_start |= CODE;
-			}
 			continue;
 		}
 		sco->mark[dc.p - sco->data] |= CODE;
@@ -591,6 +505,16 @@ static void decompile_page(int page) {
 			loop_end(branch_end_stack);
 			break;
 
+		case '[':  // Verb-obj
+			verb_obj();
+			break;
+
+		case ':':  // Conditional verb-obj
+			cali(false);
+			dc_puts(", ");
+			verb_obj();
+			break;
+
 		case ']':  // Menu
 			break;
 
@@ -629,13 +553,7 @@ static void decompile_page(int page) {
 		case 'Y': arguments("ee"); break;
 		case 'Z': arguments("ee"); break;
 		default:
-			if (dc.out)
-				error("%s:%x: unknown command '%.*s'", sjis2utf(sco->sco_name), topaddr, dc_addr() - topaddr, sco->data + topaddr);
-			// If we're in the analyze phase, retry as a data block.
-			dc.p = sco->data + topaddr;
-			sco->mark[topaddr] &= ~CODE;
-			sco->mark[topaddr] |= DATA;
-			break;
+			error("%s:%x: unknown command '%.*s'", sjis2utf(sco->sco_name), topaddr, dc_addr() - topaddr, sco->data + topaddr);
 		}
 		dc_putc('\n');
 	}

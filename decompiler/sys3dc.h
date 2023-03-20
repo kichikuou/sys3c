@@ -41,8 +41,7 @@ enum {
 
 	  // Flags
 	  CODE        = 1 << 4,
-	  DATA        = 1 << 5,
-	  LABEL       = 1 << 6,
+	  LABEL       = 1 << 5,
 };
 
 // cali.c
