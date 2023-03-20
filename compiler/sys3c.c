@@ -198,7 +198,8 @@ static void build(Vector *src_paths, Vector *variables, const char *adisk_name) 
 		char ald_path[PATH_MAX+1];
 		strncpy(ald_path, adisk_name, PATH_MAX);
 		if (i != 1) {
-			char *base = basename_utf8(ald_path);
+			char *base = strrchr(ald_path, '/');
+			base = base ? base + 1 : ald_path;
 			if (toupper(*base) != 'A')
 				error("cannot determine output filename");
 			*base += i - 1;

@@ -250,6 +250,17 @@ static Label *label(void) {
 	return l;
 }
 
+static void verb_obj(void) {
+	int loc = current_address(out);
+	emit_word(out, 0);  // dummy
+	label();
+	expect(',');
+	set_byte(out, loc, get_number());  // verb
+	expect(',');
+	set_byte(out, loc + 1, get_number());  // obj
+	expect(':');
+}
+
 // Compile command arguments. Directives:
 //  e: expression
 //  n: number (ascii digits)
@@ -554,7 +565,15 @@ static bool command(void) {
 		break;
 
 	case '[':  // Verb-obj
-		error("not implemented");
+		emit(out, cmd);
+		verb_obj();
+		break;
+
+	case ':':  // Conditional verb-obj
+		emit(out, cmd);
+		expr();
+		expect(',');
+		verb_obj();
 		break;
 
 	case 'A': break;
