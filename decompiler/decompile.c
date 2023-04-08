@@ -206,11 +206,13 @@ static void conditional(Vector *branch_end_stack) {
 	dc.indent++;
 	cali(false);
 	dc_putc(':');
-	uint16_t endaddr = le16(dc.p);
-	dc.p += 2;
 
-	*mark_at(dc.page, endaddr) |= CODE;
-	stack_push(branch_end_stack, endaddr);
+	if (config.sys_ver == SYSTEM3) {
+		uint16_t endaddr = le16(dc.p);
+		dc.p += 2;
+		*mark_at(dc.page, endaddr) |= CODE;
+		stack_push(branch_end_stack, endaddr);
+	}
 }
 
 static void for_loop(void) {
@@ -355,7 +357,7 @@ static void decompile_page(int page) {
 			dc_printf("*L_%05x:\n", dc.p - sco->data);
 		}
 
-		if (*dc.p == '>')
+		if (*dc.p == '>' || *dc.p == '}')
 			dc.indent--;
 		indent();
 		if (*dc.p == 0 || *dc.p == 0x20 || *dc.p > 0x80) {
@@ -414,6 +416,9 @@ static void decompile_page(int page) {
 			conditional(branch_end_stack);
 			break;
 
+		case '}':  // Branch end
+			break;
+
 		case '@':  // Label jump
 			label();
 			dc_putc(':');
@@ -466,13 +471,11 @@ static void decompile_page(int page) {
 			break;
 
 		case '\'':  // SysEng-style message
-			dc_putc('\'');
 			const uint8_t *begin = dc.p;
 			while (*dc.p != '\'')
 				dc.p = advance_char(dc.p);
 			dc_put_string_n((const char *)begin, dc.p - begin, STRING_ESCAPE | STRING_EXPAND);
-			dc.p++;
-			dc_putc('\'');
+			dc_putc(*dc.p++);  // '\''
 			break;
 
 		case 'A': break;
@@ -484,12 +487,12 @@ static void decompile_page(int page) {
 		case 'I': arguments("eeeeee"); break;
 		case 'J': arguments("ee"); break;
 		case 'K': arguments("n"); break;
-		case 'L': arguments("e"); break;
+		case 'L': arguments_by_sysver("n", "n", "e"); break;
 		case 'M': arguments("s"); break;
 		case 'N': arguments("nee"); break;
 		case 'O': arguments("ee"); break;
 		case 'P': arguments_by_sysver("n", "n", "eeee"); break;
-		case 'Q': arguments("e"); break;
+		case 'Q': arguments_by_sysver("n", "n", "e"); break;
 		case 'R': break;
 		case 'S': arguments("n"); break;
 		case 'T': arguments("ee"); break;
