@@ -29,7 +29,7 @@ static const struct option long_options[] = {
 	{ "encoding", required_argument, NULL, 'E' },
 	{ "help",     no_argument,       NULL, 'h' },
 	{ "outdir",   required_argument, NULL, 'o' },
-	{ "sysver",   required_argument, NULL, 's' },
+	{ "sys-ver",  required_argument, NULL, 's' },
 	{ "verbose",  no_argument,       NULL, 'V' },
 	{ "version",  no_argument,       NULL, 'v' },
 	{ 0, 0, 0, 0 }
@@ -43,7 +43,7 @@ static void usage(void) {
 	puts("    -Eu, --encoding=utf8      Output files in UTF-8 encoding (default)");
 	puts("    -h, --help                Display this message and exit");
 	puts("    -o, --outdir <directory>  Write output into <directory>");
-	puts("    -s, --sysver <version>    NACT system version (default: 3)");
+	puts("    -s, --sys-ver <ver>       NACT system version (1|2|3(default))");
 	puts("    -V, --verbose             Be verbose");
 	puts("    -v, --version             Print version information and exit");
 }

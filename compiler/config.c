@@ -21,26 +21,8 @@
 #include <string.h>
 
 Config config = {
-	.sys_ver = SYSTEM35,
+	.sys_ver = SYSTEM3,
 	.utf8 = true,
-};
-
-typedef struct {
-	const char *opt_val;
-	SysVer sys_ver;
-} SysVerOptValue;
-
-static const SysVerOptValue sys_ver_opt_values[] = {
-	{"3.5", SYSTEM35},
-	{"3.6", SYSTEM36},
-	{"3.8", SYSTEM38},
-	{"3.9", SYSTEM39},
-	{"S350", SYSTEM35},
-	{"S351", SYSTEM35},
-	{"153S", SYSTEM36},
-	{"S360", SYSTEM36},
-	{"S380", SYSTEM39},
-	{NULL, 0},
 };
 
 static bool to_bool(const char *s) {
@@ -52,22 +34,12 @@ static bool to_bool(const char *s) {
 }
 
 void set_sys_ver(const char *ver) {
-	for (const SysVerOptValue *v = sys_ver_opt_values; v->opt_val; v++) {
-		if (!strcmp(ver, v->opt_val)) {
-			config.sys_ver = v->sys_ver;
-			return;
-		}
+	switch (ver[0]) {
+	case '1': config.sys_ver = SYSTEM1; break;
+	case '2': config.sys_ver = SYSTEM2; break;
+	case '3': config.sys_ver = SYSTEM3; break;
+	default: error("Unknown system version '%s'", ver);
 	}
-	error("Unknown system version '%s'", ver);
-}
-
-static const char *get_sys_ver(void) {
-	for (const SysVerOptValue *v = sys_ver_opt_values; v->opt_val; v++) {
-		if (config.sys_ver == v->sys_ver)
-			return v->opt_val;
-	}
-	assert("cannot happen");
-	return NULL;
 }
 
 void load_config(FILE *fp, const char *cfg_dir) {
@@ -106,7 +78,7 @@ int init_project(const char *project, const char *hed, const char *adisk_name) {
 		hed = "sources.hed";
 
 	FILE *fp = checked_fopen(project, "w");
-	fprintf(fp, "sys_ver = %s\n", get_sys_ver());
+	fprintf(fp, "sys_ver = %d\n", config.sys_ver);
 	if (!config.utf8)
 		fputs("encoding = sjis\n", fp);
 	fprintf(fp, "hed = %s\n", hed);

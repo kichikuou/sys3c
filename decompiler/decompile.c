@@ -528,6 +528,7 @@ static void write_config(const char *path, const char *adisk_name) {
 	if (dc.scos->len == 0)
 		return;
 	FILE *fp = checked_fopen(path, "w+");
+	fprintf(fp, "sys_ver = %d\n", config.sys_ver);
 	if (adisk_name)
 		fprintf(fp, "adisk_name = %s\n", adisk_name);
 

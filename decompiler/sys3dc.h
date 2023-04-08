@@ -61,14 +61,8 @@ void print_cali(Cali *node, Vector *variables, FILE *out);
 
 // decompile.c
 
-enum sys_version {
-	SYSTEM1 = 1,
-	SYSTEM2,
-	SYSTEM3,
-};
-
 typedef struct {
-	enum sys_version sys_ver;
+	SysVer sys_ver;
 	bool address;
 	bool utf8_input;
 	bool utf8_output;

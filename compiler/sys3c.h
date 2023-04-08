@@ -19,13 +19,6 @@
 
 // config.c
 
-typedef enum {
-	SYSTEM35,
-	SYSTEM36,
-	SYSTEM38,
-	SYSTEM39,
-} SysVer;
-
 typedef struct {
 	const char *adisk_name;
 
@@ -112,8 +105,6 @@ typedef struct {
 	Vector *src_paths;
 	Vector *variables;
 	HashMap *symbols;   // variables and constants
-	Buffer *msg_buf;
-	int msg_count;
 	Sco *scos;
 	struct DebugInfo *dbg_info;
 } Compiler;

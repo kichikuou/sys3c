@@ -198,3 +198,9 @@ enum {
 	COMMAND_CONST = 0x82,
 	COMMAND_PRAGMA = 0x83,
 };
+
+typedef enum {
+	SYSTEM1 = 1,
+	SYSTEM2,
+	SYSTEM3,
+} SysVer;

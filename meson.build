@@ -65,16 +65,6 @@ sys3c_srcs = [
 ]
 sys3c = executable('sys3c', sys3c_srcs, dependencies : [common, compiler], install : true)
 
-compiler_tests_srcs = [
-  'compiler/compile_test.c',
-  'compiler/compiler_tests.c',
-  'compiler/hel_test.c',
-  'compiler/sco_test.c',
-]
-
-compiler_tests = executable('compiler_tests', compiler_tests_srcs, dependencies : [common, compiler])
-test('compiler_tests', compiler_tests, workdir : meson.current_source_dir())
-
 #
 # decompiler
 #

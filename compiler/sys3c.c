@@ -53,7 +53,7 @@ static void usage(void) {
 	puts("    -h, --help                Display this message and exit");
 	puts("    -I, --init                Create a new sys3c project");
 	puts("    -p, --project <file>      Read project configuration from <file>");
-	puts("    -s, --sys-ver <ver>       Target System version (3.5|3.6|3.8|3.9(default))");
+	puts("    -s, --sys-ver <ver>       Target System version (1|2|3(default))");
 	puts("    -u, --unicode             Generate Unicode output (can only be run on xsystem35)");
 	puts("    -V, --variables <file>    Read list of variables from <file>");
 	puts("    -v, --version             Print version information and exit");

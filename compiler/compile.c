@@ -325,6 +325,14 @@ static void arguments(const char *sig) {
 	expect(':');
 }
 
+static void arguments_by_sysver(const char *sig1, const char *sig2, const char *sig3) {
+	switch (config.sys_ver) {
+	case SYSTEM1: arguments(sig1); break;
+	case SYSTEM2: arguments(sig2); break;
+	case SYSTEM3: arguments(sig3); break;
+	}
+}
+
 // assign ::= '!' var [+-*/%&|^]? ':' expr '!'
 static void assign(void) {
 	int op = current_address(out);
@@ -468,7 +476,7 @@ static bool command(void) {
 		break;
 
 	case '\'': // Message
-		compile_string(out, '\'', config.sys_ver == SYSTEM35, true);
+		compile_string(out, '\'', true, true);
 		break;
 
 	case '!':  // Assign
@@ -547,7 +555,7 @@ static bool command(void) {
 		label();
 		expect('$');
 		if (!isascii(*input)) {
-			compile_string(out, '$', config.sys_ver == SYSTEM35, true);
+			compile_string(out, '$', true, true);
 			emit(out, '$');
 		} else {
 			menu_item_start = command_top;
@@ -560,7 +568,7 @@ static bool command(void) {
 		break;
 
 	case '"':  // String data
-		compile_string(out, '"', config.sys_ver == SYSTEM35, false);
+		compile_string(out, '"', true, false);
 		emit(out, 0);
 		break;
 
@@ -580,17 +588,17 @@ static bool command(void) {
 	case 'B': arguments("neeeeee"); break;
 	case 'E': arguments("eeeeee"); break;
 	case 'F': break;
-	case 'G': arguments("e"); break;
+	case 'G': arguments_by_sysver("n", "e", "e"); break;
 	case 'H': arguments("ne"); break;
 	case 'I': arguments("eeeeee"); break;
 	case 'J': arguments("ee"); break;
 	case 'K': arguments("n"); break;
-	case 'L': arguments("e"); break;
+	case 'L': arguments_by_sysver("n", "n", "e"); break;
 	case 'M': arguments("s"); break;
 	case 'N': arguments("nee"); break;
 	case 'O': arguments("ee"); break;
-	case 'P': arguments("eeee"); break;
-	case 'Q': arguments("e"); break;
+	case 'P': arguments_by_sysver("n", "n", "eeee"); break;
+	case 'Q': arguments_by_sysver("n", "n", "e"); break;
 	case 'R': break;
 	case 'S': arguments("n"); break;
 	case 'T': arguments("ee"); break;
@@ -663,7 +671,7 @@ static void prepare(Compiler *comp, const char *source, int pageno) {
 	compiler = comp;
 	lexer_init(source, comp->src_paths->data[pageno], pageno);
 	menu_item_start = NULL;
-	branch_end_stack = (config.sys_ver == SYSTEM35) ? new_vec() : NULL;
+	branch_end_stack = new_vec();  // FIXME: not nullable now
 }
 
 static void check_undefined_labels(void) {
@@ -688,9 +696,6 @@ void preprocess(Compiler *comp, const char *source, int pageno) {
 }
 
 void preprocess_done(Compiler *comp) {
-	if (config.sys_ver == SYSTEM39)
-		comp->msg_buf = new_buf();
-	comp->msg_count = 0;
 }
 
 Sco *compile(Compiler *comp, const char *source, int pageno) {
