@@ -59,8 +59,8 @@ void load_config(FILE *fp, const char *cfg_dir) {
 			config.hed = path_join(cfg_dir, val);
 		} else if (sscanf(line, "variables = %s", val)) {
 			config.var_list = path_join(cfg_dir, val);
-		} else if (sscanf(line, "old_SR = %s", val)) {
-			config.old_SR = to_bool(val);
+		} else if (sscanf(line, "ascii_messages = %s", val)) {
+			config.ascii_messages = to_bool(val);
 		} else if (sscanf(line, "adisk_name = %s", val)) {
 			config.adisk_name = path_join(cfg_dir, val);
 		} else if (sscanf(line, "unicode = %s", val)) {

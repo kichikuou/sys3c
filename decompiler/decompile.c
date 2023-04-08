@@ -42,7 +42,7 @@ typedef struct {
 	const uint8_t *p;  // Points inside scos->data[page]->data
 	int indent;
 
-	bool old_SR;
+	bool ascii_messages;
 } Decompiler;
 
 static Decompiler dc;
@@ -471,9 +471,13 @@ static void decompile_page(int page) {
 			break;
 
 		case '\'':  // SysEng-style message
+			dc.ascii_messages = true;
 			const uint8_t *begin = dc.p;
-			while (*dc.p != '\'')
+			while (*dc.p != '\'') {
+				if (*dc.p == '\\')
+					dc.p++;
 				dc.p = advance_char(dc.p);
+			}
 			dc_put_string_n((const char *)begin, dc.p - begin, STRING_ESCAPE | STRING_EXPAND);
 			dc_putc(*dc.p++);  // '\''
 			break;
@@ -534,8 +538,8 @@ static void write_config(const char *path, const char *adisk_name) {
 
 	fputs("hed = sys3dc.hed\n", fp);
 	fputs("variables = variables.txt\n", fp);
-	if (dc.old_SR)
-		fputs("old_SR = true\n", fp);
+	if (dc.ascii_messages)
+		fputs("ascii_messages = true\n", fp);
 
 	fprintf(fp, "encoding = %s\n", config.utf8_output ? "utf8" : "sjis");
 	if (config.utf8_input)

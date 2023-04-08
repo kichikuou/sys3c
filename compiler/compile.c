@@ -294,19 +294,6 @@ static void arguments(const char *sig) {
 			}
 			emit(out, *sig == 'z' ? 0 : ':');
 			break;
-		case 'o': // obfuscated string
-			{
-				emit(out, 0);
-				expect('"');
-				int start = current_address(out);
-				compile_string(out, '"', false, false);
-				for (int i = start; i < current_address(out); i++) {
-					uint8_t b = get_byte(out, i);
-					set_byte(out, i, b >> 4 | b << 4);
-				}
-				emit(out, 0);
-			}
-			break;
 		case 'v':
 			variable(get_identifier(), false);
 			emit(out, OP_END);
@@ -476,7 +463,13 @@ static bool command(void) {
 		break;
 
 	case '\'': // Message
-		compile_string(out, '\'', true, true);
+		if (config.ascii_messages){
+			emit(out, cmd);
+			compile_string(out, '\'', true, false);
+			emit(out, cmd);
+		} else {
+			compile_string(out, '\'', true, true);
+		}
 		break;
 
 	case '!':  // Assign

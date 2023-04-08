@@ -29,7 +29,7 @@ typedef struct {
 	bool debug;
 	bool unicode;
 	bool utf8;
-	bool old_SR;
+	bool ascii_messages;
 } Config;
 extern Config config;
 
