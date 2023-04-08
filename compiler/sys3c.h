@@ -36,7 +36,6 @@ typedef struct {
 	bool debug;
 	bool unicode;
 	bool utf8;
-	bool disable_else;
 	bool old_SR;
 } Config;
 extern Config config;

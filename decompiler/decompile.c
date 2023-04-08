@@ -42,7 +42,6 @@ typedef struct {
 	const uint8_t *p;  // Points inside scos->data[page]->data
 	int indent;
 
-	bool disable_else;
 	bool old_SR;
 } Decompiler;
 
@@ -54,15 +53,6 @@ static inline Sco *current_sco(void) {
 
 static inline int dc_addr(void) {
 	return dc.p - current_sco()->data;
-}
-
-static const uint8_t *code_at(int page, int addr) {
-	if (page >= dc.scos->len)
-		error("page out of range (%x:%x)", page, addr);
-	Sco *sco = dc.scos->data[page];
-	if (addr >= sco->filesize)
-		error("address out of range (%x:%x)", page, addr);
-	return &sco->data[addr];
 }
 
 static uint8_t *mark_at(int page, int addr) {
@@ -212,21 +202,7 @@ static void verb_obj(void) {
 	dc_printf(", %d, %d:", verb, obj);
 }
 
-static uint8_t *get_surrounding_else(Vector *branch_end_stack) {
-	if (branch_end_stack->len == 0)
-		return NULL;
-	uint8_t *mark = mark_at(dc.page, dc_addr() - 6);
-	if ((*mark & TYPE_MASK) != ELSE)
-		return NULL;
-	uint32_t addr = le32(dc.p - 5);
-	if (addr != stack_top(branch_end_stack))
-		return NULL;
-	return mark;
-}
-
 static void conditional(Vector *branch_end_stack) {
-	uint8_t *surrounding_else = get_surrounding_else(branch_end_stack);
-
 	dc.indent++;
 	cali(false);
 	dc_putc(':');
@@ -234,31 +210,6 @@ static void conditional(Vector *branch_end_stack) {
 	dc.p += 2;
 
 	*mark_at(dc.page, endaddr) |= CODE;
-	const uint8_t *epilogue = code_at(dc.page, endaddr - 5);
-	switch (*epilogue) {
-	case '@':
-		if (!dc.disable_else) {
-			uint32_t addr = le32(epilogue + 1);
-			if (endaddr <= addr && addr <= current_sco()->filesize) {
-				if (surrounding_else && stack_top(branch_end_stack) == addr) {
-					stack_pop(branch_end_stack);
-					annotate(surrounding_else, ELSE_IF);
-				}
-				uint8_t *m = mark_at(dc.page, endaddr - 5);
-				if ((*m & TYPE_MASK) != ELSE_IF)
-					annotate(m, ELSE);
-				endaddr = addr;
-			} else {
-				dc.disable_else = true;
-			}
-		}
-		break;
-	case '>':
-		break;
-	default:
-		dc.disable_else = true;
-		break;
-	}
 	stack_push(branch_end_stack, endaddr);
 }
 
@@ -404,29 +355,6 @@ static void decompile_page(int page) {
 			dc_printf("*L_%05x:\n", dc.p - sco->data);
 		}
 
-		if ((mark & TYPE_MASK) == ELSE_IF && !dc.disable_else) {
-			assert(*dc.p == '@');
-			assert(dc.p[5] == '{');
-			dc.p += 6;
-			dc.indent--;
-			stack_pop(branch_end_stack);
-			indent();
-			dc_puts("} else if {");
-			conditional(branch_end_stack);
-			dc_putc('\n');
-			continue;
-		}
-		if ((mark & TYPE_MASK) == ELSE && !dc.disable_else) {
-			assert(*dc.p == '@');
-			dc.p += 5;
-			if (le32(dc.p - 4) != dc_addr()) {
-				dc.indent--;
-				indent();
-				dc_puts("} else {\n");
-				dc.indent++;
-			}
-			continue;
-		}
 		if (*dc.p == '>')
 			dc.indent--;
 		indent();
@@ -602,8 +530,6 @@ static void write_config(const char *path, const char *adisk_name) {
 
 	fputs("hed = sys3dc.hed\n", fp);
 	fputs("variables = variables.txt\n", fp);
-	if (dc.disable_else)
-		fputs("disable_else = true\n", fp);
 	if (dc.old_SR)
 		fputs("old_SR = true\n", fp);
 

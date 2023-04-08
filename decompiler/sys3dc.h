@@ -35,8 +35,6 @@ enum {
 	  // Type field
 	  WHILE_START = 1,  // on '{'
 	  FOR_START,        // on '!'
-	  ELSE,             // on '@'
-	  ELSE_IF,          // on '@'
 	  TYPE_MASK   = 0x7,
 
 	  // Flags
