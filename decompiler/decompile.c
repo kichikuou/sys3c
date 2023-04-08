@@ -25,6 +25,7 @@
 #include <string.h>
 
 Config config = {
+	.sys_ver = SYSTEM3,
 	.utf8_output = true,
 };
 
@@ -350,6 +351,14 @@ static void arguments(const char *sig) {
 	dc_putc(':');
 }
 
+static void arguments_by_sysver(const char *sig1, const char *sig2, const char *sig3) {
+	switch (config.sys_ver) {
+	case SYSTEM1: arguments(sig1); break;
+	case SYSTEM2: arguments(sig2); break;
+	case SYSTEM3: arguments(sig3); break;
+	}
+}
+
 static int get_command(void) {
 	dc_putc(*dc.p++);
 	return dc.p[-1];
@@ -528,11 +537,21 @@ static void decompile_page(int page) {
 			}
 			break;
 
+		case '\'':  // SysEng-style message
+			dc_putc('\'');
+			const uint8_t *begin = dc.p;
+			while (*dc.p != '\'')
+				dc.p = advance_char(dc.p);
+			dc_put_string_n((const char *)begin, dc.p - begin, STRING_ESCAPE | STRING_EXPAND);
+			dc.p++;
+			dc_putc('\'');
+			break;
+
 		case 'A': break;
 		case 'B': arguments("neeeeee"); break;
 		case 'E': arguments("eeeeee"); break;
 		case 'F': break;
-		case 'G': arguments("e"); break;
+		case 'G': arguments_by_sysver("n", "e", "e"); break;
 		case 'H': arguments("ne"); break;
 		case 'I': arguments("eeeeee"); break;
 		case 'J': arguments("ee"); break;
@@ -541,7 +560,7 @@ static void decompile_page(int page) {
 		case 'M': arguments("s"); break;
 		case 'N': arguments("nee"); break;
 		case 'O': arguments("ee"); break;
-		case 'P': arguments("eeee"); break;
+		case 'P': arguments_by_sysver("n", "n", "eeee"); break;
 		case 'Q': arguments("e"); break;
 		case 'R': break;
 		case 'S': arguments("n"); break;

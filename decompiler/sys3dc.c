@@ -23,13 +23,13 @@
 #include <string.h>
 #include <sys/stat.h>
 
-static const char short_options[] = "adE:ho:sVv";
+static const char short_options[] = "adE:ho:s:Vv";
 static const struct option long_options[] = {
 	{ "address",  no_argument,       NULL, 'a' },
 	{ "encoding", required_argument, NULL, 'E' },
 	{ "help",     no_argument,       NULL, 'h' },
 	{ "outdir",   required_argument, NULL, 'o' },
-	{ "seq",      no_argument,       NULL, 's' },
+	{ "sysver",   required_argument, NULL, 's' },
 	{ "verbose",  no_argument,       NULL, 'V' },
 	{ "version",  no_argument,       NULL, 'v' },
 	{ 0, 0, 0, 0 }
@@ -43,7 +43,7 @@ static void usage(void) {
 	puts("    -Eu, --encoding=utf8      Output files in UTF-8 encoding (default)");
 	puts("    -h, --help                Display this message and exit");
 	puts("    -o, --outdir <directory>  Write output into <directory>");
-	puts("    -s, --seq                 Output with sequential filenames (0.adv, 1.adv, ...)");
+	puts("    -s, --sysver <version>    NACT system version (default: 3)");
 	puts("    -V, --verbose             Be verbose");
 	puts("    -v, --version             Print version information and exit");
 }
@@ -96,7 +96,6 @@ int main(int argc, char *argv[]) {
 	init(&argc, &argv);
 
 	const char *outdir = NULL;
-	bool seq = false;
 
 	int opt;
 	while ((opt = getopt_long(argc, argv, short_options, long_options, NULL)) != -1) {
@@ -118,7 +117,12 @@ int main(int argc, char *argv[]) {
 			outdir = optarg;
 			break;
 		case 's':
-			seq = true;
+			switch (optarg[0]) {
+			case '1': config.sys_ver = SYSTEM1; break;
+			case '2': config.sys_ver = SYSTEM2; break;
+			case '3': config.sys_ver = SYSTEM3; break;
+			default: error("Invalid system version '%s'", optarg);
+			}
 			break;
 		case 'V':
 			config.verbose = true;
@@ -154,11 +158,6 @@ int main(int argc, char *argv[]) {
 			continue;
 		Sco *sco = sco_new(i + 1, e->data, e->size, e->volume);
 		scos->data[i] = sco;
-		if (seq) {
-			char buf[16];
-			sprintf(buf, "%d.adv", i);
-			sco->src_name = strdup(buf);
-		}
 
 		// Detect unicode SCO.
 		if (i == 0 && !memcmp(sco->data + sco->hdrsize, "ZU\x41\x7f", 4))
