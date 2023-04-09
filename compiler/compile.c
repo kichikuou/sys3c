@@ -465,7 +465,7 @@ static bool command(void) {
 	case '\'': // Message
 		if (config.ascii_messages){
 			emit(out, cmd);
-			compile_string(out, '\'', true, false);
+			compile_string(out, '\'', false, false);
 			emit(out, cmd);
 		} else {
 			compile_string(out, '\'', true, true);

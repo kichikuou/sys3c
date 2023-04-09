@@ -478,7 +478,7 @@ static void decompile_page(int page) {
 					dc.p++;
 				dc.p = advance_char(dc.p);
 			}
-			dc_put_string_n((const char *)begin, dc.p - begin, STRING_ESCAPE | STRING_EXPAND);
+			dc_put_string_n((const char *)begin, dc.p - begin, STRING_ESCAPE);
 			dc_putc(*dc.p++);  // '\''
 			break;
 
