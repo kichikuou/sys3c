@@ -351,12 +351,21 @@ static void conditional(void) {
 	emit(out, '{');
 	expr();
 	expect(':');
-	int hole = current_address(out);
-	emit_word(out, 0);
+
+	int hole;
+	if (config.sys_ver == SYSTEM3) {
+		hole = current_address(out);
+		emit_word(out, 0);
+	}
 
 	commands();
+
 	expect('}');
-	swap_word(out, hole, current_address(out));
+	if (config.sys_ver == SYSTEM3) {
+		swap_word(out, hole, current_address(out));
+	} else {
+		emit(out, '}');
+	}
 }
 
 static void pragma(void) {
