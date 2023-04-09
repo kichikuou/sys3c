@@ -319,28 +319,10 @@ static void arguments_by_sysver(const char *sig1, const char *sig2, const char *
 	}
 }
 
-// assign ::= '!' var [+-*/%&|^]? ':' expr '!'
+// assign ::= '!' var ':' expr '!'
 static void assign(void) {
-	int op = current_address(out);
 	emit(out, '!');
 	variable(get_identifier(), true);
-	if (consume('+')) {
-		set_byte(out, op, 0x10);
-	} else if (consume('-')) {
-		set_byte(out, op, 0x11);
-	} else if (consume('*')) {
-		set_byte(out, op, 0x12);
-	} else if (consume('/')) {
-		set_byte(out, op, 0x13);
-	} else if (consume('%')) {
-		set_byte(out, op, 0x14);
-	} else if (consume('&')) {
-		set_byte(out, op, 0x15);
-	} else if (consume('|')) {
-		set_byte(out, op, 0x16);
-	} else if (consume('^')) {
-		set_byte(out, op, 0x17);
-	}
 	expect(':');
 	expr();
 	expect('!');

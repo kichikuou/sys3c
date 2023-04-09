@@ -331,17 +331,11 @@ static void decompile_page(int page) {
 		int cmd = get_command();
 		switch (cmd) {
 		case '!':  // Assign
-		case 0x10: case 0x11: case 0x12: case 0x13:
-		case 0x14: case 0x15: case 0x16: case 0x17:
-			{
-				cali(true);
-				dc_putc(' ');
-				if (cmd != '!')
-					dc_putc("+-*/%&|^"[cmd - 0x10]);
-				dc_puts(": ");
-				cali(false);
-				dc_putc('!');
-			}
+			cali(true);
+			dc_putc(' ');
+			dc_puts(": ");
+			cali(false);
+			dc_putc('!');
 			break;
 
 		case '{':  // Branch
