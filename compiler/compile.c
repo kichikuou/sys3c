@@ -267,6 +267,9 @@ static void verb_obj(void) {
 //  v: variable
 //  z: string (zero-terminated)
 static void arguments(const char *sig) {
+	if (!sig)
+		error_at(input, "invalid command");
+
 	if (*sig == 'n') {
 		emit(out, get_number());
 		if (*++sig)
@@ -487,26 +490,26 @@ static bool command(void) {
 		break;
 
 	case 'A': break;
-	case 'B': arguments("neeeeee"); break;
-	case 'E': arguments("eeeeee"); break;
+	case 'B': arguments_by_sysver(NULL, "eeeeeee", "neeeeee"); break;
+	case 'E': arguments_by_sysver(NULL, "eee", "eeeeee"); break;
 	case 'F': break;
 	case 'G': arguments_by_sysver("n", "e", "e"); break;
-	case 'H': arguments("ne"); break;
-	case 'I': arguments("eeeeee"); break;
-	case 'J': arguments("ee"); break;
-	case 'K': arguments("n"); break;
+	case 'H': arguments_by_sysver(NULL, "ne", "ne"); break;
+	case 'I': arguments_by_sysver(NULL, "eee", "eeeeee"); break;
+	case 'J': arguments_by_sysver(NULL, "ee", "ee"); break;
+	case 'K': arguments_by_sysver(NULL, NULL, "n"); break;
 	case 'L': arguments_by_sysver("n", "n", "e"); break;
-	case 'M': arguments("s"); break;
-	case 'N': arguments("nee"); break;
-	case 'O': arguments("ee"); break;
+	case 'M': arguments_by_sysver(NULL, "s", "s"); break;
+	case 'N': arguments_by_sysver(NULL, "ee", "nee"); break;
+	case 'O': arguments_by_sysver(NULL, "eee", "ev"); break;
 	case 'P': arguments_by_sysver("n", "n", "eeee"); break;
 	case 'Q': arguments_by_sysver("n", "n", "e"); break;
 	case 'R': break;
 	case 'S': arguments("n"); break;
-	case 'T': arguments("ee"); break;
-	case 'U': arguments("ee"); break;
-	case 'V': arguments("ee"); break;
-	case 'W': arguments("eee"); break;
+	case 'T': arguments_by_sysver(NULL, "eee", "ee"); break;
+	case 'U': arguments_by_sysver("nn", "nn", "ee"); break;  // FIXME: Use "ee" for yakata2
+	case 'V': arguments_by_sysver(NULL, NULL, "ee"); break;
+	case 'W': arguments_by_sysver(NULL, "eeee", "eee"); break;
 	case 'X': arguments("n"); break;
 	case 'Y': arguments("ee"); break;
 	case 'Z': arguments("ee"); break;
