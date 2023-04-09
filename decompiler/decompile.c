@@ -29,10 +29,6 @@ Config config = {
 	.utf8_output = true,
 };
 
-static inline void annotate(uint8_t* mark, int type) {
-	*mark = (*mark & ~TYPE_MASK) | type;
-}
-
 typedef struct {
 	Vector *scos;
 	Vector *variables;
@@ -215,48 +211,6 @@ static void conditional(Vector *branch_end_stack) {
 	}
 }
 
-static void for_loop(void) {
-	uint8_t *mark = mark_at(dc.page, dc_addr()) - 2;
-	while (!(*mark & CODE))
-		mark--;
-	annotate(mark, FOR_START);
-	if (*dc.p++ != 0)
-		error("for_loop: 0 expected, got 0x%02x", *--dc.p);
-	if (*dc.p++ != '<')
-		error("for_loop: '<' expected, got 0x%02x", *--dc.p);
-	if (*dc.p++ != 1)
-		error("for_loop: 1 expected, got 0x%02x", *--dc.p);
-	dc.p += 4; // skip label
-	parse_cali(&dc.p, false);  // var
-	cali(false);  // e2
-	dc_puts(", ");
-	cali(false);  // e3
-	dc_puts(", ");
-	cali(false);  // e4
-	dc_putc(':');
-	dc.indent++;
-}
-
-static void loop_end(Vector *branch_end_stack) {
-	uint16_t addr = le16(dc.p);
-	dc.p += 2;
-
-	uint8_t *mark = mark_at(dc.page, addr);
-	Sco *sco = dc.scos->data[dc.page];
-	switch (sco->data[addr]) {
-	case '{':
-		annotate(mark, WHILE_START);
-		if (stack_top(branch_end_stack) != dc_addr())
-			error("while-loop: unexpected address (%x != %x)", stack_top(branch_end_stack), dc_addr());
-		stack_pop(branch_end_stack);
-		break;
-	case '<':
-		break;
-	default:
-		error("Unexpected loop structure");
-	}
-}
-
 // Decompile command arguments. Directives:
 //  e: expression
 //  n: number (single-byte)
@@ -374,28 +328,6 @@ static void decompile_page(int page) {
 			continue;
 		}
 		sco->mark[dc.p - sco->data] |= CODE;
-		if ((mark & TYPE_MASK) == FOR_START) {
-			assert(*dc.p == '!');
-			dc.p++;
-			dc_putc('<');
-			cali(true);
-			dc_puts(", ");
-			cali(false);
-			dc_puts(", ");
-			assert(*dc.p == '<');
-			dc.p++;
-			for_loop();
-			dc_putc('\n');
-			continue;
-		}
-		if ((mark & TYPE_MASK) == WHILE_START) {
-			assert(*dc.p == '{');
-			dc.p++;
-			dc_puts("<@");
-			conditional(branch_end_stack);
-			dc_putc('\n');
-			continue;
-		}
 		int cmd = get_command();
 		switch (cmd) {
 		case '!':  // Assign
@@ -437,14 +369,6 @@ static void decompile_page(int page) {
 		case '%':  // Page call / return
 			page_name(cmd);
 			dc_putc(':');
-			break;
-
-		case '<':  // For-loop
-			for_loop();
-			break;
-
-		case '>':  // Loop end
-			loop_end(branch_end_stack);
 			break;
 
 		case '[':  // Verb-obj

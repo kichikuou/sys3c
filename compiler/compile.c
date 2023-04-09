@@ -24,7 +24,6 @@
 static Compiler *compiler;
 static const char *menu_item_start;
 static bool compiling;
-static Vector *branch_end_stack;
 
 typedef enum {
 	VARIABLE,
@@ -355,73 +354,9 @@ static void conditional(void) {
 	int hole = current_address(out);
 	emit_word(out, 0);
 
-	if (branch_end_stack) {
-		stack_push(branch_end_stack, hole);
-		return;
-	}
-
 	commands();
 	expect('}');
 	swap_word(out, hole, current_address(out));
-}
-
-// while-loop ::= '<@' expr ':' commands '>'
-static void while_loop(void) {
-	int loop_addr = current_address(out);
-	emit(out, '{');
-	expr();
-	expect(':');
-	int end_hole = current_address(out);
-	emit_word(out, 0);
-
-	commands();
-
-	expect('>');
-	emit(out, '>');
-	emit_word(out, loop_addr);
-
-	swap_word(out, end_hole, current_address(out));
-}
-
-// for-loop ::= '<' var ',' expr ',' expr ',' expr ',' expr ':' commands '>'
-static void for_loop(void) {
-	emit(out, '!');
-	int var_begin = current_address(out);
-	variable(get_identifier(), true);  // for-loop can define a variable.
-	int var_end = current_address(out);
-	expect(',');
-
-	expr();  // start
-	expect(',');
-
-	emit(out, '<');
-	emit(out, 0x00);
-	int loop_addr = current_address(out);
-	emit(out, '<');
-	emit(out, 0x01);
-
-	int end_hole = current_address(out);
-	emit_word(out, 0);
-
-	// Copy the opcode for the variable.
-	for (int i = var_begin; i < var_end; i++)
-		emit(out, get_byte(out, i));
-	emit(out, OP_END);
-
-	expr();  // end
-	expect(',');
-	expr();  // sign
-	expect(',');
-	expr();  // step
-	expect(':');
-
-	commands();
-
-	expect('>');
-	emit(out, '>');
-	emit_word(out, loop_addr);
-
-	swap_word(out, end_hole, current_address(out));
 }
 
 static void pragma(void) {
@@ -481,14 +416,7 @@ static bool command(void) {
 		break;
 
 	case '}':
-		if (branch_end_stack && branch_end_stack->len > 0) {
-			expect('}');
-			swap_word(out, stack_top(branch_end_stack), current_address(out));
-			stack_pop(branch_end_stack);
-		} else {
-			return false;
-		}
-		break;
+		return false;
 
 	case '*':  // Label
 		add_label();
@@ -524,16 +452,6 @@ static bool command(void) {
 		expr();
 		expect(':');
 		break;
-
-	case '<':  // Loop
-		if (consume('@'))
-			while_loop();
-		else
-			for_loop();
-		break;
-
-	case '>':
-		return false;
 
 	case ']':  // Menu
 		emit(out, cmd);
@@ -664,7 +582,6 @@ static void prepare(Compiler *comp, const char *source, int pageno) {
 	compiler = comp;
 	lexer_init(source, comp->src_paths->data[pageno], pageno);
 	menu_item_start = NULL;
-	branch_end_stack = new_vec();  // FIXME: not nullable now
 }
 
 static void check_undefined_labels(void) {
@@ -684,8 +601,6 @@ void preprocess(Compiler *comp, const char *source, int pageno) {
 
 	if (menu_item_start)
 		error_at(menu_item_start, "unfinished menu item");
-	if (branch_end_stack && branch_end_stack->len > 0)
-		error_at(input, "'}' expected");
 }
 
 void preprocess_done(Compiler *comp) {

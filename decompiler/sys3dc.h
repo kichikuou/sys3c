@@ -30,16 +30,9 @@ typedef struct {
 } Sco;
 
 // Sco.mark[i] stores annotation for Sco.data[i].
-// An annotation consists of a 3-bit type field and flags.
 enum {
-	  // Type field
-	  WHILE_START = 1,  // on '{'
-	  FOR_START,        // on '!'
-	  TYPE_MASK   = 0x7,
-
-	  // Flags
-	  CODE        = 1 << 4,
-	  LABEL       = 1 << 5,
+	  CODE        = 1 << 0,
+	  LABEL       = 1 << 1,
 };
 
 // cali.c
