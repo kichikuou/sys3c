@@ -42,7 +42,6 @@ typedef struct Cali {
 		NODE_NUMBER,
 		NODE_VARIABLE,
 		NODE_OP,
-		NODE_AREF,
 	} type;
 	int val;
 	struct Cali *lhs, *rhs;

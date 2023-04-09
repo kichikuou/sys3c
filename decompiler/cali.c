@@ -43,13 +43,8 @@ static Cali *parse(const uint8_t **code, bool is_lhs) {
 		case OP_END:
 			if (top == stack)
 				error_at(p, "empty expression");
-			while (top - 2 >= stack) {
-				// Rance 2, Oudou Yuusha
-				warning_at(p, "unexpected end of expression");
-				Cali *rhs = *--top;
-				Cali *lhs = *--top;
-				*top++ = new_node(NODE_OP, OP_END, lhs, rhs);
-			}
+			if (top - 2 >= stack)
+				error_at(p, "unexpected end of expression");
 			*code = p;
 			return *--top;
 
@@ -101,7 +96,7 @@ static Cali *parse(const uint8_t **code, bool is_lhs) {
 	if (--top != stack)
 		warning_at(p, "unexpected end of expression");
 	Cali *node = *top;
-	if (node->type != NODE_VARIABLE && node->type != NODE_AREF)
+	if (node->type != NODE_VARIABLE)
 		error_at(p, "unexpected left-hand-side for assignment %d", node->type);
 	*code = p;
 	return node;
@@ -135,7 +130,6 @@ void print_cali_prec(Cali *node, int out_prec, Vector *variables, FILE *out) {
 		break;
 
 	case NODE_VARIABLE:
-	case NODE_AREF:
 		while (variables->len <= node->val)
 			vec_push(variables, NULL);
 		if (!variables->data[node->val]) {
@@ -144,11 +138,6 @@ void print_cali_prec(Cali *node, int out_prec, Vector *variables, FILE *out) {
 			variables->data[node->val] = strdup(buf);
 		}
 		fputs(variables->data[node->val], out);
-		if (node->type == NODE_AREF) {
-			fputc('[', out);
-			print_cali_prec(node->lhs, 0, variables, out);
-			fputc(']', out);
-		}
 		break;
 
 	case NODE_OP:
