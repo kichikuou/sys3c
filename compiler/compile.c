@@ -265,7 +265,6 @@ static void verb_obj(void) {
 //  n: number (ascii digits)
 //  s: string (colon-terminated)
 //  v: variable
-//  z: string (zero-terminated)
 static void arguments(const char *sig) {
 	if (!sig)
 		error_at(input, "invalid command");
@@ -285,7 +284,6 @@ static void arguments(const char *sig) {
 			emit(out, get_number());
 			break;
 		case 's':
-		case 'z':
 			while (isspace(*input))
 				input++;  // Do not consume full-width spaces here
 			if (*input == '"') {
@@ -294,7 +292,7 @@ static void arguments(const char *sig) {
 			} else {
 				compile_bare_string(out);
 			}
-			emit(out, *sig == 'z' ? 0 : ':');
+			emit(out, ':');
 			break;
 		case 'v':
 			variable(get_identifier(), false);
@@ -388,9 +386,6 @@ static bool command(void) {
 	case '\0':
 		return false;
 
-	case '\x1a': // DOS EOF
-		break;
-
 	case '\'': // Message
 		if (config.ascii_messages){
 			emit(out, cmd);
@@ -465,16 +460,6 @@ static bool command(void) {
 		} else {
 			menu_item_start = command_top;
 		}
-		break;
-
-	case '_':  // Label address as data
-		label();
-		expect(':');
-		break;
-
-	case '"':  // String data
-		compile_string(out, '"', true, false);
-		emit(out, 0);
 		break;
 
 	case '[':  // Verb-obj

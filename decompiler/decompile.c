@@ -216,7 +216,6 @@ static void conditional(Vector *branch_end_stack) {
 //  n: number (single-byte)
 //  s: string (colon-terminated)
 //  v: variable
-//  z: string (zero-terminated)
 static void arguments(const char *sig) {
 	if (!sig)
 		error_at(dc.p, "invalid command");
@@ -235,24 +234,7 @@ static void arguments(const char *sig) {
 			dc_printf("%d", *dc.p++);
 			break;
 		case 's':
-		case 'z':
-			{
-				uint8_t terminator = *sig == 'z' ? 0 : ':';
-				dc.p = dc_put_string((const char *)dc.p, terminator, 0);
-			}
-			break;
-		case 'o':  // obfuscated string
-			{
-				if (*dc.p != 0)
-					error_at(dc.p, "0x00 expected");
-				dc_putc('"');
-				char *buf = strdup((const char *)++dc.p);
-				for (uint8_t *p = (uint8_t *)buf; *p; p++)
-					*p = *p >> 4 | *p << 4;
-				dc_put_string(buf, '\0', 0);
-				dc.p += strlen(buf) + 1;
-				dc_putc('"');
-			}
+			dc.p = dc_put_string((const char *)dc.p, ':', 0);
 			break;
 		default:
 			error("BUG: invalid arguments() template : %c", *sig);
