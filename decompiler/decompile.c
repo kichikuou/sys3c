@@ -234,7 +234,13 @@ static void arguments(const char *sig) {
 			dc_printf("%d", *dc.p++);
 			break;
 		case 's':
-			dc.p = dc_put_string((const char *)dc.p, ':', 0);
+			if (*dc.p == ' ') {
+				dc_putc('"');
+				dc.p = dc_put_string((const char *)dc.p, ':', STRING_ESCAPE);
+				dc_putc('"');
+			} else {
+				dc.p = dc_put_string((const char *)dc.p, ':', 0);
+			}
 			break;
 		default:
 			error("BUG: invalid arguments() template : %c", *sig);
