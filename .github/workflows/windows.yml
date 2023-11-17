@@ -3,12 +3,12 @@ on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: windows-2019
+    runs-on: windows-latest
     strategy:
       matrix:
         include:
         - { sys: MINGW32, archive-suffix: "-32bit" }
-        - { sys: MINGW64, archive-suffix: "-64bit" }
+        - { sys: UCRT64, archive-suffix: "-64bit" }
     defaults:
       run:
         shell: msys2 {0}
@@ -21,13 +21,15 @@ jobs:
         msystem: ${{ matrix.sys }}
         release: false
         pacboy: >-
+          diffutils:
+          gcc:p
           meson:p
           pkgconf:p
           libpng:p
           asciidoctor:p
 
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Build
       run: |
@@ -48,7 +50,7 @@ jobs:
         cp build/*.html artifacts/docs
 
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: sys3c${{ matrix.archive-suffix }}
         path: artifacts
