@@ -84,10 +84,8 @@ libpng_utils = static_library('png_utils', 'tools/png_utils.c', dependencies : [
 png_utils = declare_dependency(link_with : libpng_utils)
 
 dri = executable('dri', ['tools/ald.c'], dependencies : common, install : true)
-alk = executable('alk', ['tools/alk.c'], dependencies : common, install : true)
 vsp = executable('vsp', ['tools/vsp.c'], dependencies : [common, png, png_utils], install : true)
 pms = executable('pms', ['tools/pms.c'], dependencies : [common, png, png_utils], install : true)
-qnt = executable('qnt', ['tools/qnt.c'], dependencies : [common, png, png_utils], install : true)
 
 #
 # regression test
@@ -99,7 +97,7 @@ test('regression_test',
   bash,
   args : ['./regression_test.sh', meson.current_build_dir()],
   workdir : meson.current_source_dir(),
-  depends : [sys3c, sys3dc, dri, alk, vsp, pms, qnt])
+  depends : [sys3c, sys3dc, dri, vsp, pms])
 
 #
 # docs
@@ -107,9 +105,8 @@ test('regression_test',
 
 docs = [
   ['docs/ald.adoc', ['ald.1']],
-  ['docs/alk.adoc', ['alk.1']],
   ['docs/unicode.adoc', []],
-  ['docs/vsp.adoc', ['vsp.1', 'pms.1', 'qnt.1']],
+  ['docs/vsp.adoc', ['vsp.1', 'pms.1']],
   ['docs/sys3c.adoc', ['sys3c.1']],
   ['docs/sys3dc.adoc', ['sys3dc.1']],
 ]

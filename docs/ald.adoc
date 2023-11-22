@@ -97,6 +97,3 @@ Usage: *ald version*
   * (ald create) Read manifest file from _file_.
   * (ald extract) Write manifest file to _file_. It can be used to recreate
     the ALD archive from extracted files.
-
-== See also
-xref:alk.adoc[*alk(1)*]

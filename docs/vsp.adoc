@@ -4,25 +4,24 @@
 :mansource: sys3c
 
 == Name
-vsp, pms, qnt - utilities for VSP, PMS, QNT images
+vsp, pms - utilities for VSP, PMS images
 
 == Synopsis
 [verse]
 *vsp* [_options_] _file_...
 *pms* [_options_] _file_...
-*qnt* [_options_] _file_...
 
 == Description
-By default, *vsp*, *pms* and *qnt* commands convert VSP, PMS and QNT image
+By default, *vsp* and *pms* commands convert VSP and PMS image
 files to PNG format, respectively.  If `-e` option is specified, these commands
-convert PNG files to VSP, PMS or QNT.
+convert PNG files to VSP or PMS.
 
 Output filename is the same as the input filename, with the extension changed
-to `.png`, `.vsp`, `.pms` or `.qnt`, depending on the destination format.
+to `.png`, `.vsp` or `.pms`, depending on the destination format.
 
 == Options
 *-e, --encode*::
-  Encode PNG file(s) to VSP, PMS or QNT format.
+  Encode PNG file(s) to VSP or PMS format.
 
 *-h, --help*::
   Display help message about the command and exit.
