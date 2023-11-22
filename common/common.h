@@ -21,7 +21,7 @@
 #include <stdnoreturn.h>
 #include <time.h>
 
-#define VERSION "1.9.2"
+#define VERSION "0.0.1"
 
 static inline uint32_t le16(const uint8_t *p) {
 	return p[0] | p[1] << 8;
@@ -150,33 +150,6 @@ typedef struct {
 void ald_write(Vector *entries, int volume, FILE *fp);
 Vector *ald_read(Vector *entries, const char *path);
 
-// System39.ain
-
-typedef enum {
-	HEL_pword = 0,
-	HEL_int = 1,
-	HEL_ISurface = 2,
-	HEL_IString = 3,
-	HEL_IWinMsg = 4,
-	HEL_ITimer = 5,
-	HEL_IUI = 6,
-	HEL_ISys3xDIB = 7,
-	HEL_ISys3xCG = 9,
-	HEL_ISys3xStringTable = 10,
-	HEL_ISys3xSystem = 13,
-	HEL_ISys3xMusic = 14,
-	HEL_ISys3xMsgString = 15,
-	HEL_ISys3xInputDevice = 16,
-	HEL_ISys3x = 17,
-	HEL_IConstString = 18,
-} HELType;
-
-typedef struct {
-	const char *name;
-	uint32_t argc;
-	HELType argtypes[];
-} DLLFunc;
-
 // opcodes
 
 enum {
@@ -194,9 +167,8 @@ enum {
 enum {
 	// Pseudo commands
 	COMMAND_IF = 0x80,
-	COMMAND_LXWx = 0x81,
-	COMMAND_CONST = 0x82,
-	COMMAND_PRAGMA = 0x83,
+	COMMAND_CONST = 0x81,
+	COMMAND_PRAGMA = 0x82,
 };
 
 typedef enum {

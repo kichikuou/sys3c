@@ -121,10 +121,6 @@ void preprocess(Compiler *comp, const char *source, int pageno);
 void preprocess_done(Compiler *comp);
 Sco *compile(Compiler *comp, const char *source, int pageno);
 
-// hel.c
-
-Vector *parse_hel(const char* hel, const char *name);
-
 // debuginfo.c
 
 struct DebugInfo *new_debug_info(Map *srcs);

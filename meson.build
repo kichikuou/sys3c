@@ -52,7 +52,6 @@ compiler_srcs = [
   'compiler/compile.c',
   'compiler/config.c',
   'compiler/debuginfo.c',
-  'compiler/hel.c',
   'compiler/lexer.c',
   'compiler/sco.c',
 ]
