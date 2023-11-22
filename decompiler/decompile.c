@@ -533,8 +533,8 @@ void decompile(Vector *scos, const char *outdir, const char *adisk_name) {
 		if (config.verbose)
 			printf("Decompiling %s (page %d)...\n", sjis2utf(sco->sco_name), i);
 		dc.out = checked_fopen(path_join(outdir, to_utf8(sco->src_name)), "w+");
-		if (sco->ald_volume != 1)
-			fprintf(dc.out, "pragma ald_volume %d:\n", sco->ald_volume);
+		if (sco->dri_volume != 1)
+			fprintf(dc.out, "pragma dri_volume %d:\n", sco->dri_volume);
 		decompile_page(i);
 		if (!config.utf8_input && config.utf8_output)
 			convert_to_utf8(dc.out);

@@ -7,7 +7,7 @@
 sys3dc - System 3.x decompiler
 
 == Synopsis
-*sys3dc* [_options_] _aldfile_... [_system39.ain_]
+*sys3dc* [_options_] _drifile_... [_system39.ain_]
 
 == Description
 `sys3dc` is a decompiler for AliceSoft's System 3.x game engine. It reads a
@@ -56,4 +56,4 @@ If you want to use the official System 3.x SDK, specify the generated
 `sys3dc.hed` file in the `DIR.HED` file of your project directory.
 
 == See also
-xref:sys3c.adoc[*sys3c(1)*], xref:ald.adoc[*ald(1)*]
+xref:sys3c.adoc[*sys3c(1)*], xref:dri.adoc[*dri(1)*]

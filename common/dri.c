@@ -45,16 +45,16 @@ static void pad(FILE *fp) {
 		fputc(0, fp);
 }
 
-static void write_entry(AldEntry *entry, FILE *fp) {
+static void write_entry(DriEntry *entry, FILE *fp) {
 	fwrite(entry->data, entry->size, 1, fp);
 }
 
-void ald_write(Vector *entries, int volume, FILE *fp) {
+void dri_write(Vector *entries, int volume, FILE *fp) {
 	int sector = 0;
 
 	int ptr_count = 0;
 	for (int i = 0; i < entries->len; i++) {
-		AldEntry *entry = entries->data[i];
+		DriEntry *entry = entries->data[i];
 		if (entry && entry->volume == volume)
 			ptr_count++;
 	}
@@ -62,7 +62,7 @@ void ald_write(Vector *entries, int volume, FILE *fp) {
 	write_ptr((ptr_count + 2) * 2, &sector, fp);
 	write_ptr(entries->len * 2 + 1, &sector, fp);
 	for (int i = 0; i < entries->len; i++) {
-		AldEntry *entry = entries->data[i];
+		DriEntry *entry = entries->data[i];
 		if (entry && entry->volume == volume)
 			write_ptr(entry->size, &sector, fp);
 	}
@@ -71,7 +71,7 @@ void ald_write(Vector *entries, int volume, FILE *fp) {
 	uint16_t link[256];
 	memset(link, 0, sizeof(link));
 	for (int i = 0; i < entries->len; i++) {
-		AldEntry *entry = entries->data[i];
+		DriEntry *entry = entries->data[i];
 		int vol = entry ? entry->volume : 0;
 		fputc(vol, fp);
 		if (vol)
@@ -82,7 +82,7 @@ void ald_write(Vector *entries, int volume, FILE *fp) {
 	pad(fp);
 
 	for (int i = 0; i < entries->len; i++) {
-		AldEntry *entry = entries->data[i];
+		DriEntry *entry = entries->data[i];
 		if (!entry || entry->volume != volume)
 			continue;
 		write_entry(entry, fp);
@@ -90,36 +90,36 @@ void ald_write(Vector *entries, int volume, FILE *fp) {
 	}
 }
 
-static inline uint8_t *ald_sector(uint8_t *ald, int size, int index) {
-	uint8_t *p = ald + index * 2;
+static inline uint8_t *dri_sector(uint8_t *dri, int size, int index) {
+	uint8_t *p = dri + index * 2;
 	int offset = (p[0] << 8 | p[1] << 16) - 256;
 	if (offset > size)
 		error("sector offset out of range: %d", offset);
-	return ald + offset;
+	return dri + offset;
 }
 
-static void ald_read_entries(Vector *entries, int volume, uint8_t *data, int size) {
-	uint8_t *link_sector = ald_sector(data, size, 0);
-	uint8_t *link_sector_end = ald_sector(data, size, 1);
+static void dri_read_entries(Vector *entries, int volume, uint8_t *data, int size) {
+	uint8_t *link_sector = dri_sector(data, size, 0);
+	uint8_t *link_sector_end = dri_sector(data, size, 1);
 
 	for (uint8_t *link = link_sector; link < link_sector_end; link += 2) {
 		uint8_t vol_nr = link[0];
 		uint8_t ptr_nr = link[1];
 		if (vol_nr != volume)
 			continue;
-		uint8_t *entry_ptr = ald_sector(data, size, ptr_nr);
-		AldEntry *e = calloc(1, sizeof(AldEntry));
+		uint8_t *entry_ptr = dri_sector(data, size, ptr_nr);
+		DriEntry *e = calloc(1, sizeof(DriEntry));
 		e->id = (link - link_sector) / 2 + 1;
 		e->volume = volume;
 		e->data = entry_ptr;
-		e->size = ald_sector(data, size, ptr_nr + 1) - entry_ptr;
+		e->size = dri_sector(data, size, ptr_nr + 1) - entry_ptr;
 		if (e->data + e->size > data + size)
-			error("entry size exceeds end of ald file");
+			error("entry size exceeds end of dri file");
 		vec_set(entries, e->id - 1, e);
 	}
 }
 
-Vector *ald_read(Vector *entries, const char *path) {
+Vector *dri_read(Vector *entries, const char *path) {
 	if (!entries)
 		entries = new_vec();
 
@@ -146,7 +146,7 @@ Vector *ald_read(Vector *entries, const char *path) {
 	close(fd);
 
 	int volume = toupper(basename_utf8(path)[0]) - 'A' + 1;
-	ald_read_entries(entries, volume, p, sbuf.st_size);
+	dri_read_entries(entries, volume, p, sbuf.st_size);
 
 	return entries;
 }

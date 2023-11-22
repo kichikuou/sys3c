@@ -36,7 +36,7 @@ static const struct option long_options[] = {
 };
 
 static void usage(void) {
-	puts("Usage: sys3dc [options] aldfile(s)");
+	puts("Usage: sys3dc [options] drifile(s)");
 	puts("Options:");
 	puts("    -a, --address             Prefix each line with address");
 	puts("    -Es, --encoding=sjis      Output files in SJIS encoding");
@@ -61,7 +61,7 @@ static Sco *sco_new(int page, const uint8_t *data, int len, int volume) {
 	sco->sco_name = strdup(name);
 	sprintf(name, "%d.adv", page);
 	sco->src_name = strdup(name);
-	sco->ald_volume = volume;
+	sco->dri_volume = volume;
 	sco->hdrsize = 2;
 	sco->filesize = len;  // `*(uint16_t*)data` is filesize, but don't trust it.
 	sco->page = page;
@@ -146,14 +146,14 @@ int main(int argc, char *argv[]) {
 	Vector *scos = NULL;
 	const char *adisk_name = NULL;
 	for (int i = 0; i < argc; i++) {
-		scos = ald_read(scos, argv[i]);
+		scos = dri_read(scos, argv[i]);
 		char *basename = basename_utf8(argv[i]);
 		if (toupper(basename[0]) == 'A')
 			adisk_name = basename;
 	}
 
 	for (int i = 0; i < scos->len; i++) {
-		AldEntry *e = scos->data[i];
+		DriEntry *e = scos->data[i];
 		if (!e)
 			continue;
 		Sco *sco = sco_new(i + 1, e->data, e->size, e->volume);

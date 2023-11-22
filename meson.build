@@ -26,7 +26,7 @@ endif
 inc = include_directories('common')
 
 common_srcs = [
-  'common/ald.c',
+  'common/dri.c',
   'common/container.c',
   'common/sjisutf.c',
   'common/util.c',
@@ -82,7 +82,7 @@ sys3dc = executable('sys3dc', sys3dc_srcs, dependencies : common, install : true
 libpng_utils = static_library('png_utils', 'tools/png_utils.c', dependencies : [common, png])
 png_utils = declare_dependency(link_with : libpng_utils)
 
-dri = executable('dri', ['tools/ald.c'], dependencies : common, install : true)
+dri = executable('dri', ['tools/dri.c'], dependencies : common, install : true)
 vsp = executable('vsp', ['tools/vsp.c'], dependencies : [common, png, png_utils], install : true)
 pms = executable('pms', ['tools/pms.c'], dependencies : [common, png, png_utils], install : true)
 
@@ -103,7 +103,7 @@ test('regression_test',
 #
 
 docs = [
-  ['docs/ald.adoc', ['ald.1']],
+  ['docs/dri.adoc', ['dri.1']],
   ['docs/unicode.adoc', []],
   ['docs/vsp.adoc', ['vsp.1', 'pms.1']],
   ['docs/sys3c.adoc', ['sys3c.1']],

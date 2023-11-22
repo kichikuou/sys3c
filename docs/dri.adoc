@@ -1,0 +1,99 @@
+= dri(1)
+:doctype: manpage
+:manmanual: sys3c manual
+:mansource: sys3c
+
+== Name
+dri - DAT archive utility
+
+== Synopsis
+[verse]
+*dri list* _drifile_...
+*dri create* _drifile_ _file_...
+*dri create* _drifile_ -m _manifest-file_
+*dri extract* [_options_] _drifile_... [--] [(_index_|_filename_)...]
+*dri dump* _drifile_... [--] (_index_|_filename_)
+*dri compare* _drifile1_ _drifile2_
+*dri help* [_command_]
+*dri version*
+
+== Description
+`dri` manipulates DAT archive files.
+
+=== dri list
+Usage: *dri list* _drifile_...
+
+*dri list* lists files in the DAT archive. Since an DAT archive may consist of
+multiple files (`xxxA.DAT`, `xxxB.DAT`, ...), multiple DAT files can be
+specified.
+
+The following information are displayed for each file in the archive:
+
+* index
+* volume id (1 for `xxxA.DAT`, 2 for `xxxB.DAT`, etc.)
+* timestamp
+* size
+* filename
+
+=== dri create
+Usage: *dri create* _drifile_ _file_...
+
+This form creates a new DAT archive containing the specified files.
+
+Usage: *dri create* _drifile_ -m _manifest-file_
+
+In this form, _drifile_ must end with "a.dri". This form creates a new DAT
+archive from the files listed in _manifest-file_. Here is an example of a
+manifest file:
+
+  1,001,cg001.qnt
+  1,002,cg002.qnt
+  2,003,cg003.qnt
+
+The first number in each line is the volume number. Files with volume number 1
+are stored in `...a.dri`, files with volume number 2 are stored in `...b.dri`,
+and so on.
+
+The second number in each line is the link number. Game scripts specify assets
+by this number.
+
+=== dri extract
+Usage: *dri extract* [_options_] _drifile_... [--] [(_index_|_filename_)...]
+
+*dri extract* extracts files from an DAT archive. Optionally you can pass a list
+of archive members to be processed, specified by _index_ or _filename_.
+
+If `-m` option is given, this also generates a manifest file for the archive.
+
+=== dri dump
+Usage: *dri dump* _drifile_... [--] (_index_|_filename_)
+
+*dri dump* displays content of a file in the DAT archive, specified by _index_
+or _filename_, in hexadecimal bytes + SJIS-aware characters format.
+
+=== dri compare
+Usage: *dri compare* _drifile1_ _drifile2_
+
+*dri compare* compares contents of two DAT archives, ignoring timestamp
+differences and upper/lower case differences in file names.
+
+Exit status is 0 if the two archives are equivalent, 1 if different.
+
+=== dri help
+Usage: *dri help* [_command_]
+
+*dri help* displays help information about _command_ and exits.
+
+=== dri version
+Usage: *dri version*
+
+*dri version* displays the version number of `dri` and exits.
+
+== Options
+*-d, --directory*=_dir_::
+  (dri extract) Extract files into _dir_. (default: `.`)
+
+*-m, --manifest*=_file_::
+  * (dri create) Read manifest file from _file_.
+  * (dri extract) Write manifest file to _file_. It can be used to recreate
+    the DAT archive from extracted files.

@@ -28,7 +28,7 @@
 
 static const char short_options[] = "a:E:ghi:Io:p:s:uV:v";
 static const struct option long_options[] = {
-	{ "ald",       required_argument, NULL, 'o' },
+	{ "dri",       required_argument, NULL, 'o' },
 	{ "debug",     no_argument,       NULL, 'g' },
 	{ "encoding",  required_argument, NULL, 'E' },
 	{ "hed",       required_argument, NULL, 'i' },
@@ -45,7 +45,7 @@ static const struct option long_options[] = {
 static void usage(void) {
 	puts("Usage: sys3c [options] file...");
 	puts("Options:");
-	puts("    -o, --ald <name>          Write output to <name> (default: " DEFAULT_ADISK_NAME ")");
+	puts("    -o, --dri <name>          Write output to <name> (default: " DEFAULT_ADISK_NAME ")");
 	puts("    -g, --debug               Generate debug information");
 	puts("    -Es, --encoding=sjis      Set input coding system to SJIS");
 	puts("    -Eu, --encoding=utf8      Set input coding system to UTF-8 (default)");
@@ -178,34 +178,34 @@ static void build(Vector *src_paths, Vector *variables, const char *adisk_name) 
 
 	preprocess_done(compiler);
 
-	uint32_t ald_mask = 0;
-	Vector *ald = new_vec();
+	uint32_t dri_mask = 0;
+	Vector *dri = new_vec();
 	for (int i = 0; i < srcs->keys->len; i++) {
 		const char *source = srcs->vals->data[i];
 		Sco *sco = compile(compiler, source, i);
-		AldEntry *e = calloc(1, sizeof(AldEntry));
-		e->volume = sco->ald_volume;
+		DriEntry *e = calloc(1, sizeof(DriEntry));
+		e->volume = sco->dri_volume;
 		e->data = sco->buf->buf;
 		e->size = sco->buf->len;
-		vec_push(ald, e);
+		vec_push(dri, e);
 		if (0 < e->volume && e->volume <= 26)
-			ald_mask |= 1 << e->volume;
+			dri_mask |= 1 << e->volume;
 	}
 
 	for (int i = 1; i <= 26; i++) {
-		if (!(ald_mask & 1 << i))
+		if (!(dri_mask & 1 << i))
 			continue;
-		char ald_path[PATH_MAX+1];
-		strncpy(ald_path, adisk_name, PATH_MAX);
+		char dri_path[PATH_MAX+1];
+		strncpy(dri_path, adisk_name, PATH_MAX);
 		if (i != 1) {
-			char *base = strrchr(ald_path, '/');
-			base = base ? base + 1 : ald_path;
+			char *base = strrchr(dri_path, '/');
+			base = base ? base + 1 : dri_path;
 			if (toupper(*base) != 'A')
 				error("cannot determine output filename");
 			*base += i - 1;
 		}
-		FILE *fp = checked_fopen(ald_path, "wb");
-		ald_write(ald, i, fp);
+		FILE *fp = checked_fopen(dri_path, "wb");
+		dri_write(dri, i, fp);
 		fclose(fp);
 	}
 

@@ -27,7 +27,7 @@
 #endif
 
 static void usage(void) {
-	puts("Usage: ald <command> [<args>]");
+	puts("Usage: dri <command> [<args>]");
 	puts("");
 	puts("commands:");
 	puts("  list     Print list of archive files");
@@ -38,67 +38,67 @@ static void usage(void) {
 	puts("  help     Display help information about commands");
 	puts("  version  Display version information and exit");
 	puts("");
-	puts("Run 'ald help <command>' for more information about a specific command.");
+	puts("Run 'dri help <command>' for more information about a specific command.");
 }
 
-static Vector *read_alds(int *pargc, char **pargv[]) {
+static Vector *read_dris(int *pargc, char **pargv[]) {
 	int argc = *pargc;
 	char **argv = *pargv;
 
 	for (int dd = 0; dd < argc; dd++) {
 		if (!strcmp(argv[dd], "--")) {
-			Vector *ald = NULL;
+			Vector *dri = NULL;
 			for (int i = 0; i < dd; i++)
-				ald = ald_read(ald, argv[i]);
+				dri = dri_read(dri, argv[i]);
 			*pargc -= dd + 1;
 			*pargv += dd + 1;
-			return ald;
+			return dri;
 		}
 	}
 
-	Vector *ald = NULL;
+	Vector *dri = NULL;
 	for (int i = 0; i < argc; i++) {
 		const char *dot = strrchr(argv[i], '.');
 		if (!dot || strcasecmp(dot, ".dat"))
 			break;
-		ald = ald_read(ald, argv[i]);
+		dri = dri_read(dri, argv[i]);
 		*pargc -= 1;
 		*pargv += 1;
 	}
-	return ald;
+	return dri;
 }
 
-static AldEntry *find_entry(Vector *ald, const char *num_or_name) {
+static DriEntry *find_entry(Vector *dri, const char *num_or_name) {
 	char *endptr;
 	unsigned long idx = strtoul(num_or_name, &endptr, 0);
 	if (*endptr == '\0') {
-		if (idx == 0 || idx > ald->len) {
-			fprintf(stderr, "ald: index %lu is out of range (1-%d)\n", idx, ald->len);
+		if (idx == 0 || idx > dri->len) {
+			fprintf(stderr, "dri: index %lu is out of range (1-%d)\n", idx, dri->len);
 			return NULL;
 		}
-		if (!ald->data[idx-1]) {
-			fprintf(stderr, "ald: No entry for index %lu\n", idx);
+		if (!dri->data[idx-1]) {
+			fprintf(stderr, "dri: No entry for index %lu\n", idx);
 			return NULL;
 		}
-		return ald->data[idx-1];
+		return dri->data[idx-1];
 	}
 
-	fprintf(stderr, "ald: No entry for '%s'\n", num_or_name);
+	fprintf(stderr, "dri: No entry for '%s'\n", num_or_name);
 	return NULL;
 }
 
-static void write_manifest(Vector *ald, FILE *fp) {
-	for (int i = 0; i < ald->len; i++) {
-		AldEntry *e = ald->data[i];
+static void write_manifest(Vector *dri, FILE *fp) {
+	for (int i = 0; i < dri->len; i++) {
+		DriEntry *e = dri->data[i];
 		if (e)
 			fprintf(fp, "%d,%d,%d.out\n", e->volume, i + 1, i + 1);
 	}
 }
 
-// ald list ----------------------------------------
+// dri list ----------------------------------------
 
 static void help_list(void) {
-	puts("Usage: ald list <aldfile>...");
+	puts("Usage: dri list <drifile>...");
 }
 
 static int do_list(int argc, char *argv[]) {
@@ -106,11 +106,11 @@ static int do_list(int argc, char *argv[]) {
 		help_list();
 		return 1;
 	}
-	Vector *ald = new_vec();
+	Vector *dri = new_vec();
 	for (int i = 1; i < argc; i++)
-		ald_read(ald, argv[i]);
-	for (int i = 0; i < ald->len; i++) {
-		AldEntry *e = ald->data[i];
+		dri_read(dri, argv[i]);
+	for (int i = 0; i < dri->len; i++) {
+		DriEntry *e = dri->data[i];
 		if (!e)
 			continue;
 		printf("%4d %2d  %8d\n", i + 1, e->volume, e->size);
@@ -118,7 +118,7 @@ static int do_list(int argc, char *argv[]) {
 	return 0;
 }
 
-// ald create ----------------------------------------
+// dri create ----------------------------------------
 
 static const char create_short_options[] = "m:";
 static const struct option create_long_options[] = {
@@ -127,13 +127,13 @@ static const struct option create_long_options[] = {
 };
 
 static void help_create(void) {
-	puts("Usage: ald create <aldfile> <file>...");
-	puts("       ald create <aldfile> -m <manifest-file>");
+	puts("Usage: dri create <drifile> <file>...");
+	puts("       dri create <drifile> -m <manifest-file>");
 	puts("Options:");
 	puts("    -m, --manifest <file>    Read manifest from <file>");
 }
 
-static void add_file(Vector *ald, int volume, int no, const char *path) {
+static void add_file(Vector *dri, int volume, int no, const char *path) {
 	FILE *fp = checked_fopen(path, "rb");
 	struct stat sbuf;
 	if (fstat(fileno(fp), &sbuf) < 0)
@@ -145,14 +145,14 @@ static void add_file(Vector *ald, int volume, int no, const char *path) {
 		error("%s: %s", path, strerror(errno));
 	fclose(fp);
 
-	AldEntry *e = calloc(1, sizeof(AldEntry));
+	DriEntry *e = calloc(1, sizeof(DriEntry));
 	e->data = data;
 	e->size = sbuf.st_size;
 	e->volume = volume;
-	vec_set(ald, no - 1, e);
+	vec_set(dri, no - 1, e);
 }
 
-static uint32_t add_files_from_manifest(Vector *ald, const char *manifest) {
+static uint32_t add_files_from_manifest(Vector *dri, const char *manifest) {
 	FILE *fp = checked_fopen(manifest, "r");
 	char line[200];
 	int lineno = 0;
@@ -176,10 +176,10 @@ static uint32_t add_files_from_manifest(Vector *ald, const char *manifest) {
 			error("%s:%d invalid volume id %d", manifest, lineno, volume);
 		if (link_no < 1 || link_no > 65535)
 			error("%s:%d invalid link number %d", manifest, lineno, link_no);
-		if (link_no - 1 < ald->len && ald->data[link_no - 1])
+		if (link_no - 1 < dri->len && dri->data[link_no - 1])
 			error("%s:%d duplicated link number %d", manifest, lineno, link_no);
 		vol_bits |= 1 << volume;
-		add_file(ald, volume, link_no, fname);
+		add_file(dri, volume, link_no, fname);
 	}
 	fclose(fp);
 	return vol_bits;
@@ -205,14 +205,14 @@ static int do_create(int argc, char *argv[]) {
 		help_create();
 		return 1;
 	}
-	char *ald_path = strdup(argv[0]);
+	char *dri_path = strdup(argv[0]);
 	Vector *entries = new_vec();
 
 	if (manifest) {
-		int len = strlen(ald_path);
-		char *volume_letter = ald_path + len - 5;
-		if (strcasecmp(volume_letter, "a.ald"))
-			error("ald: output filename must end with \"a.ald\"");
+		int len = strlen(dri_path);
+		char *volume_letter = dri_path + len - 5;
+		if (strcasecmp(volume_letter, "a.dri"))
+			error("dri: output filename must end with \"a.dri\"");
 		char base = *volume_letter - 1;
 
 		uint32_t vol_bits = add_files_from_manifest(entries, manifest);
@@ -220,21 +220,21 @@ static int do_create(int argc, char *argv[]) {
 			if ((vol_bits & 1 << vol) == 0)
 				continue;
 			*volume_letter = base + vol;
-			FILE *fp = checked_fopen(ald_path, "wb");
-			ald_write(entries, vol, fp);
+			FILE *fp = checked_fopen(dri_path, "wb");
+			dri_write(entries, vol, fp);
 			fclose(fp);
 		}
 	} else {
 		for (int i = 1; i < argc; i++)
 			add_file(entries, 1, i, argv[i]);
-		FILE *fp = checked_fopen(ald_path, "wb");
-		ald_write(entries, 1, fp);
+		FILE *fp = checked_fopen(dri_path, "wb");
+		dri_write(entries, 1, fp);
 		fclose(fp);
 	}
 	return 0;
 }
 
-// ald extract ----------------------------------------
+// dri extract ----------------------------------------
 
 static const char extract_short_options[] = "d:m:";
 static const struct option extract_long_options[] = {
@@ -244,13 +244,13 @@ static const struct option extract_long_options[] = {
 };
 
 static void help_extract(void) {
-	puts("Usage: ald extract [options] <aldfile>... [--] [(<n>|<file>)...]");
+	puts("Usage: dri extract [options] <drifile>... [--] [(<n>|<file>)...]");
 	puts("Options:");
 	puts("    -d, --directory <dir>    Extract files into <dir>");
 	puts("    -m, --manifest <file>    Write manifest to <file>");
 }
 
-static void extract_entry(AldEntry *e, const char *directory) {
+static void extract_entry(DriEntry *e, const char *directory) {
 	char name[20];
 	sprintf(name, "%d.out", e->id);
 	puts(name);
@@ -280,8 +280,8 @@ static int do_extract(int argc, char *argv[]) {
 	argc -= optind;
 	argv += optind;
 
-	Vector *ald = read_alds(&argc, &argv);
-	if (!ald) {
+	Vector *dri = read_dris(&argc, &argv);
+	if (!dri) {
 		help_extract();
 		return 1;
 	}
@@ -291,20 +291,20 @@ static int do_extract(int argc, char *argv[]) {
 
 	if (manifest) {
 		FILE *fp = checked_fopen(manifest, "w");
-		write_manifest(ald, fp);
+		write_manifest(dri, fp);
 		fclose(fp);
 	}
 
 	if (!argc) {
 		// Extract all files.
-		for (int i = 0; i < ald->len; i++) {
-			AldEntry *e = ald->data[i];
+		for (int i = 0; i < dri->len; i++) {
+			DriEntry *e = dri->data[i];
 			if (e)
 				extract_entry(e, directory);
 		}
 	} else {
 		for (int i = 0; i < argc; i++) {
-			AldEntry *e = find_entry(ald, argv[i]);
+			DriEntry *e = find_entry(dri, argv[i]);
 			if (e)
 				extract_entry(e, directory);
 		}
@@ -312,10 +312,10 @@ static int do_extract(int argc, char *argv[]) {
 	return 0;
 }
 
-// ald dump ----------------------------------------
+// dri dump ----------------------------------------
 
 static void help_dump(void) {
-	puts("Usage: ald dump <aldfile>... [--] <n>|<file>");
+	puts("Usage: dri dump <drifile>... [--] <n>|<file>");
 }
 
 static void print_sjis_2byte(uint8_t c1, uint8_t c2) {
@@ -324,7 +324,7 @@ static void print_sjis_2byte(uint8_t c1, uint8_t c2) {
 	fputs(out, stdout);
 }
 
-static void dump_entry(AldEntry *entry) {
+static void dump_entry(DriEntry *entry) {
 	bool skip_first = false;
 	for (int addr = 0; addr < entry->size; addr += 16) {
 		int n = (entry->size - addr > 16) ? 16 : entry->size - addr;
@@ -366,26 +366,26 @@ static void dump_entry(AldEntry *entry) {
 static int do_dump(int argc, char *argv[]) {
 	argc--;
 	argv++;
-	Vector *ald = read_alds(&argc, &argv);
-	if (!ald || argc != 1) {
+	Vector *dri = read_dris(&argc, &argv);
+	if (!dri || argc != 1) {
 		help_dump();
 		return 1;
 	}
 
-	AldEntry *e = find_entry(ald, argv[0]);
+	DriEntry *e = find_entry(dri, argv[0]);
 	if (!e)
 		return 1;
 	dump_entry(e);
 	return 0;
 }
 
-// ald compare ----------------------------------------
+// dri compare ----------------------------------------
 
 static void help_compare(void) {
-	puts("Usage: ald compare <aldfile1> <aldfile2>");
+	puts("Usage: dri compare <drifile1> <drifile2>");
 }
 
-static bool compare_entry(int page, AldEntry *e1, AldEntry *e2) {
+static bool compare_entry(int page, DriEntry *e1, DriEntry *e2) {
 	// Ignore the first two bytes
 	if (e1->size == e2->size && !memcmp(e1->data + 2, e2->data + 2, e1->size - 2))
 		return false;
@@ -404,51 +404,51 @@ static int do_compare(int argc, char *argv[]) {
 		help_compare();
 		return 1;
 	}
-	const char *aldfile1 = argv[1];
-	const char *aldfile2 = argv[2];
-	Vector *ald1 = ald_read(NULL, aldfile1);
-	Vector *ald2 = ald_read(NULL, aldfile2);
+	const char *drifile1 = argv[1];
+	const char *drifile2 = argv[2];
+	Vector *dri1 = dri_read(NULL, drifile1);
+	Vector *dri2 = dri_read(NULL, drifile2);
 
 	bool differs = false;
-	for (int i = 0; i < ald1->len && i < ald2->len; i++) {
-		if (ald1->data[i] && ald2->data[i]) {
-			differs |= compare_entry(i + 1, ald1->data[i], ald2->data[i]);
-		} else if (ald1->data[i]) {
-			printf("page %d only exists in %s\n", i + 1, aldfile1);
+	for (int i = 0; i < dri1->len && i < dri2->len; i++) {
+		if (dri1->data[i] && dri2->data[i]) {
+			differs |= compare_entry(i + 1, dri1->data[i], dri2->data[i]);
+		} else if (dri1->data[i]) {
+			printf("page %d only exists in %s\n", i + 1, drifile1);
 			differs = true;
-		} else if (ald2->data[i]) {
-			printf("page %d only exists in %s\n", i + 1, aldfile2);
+		} else if (dri2->data[i]) {
+			printf("page %d only exists in %s\n", i + 1, drifile2);
 			differs = true;
 		}
 	}
 
-	for (int i = ald2->len; i < ald1->len; i++) {
-		printf("page %d only exists in %s\n", i + 1, aldfile1);
+	for (int i = dri2->len; i < dri1->len; i++) {
+		printf("page %d only exists in %s\n", i + 1, drifile1);
 		differs = true;
 	}
-	for (int i = ald1->len; i < ald2->len; i++) {
-		printf("page %d only exists in %s\n", i + 1, aldfile2);
+	for (int i = dri1->len; i < dri2->len; i++) {
+		printf("page %d only exists in %s\n", i + 1, drifile2);
 		differs = true;
 	}
 	return differs ? 1 : 0;
 }
 
-// ald help ----------------------------------------
+// dri help ----------------------------------------
 
 static void help_help(void) {
-	puts("Usage: ald help <command>");
+	puts("Usage: dri help <command>");
 }
 
 static int do_help(int argc, char *argv[]);  // defined below
 
-// ald version ----------------------------------------
+// dri version ----------------------------------------
 
 static void help_version(void) {
-	puts("Usage: ald version");
+	puts("Usage: dri version");
 }
 
 static int do_version(int argc, char *argv[]) {
-	puts("ald " VERSION);
+	puts("dri " VERSION);
 	return 0;
 }
 
@@ -483,7 +483,7 @@ static int do_help(int argc, char *argv[]) {
 			return 0;
 		}
 	}
-	error("ald help: Invalid subcommand '%s'", argv[1]);
+	error("dri help: Invalid subcommand '%s'", argv[1]);
 }
 
 int main(int argc, char *argv[]) {
@@ -497,5 +497,5 @@ int main(int argc, char *argv[]) {
 		if (!strcmp(argv[1], cmd->name))
 			return cmd->func(argc - 1, argv + 1);
 	}
-	error("ald: Invalid subcommand '%s'", argv[1]);
+	error("dri: Invalid subcommand '%s'", argv[1]);
 }

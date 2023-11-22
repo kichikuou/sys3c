@@ -96,7 +96,7 @@ int get_command(Buffer *b);
 
 typedef struct {
 	Buffer *buf;
-	int ald_volume;
+	int dri_volume;
 } Sco;
 
 struct DebugInfo;

@@ -352,8 +352,8 @@ static void conditional(void) {
 }
 
 static void pragma(void) {
-	if (consume_keyword("ald_volume")) {
-		compiler->scos[input_page].ald_volume = get_number();
+	if (consume_keyword("dri_volume")) {
+		compiler->scos[input_page].dri_volume = get_number();
 		expect(':');
 	} else if (consume_keyword("address")) {
 		int address = get_number();
@@ -590,7 +590,7 @@ Sco *compile(Compiler *comp, const char *source, int pageno) {
 	compiling = true;
 	labels = new_map();
 
-	comp->scos[pageno].ald_volume = 1;
+	comp->scos[pageno].dri_volume = 1;
 	out = new_buf();
 	sco_init(out, basename_utf8(comp->src_paths->data[pageno]), pageno);
 	if (comp->dbg_info)

@@ -37,7 +37,7 @@ sys3c - System 3.x compiler
 *-a, --ain*=_file_::
   Write AIN output to _file_. (default: `System39.ain`)
 
-*-o, --ald*=_name_::
+*-o, --dri*=_name_::
   Write ALD output to __name__``SA.ALD``, __name__``SB.ALD``, ... (default: `out`)
 
 *-g, --debug*::
@@ -116,4 +116,4 @@ language is to decompile an existing game with xref:sys3dc.adoc[*sys3dc(1)*],
 and look at the generated source files.
 
 == See also
-xref:sys3dc.adoc[*sys3dc(1)*], xref:ald.adoc[*ald(1)*]
+xref:sys3dc.adoc[*sys3dc(1)*], xref:dri.adoc[*dri(1)*]

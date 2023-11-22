@@ -138,17 +138,17 @@ void hash_put(HashMap *m, const void *key, const void *val);
 void *hash_get(HashMap *m, const void *key);
 HashItem *hash_iterate(HashMap *m, HashItem *item);
 
-// ald.c
+// dri.c
 
 typedef struct {
 	int id;      // 1-based
 	const uint8_t *data;
 	int size;
 	int volume;  // volume id (1 for *A.ALD, 2 for *B.ALD, ...)
-} AldEntry;
+} DriEntry;
 
-void ald_write(Vector *entries, int volume, FILE *fp);
-Vector *ald_read(Vector *entries, const char *path);
+void dri_write(Vector *entries, int volume, FILE *fp);
+Vector *dri_read(Vector *entries, const char *path);
 
 // opcodes
 
