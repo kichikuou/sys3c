@@ -391,7 +391,7 @@ static bool compare_entry(int page, DriEntry *e1, DriEntry *e2) {
 		return false;
 
 	int i;
-	for (i = 0; i < e1->size && i < e2->size; i++) {
+	for (i = 2; i < e1->size && i < e2->size; i++) {
 		if (e1->data[i] != e2->data[i])
 			break;
 	}
