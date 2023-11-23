@@ -420,15 +420,16 @@ static void decompile_page(int page) {
 		}
 		dc_putc('\n');
 	}
-	while (branch_end_stack->len > 0 && stack_top(branch_end_stack) == sco->filesize) {
+	int eofaddr = dc.p - sco->data;
+	while (branch_end_stack->len > 0 && stack_top(branch_end_stack) == eofaddr) {
 		stack_pop(branch_end_stack);
 		dc.indent--;
 		assert(dc.indent > 0);
 		indent();
 		dc_puts("}\n");
 	}
-	if (sco->mark[sco->filesize] & LABEL)
-		dc_printf("*L_%05x:\n", sco->filesize);
+	if (sco->mark[eofaddr] & LABEL)
+		dc_printf("*L_%05x:\n", eofaddr);
 }
 
 char *missing_adv_name(int page) {
