@@ -482,7 +482,7 @@ static bool command(void) {
 	case 'H': arguments_by_sysver(NULL, "ne", "ne"); break;
 	case 'I': arguments_by_sysver(NULL, "eee", "eeeeee"); break;
 	case 'J': arguments_by_sysver(NULL, "ee", "ee"); break;
-	case 'K': arguments_by_sysver(NULL, NULL, "n"); break;
+	case 'K': arguments_by_sysver(NULL, "", "n"); break;
 	case 'L': arguments_by_sysver("n", "n", "e"); break;
 	case 'M': arguments_by_sysver(NULL, "s", "s"); break;
 	case 'N': arguments_by_sysver(NULL, "ee", "nee"); break;
