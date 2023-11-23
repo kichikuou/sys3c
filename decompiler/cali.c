@@ -49,7 +49,13 @@ static Cali *parse(const uint8_t **code, bool is_lhs) {
 			return *--top;
 
 		case OP_MUL:
+			if (config.sys_ver == SYSTEM1)
+				goto operand;
+			// fallthrough
 		case OP_DIV:
+			if (config.sys_ver == SYSTEM1)
+				op = OP_MUL;
+			// fallthrough
 		case OP_ADD:
 		case OP_SUB:
 		case OP_EQ:
@@ -73,6 +79,7 @@ static Cali *parse(const uint8_t **code, bool is_lhs) {
 			break;
 
 		default:
+		operand:
 			if (op & 0x80) {
 				int var = op & 0x3f;
 				if (op >= 0xc0)

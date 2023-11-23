@@ -119,8 +119,10 @@ static void expr_mul(void) {
 	for (;;) {
 		if (consume('*')) {
 			expr_prim();
-			emit(out, OP_MUL);
+			emit(out, config.sys_ver == SYSTEM1 ? OP_DIV : OP_MUL);
 		} else if (consume('/')) {
+			if (config.sys_ver == SYSTEM1)
+				error_at(input - 1, "division is not supported in System 1");
 			expr_prim();
 			emit(out, OP_DIV);
 		} else {
