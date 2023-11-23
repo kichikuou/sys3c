@@ -211,6 +211,10 @@ static void conditional(Vector *branch_end_stack) {
 	}
 }
 
+static bool is_branch_end(int addr, Vector *branch_end_stack) {
+	return branch_end_stack->len > 0 && stack_top(branch_end_stack) == addr;
+}
+
 // Decompile command arguments. Directives:
 //  e: expression
 //  n: number (single-byte)
@@ -290,7 +294,7 @@ static void decompile_page(int page) {
 	while (dc.p < sco->data + sco->filesize && *dc.p != 0x1a) {
 		int topaddr = dc.p - sco->data;
 		uint8_t mark = sco->mark[dc.p - sco->data];
-		while (branch_end_stack->len > 0 && stack_top(branch_end_stack) == topaddr) {
+		while (is_branch_end(topaddr, branch_end_stack)) {
 			stack_pop(branch_end_stack);
 			dc.indent--;
 			assert(dc.indent > 0);
@@ -315,7 +319,14 @@ static void decompile_page(int page) {
 					break;
 			}
 			dc_put_string_n((const char *)begin, dc.p - begin, STRING_ESCAPE | STRING_EXPAND);
-			dc_puts("'\n");
+			dc_putc('\'');
+			// Print subsequent R/A command on the same line if possible.
+			if ((*dc.p == 'R' || *dc.p == 'A') &&
+				!is_branch_end(dc_addr(), branch_end_stack) &&
+				!(sco->mark[dc.p - sco->data] & ~CODE)) {
+				dc_putc(*dc.p++);
+			}
+			dc_putc('\n');
 			continue;
 		}
 		sco->mark[dc.p - sco->data] |= CODE;
