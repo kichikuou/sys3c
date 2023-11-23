@@ -309,7 +309,7 @@ static void decompile_page(int page) {
 		if (*dc.p == '>' || *dc.p == '}')
 			dc.indent--;
 		indent();
-		if (*dc.p == 0 || *dc.p == 0x20 || *dc.p > 0x80) {
+		if (*dc.p == 0x20 || *dc.p > 0x80) {
 			sco->mark[dc.p - sco->data] |= CODE;
 			dc_putc('\'');
 			const uint8_t *begin = dc.p;
