@@ -55,9 +55,6 @@ extern void fputw(uint16_t n, FILE *fp);
 extern void fputdw(uint32_t n, FILE *fp);
 extern void fput64(uint64_t n, FILE *fp);
 
-time_t win_filetime_to_time_t(uint64_t filetime);
-uint64_t time_t_to_win_filetime(time_t t);
-
 // sjisutf.c
 
 #define sjis2utf(s) sjis2utf_sub((s), -1)

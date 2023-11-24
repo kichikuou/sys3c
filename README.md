@@ -63,8 +63,6 @@ This creates the following executables under the `build` directory:
 - `sys3c` -- System 3.x compiler
 - `sys3dc` -- System 3.x decompiler
 - `dri` -- ALD archive utility
-- `vsp` -- VSP image utility
-- `pms` -- PMS image utility
 
 Optionally you can install these executables to your system, by:
 ```
@@ -104,4 +102,3 @@ Here are the manuals for the commands:
 - [docs/sys3c.adoc](docs/sys3c.adoc)
 - [docs/sys3dc.adoc](docs/sys3dc.adoc)
 - [docs/dri.adoc](docs/dri.adoc)
-- [docs/vsp.adoc](docs/vsp.adoc) (see this for `pms` command too)

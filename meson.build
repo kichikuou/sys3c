@@ -4,7 +4,6 @@ fs = import('fs')
 is_windows = host_machine.system() == 'windows'
 
 if host_machine.system() == 'emscripten'
-  png = declare_dependency(compile_args : ['-s', 'USE_LIBPNG=1'], link_args : ['-s', 'USE_LIBPNG=1'])
   common_link_args = [
     '-s', 'ENVIRONMENT=node',
     '-s', 'MODULARIZE',
@@ -15,7 +14,6 @@ if host_machine.system() == 'emscripten'
     '-lnodefs.js'
   ]
 else
-  png = dependency('libpng', static : is_windows)
   common_link_args = []
 endif
 
@@ -79,12 +77,7 @@ sys3dc = executable('sys3dc', sys3dc_srcs, dependencies : common, install : true
 # tools
 #
 
-libpng_utils = static_library('png_utils', 'tools/png_utils.c', dependencies : [common, png])
-png_utils = declare_dependency(link_with : libpng_utils)
-
 dri = executable('dri', ['tools/dri.c'], dependencies : common, install : true)
-vsp = executable('vsp', ['tools/vsp.c'], dependencies : [common, png, png_utils], install : true)
-pms = executable('pms', ['tools/pms.c'], dependencies : [common, png, png_utils], install : true)
 
 #
 # regression test
@@ -96,7 +89,7 @@ test('regression_test',
   bash,
   args : ['./regression_test.sh', meson.current_build_dir()],
   workdir : meson.current_source_dir(),
-  depends : [sys3c, sys3dc, dri, vsp, pms])
+  depends : [sys3c, sys3dc, dri])
 
 #
 # docs
@@ -105,7 +98,6 @@ test('regression_test',
 docs = [
   ['docs/dri.adoc', ['dri.1']],
   ['docs/unicode.adoc', []],
-  ['docs/vsp.adoc', ['vsp.1', 'pms.1']],
   ['docs/sys3c.adoc', ['sys3c.1']],
   ['docs/sys3dc.adoc', ['sys3dc.1']],
 ]

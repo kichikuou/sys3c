@@ -215,11 +215,3 @@ void fput64(uint64_t n, FILE *fp) {
 	fputdw(n, fp);
 	fputdw(n >> 32, fp);
 }
-
-time_t win_filetime_to_time_t(uint64_t t) {
-	return (t - EPOCH_DIFF_100NS) / 10000000LL;
-}
-
-uint64_t time_t_to_win_filetime(time_t t) {
-	return t * 10000000LL + EPOCH_DIFF_100NS;
-}
