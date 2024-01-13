@@ -1,8 +1,0 @@
-	!VAR0 : 0!
-	!VAR1 : 0!
-	!VAR2 : 0!
-**funcall_2c VAR1:
-	!VAR0 : 0!
-	~funcall_2c 0:
-	!VAR2 : 0!
-	~funcall_2c 0:

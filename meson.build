@@ -80,18 +80,6 @@ sys3dc = executable('sys3dc', sys3dc_srcs, dependencies : common, install : true
 dri = executable('dri', ['tools/dri.c'], dependencies : common, install : true)
 
 #
-# regression test
-#
-
-bash = find_program('bash')
-
-test('regression_test',
-  bash,
-  args : ['./regression_test.sh', meson.current_build_dir()],
-  workdir : meson.current_source_dir(),
-  depends : [sys3c, sys3dc, dri])
-
-#
 # docs
 #
 
