@@ -1,4 +1,0 @@
---langdef=system35
---langmap=system35:.adv.ADV
---regex-system35=/^(\/\*[^*]*\*\/)?[ \t]*\*\*[ \t]*([^ \t:]+)/\2/f,function/
---regex-system35=/^(\/\*[^*]*\*\/)?[ \t]*\*[ \t]*([^ \t:*]+)[ \t]*:/\2/l,label/

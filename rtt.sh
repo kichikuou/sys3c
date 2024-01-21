@@ -2,8 +2,8 @@
 #
 # rtt.sh: Round trip testing
 #
-# This decompiles given ALD file, compiles the generated source code,
-# and verifies it matches the original ALD.
+# This decompiles given DAT file, compiles the generated source code,
+# and verifies it matches the original DAT.
 #
 
 usage() {
