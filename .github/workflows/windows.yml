@@ -46,8 +46,6 @@ jobs:
         cp COPYING artifacts/
         mkdir artifacts/docs
         cp build/*.html artifacts/docs
-        mkdir artifacts/docs/image
-        cp docs/image/* artifacts/docs/image
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v3

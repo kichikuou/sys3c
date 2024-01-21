@@ -4,7 +4,7 @@
 :mansource: sys3c
 
 == Name
-sys3c - System 3.x compiler
+sys3c - System 1-3 compiler
 
 == Synopsis
 [verse]
@@ -15,7 +15,7 @@ sys3c - System 3.x compiler
 *sys3c* [_options_] --init
 
 == Description
-`sys3c` is a compiler for AliceSoft's System 3.x game engine.
+`sys3c` is a compiler for AliceSoft's System 1-3 game engine.
 
 *sys3c* [_options_]::
   If none of `--project`, `--hed` nor ADV files are specified, `sys3c` reads
@@ -34,9 +34,6 @@ sys3c - System 3.x compiler
   This form creates a new sys3c project in current directory.
 
 == Options
-*-a, --ain*=_file_::
-  Write AIN output to _file_. (default: `System39.ain`)
-
 *-o, --dri*=_name_::
   Write ALD output to __name__``SA.ALD``, __name__``SB.ALD``, ... (default: `out`)
 
@@ -92,10 +89,7 @@ Relative paths in configuration file are resolved based on the directory of the
 configuration file.
 
 == Compile header file
-The compile header (`.hed`) file specifies a list of source files to compile. In
-System 3.9 games, it may also list dynamic link libraries used in the game. This
-file format is also used in the official System 3.x SDK.
-
+The compile header (`.hed`) file specifies a list of source files to compile.
 Here is an example compile header:
 
   #SYSTEM35
@@ -105,15 +99,6 @@ Here is an example compile header:
 A compile header file starts with a `#SYSTEM35` line, followed by a list of
 source files. The order in the list is important; execution starts from the
 beginning of the first source file.
-
-== Source file
-`sys3c` accepts System 3.x source (`.adv`) files, in the same language that
-the official System 3.x SDK accepts.
-
-Explaining the System 3.x language is beyond the scope of this document; please
-refer to the official SDK documentation. Another good way to learn about the
-language is to decompile an existing game with xref:sys3dc.adoc[*sys3dc(1)*],
-and look at the generated source files.
 
 == See also
 xref:sys3dc.adoc[*sys3dc(1)*], xref:dri.adoc[*dri(1)*]

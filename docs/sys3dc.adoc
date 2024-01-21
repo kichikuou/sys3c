@@ -4,24 +4,19 @@
 :mansource: sys3c
 
 == Name
-sys3dc - System 3.x decompiler
+sys3dc - System 1-3 decompiler
 
 == Synopsis
 *sys3dc* [_options_] _drifile_... [_system39.ain_]
 
 == Description
-`sys3dc` is a decompiler for AliceSoft's System 3.x game engine. It reads a
-scenario file (usually with the suffix `SA.ALD`) and optionally a `System39.ain`
-file (for System 3.9 games), and generates source files that can be compiled
-with xref:sys3c.adoc[*sys3c(1)*] or the official System 3.x SDK.
+`sys3dc` is a decompiler for AliceSoft's System 1-3 game engine. It reads
+scenario files (`ADISK.DAT`, `BDISK.DAT`, ...), and generates source files that
+can be compiled with xref:sys3c.adoc[*sys3c(1)*].
 
 == Options
 *-a, --address*::
   Prefix each line with address.
-
-*-d, --aindump*::
-  Dump the contents of _system39.ain_ file to standard output, in JSON format.
-  Decompilation will not be performed.
 
 *-E, --encoding*=_enc_::
   Specify text encoding of output files. Possible values are `sjis` and `utf8`
@@ -45,15 +40,12 @@ with xref:sys3c.adoc[*sys3c(1)*] or the official System 3.x SDK.
   Display the `sys3dc` version number and exit.
 
 == Output
-In addition to System 3.x source files (`{asterisk}.ADV`), `sys3dc` also generates
+In addition to System 1-3 source files (`*DISK.DAT`), `sys3dc` also generates
 `sys3c.cfg` file which is a configuration file for
 xref:sys3c.adoc[*sys3c(1)*]. Using this, the original scenario file can be
 reconstructed by this command:
 
   sys3c -p sys3c.cfg
-
-If you want to use the official System 3.x SDK, specify the generated
-`sys3dc.hed` file in the `DIR.HED` file of your project directory.
 
 == See also
 xref:sys3c.adoc[*sys3c(1)*], xref:dri.adoc[*dri(1)*]

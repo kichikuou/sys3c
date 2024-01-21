@@ -2,18 +2,16 @@
 
 This document explains how to use sys3c to translate games into
 languages other than Japanese or English. To run such translated games,
-https://github.com/kichikuou/xsystem35-sdl2[xsystem35] is required.
-
-image:image/m17n.png[Example]
+https://github.com/kichikuou/system3-sdl2[system3-sdl2] is required.
 
 == The `unicode` option
 
-Normally, strings in AliceSoft's scenario files are stored in CP932, a Japanese
-character encoding used in Windows (it also covers English letters). sys3c's
-`unicode` option allows you to output a scenario file in UTF-8 character
-encoding. The generated scenario does not work on the original System 3.x, but
-it works on xsystem35 and in which you can use languages other than Japanese or
-English.
+Normally, strings in AliceSoft's scenario files are stored in Shift_JIS, a
+Japanese character encoding used in MS-DOS/Windows (it also covers English
+letters). sys3c's `unicode` option allows you to output a scenario file in
+UTF-8 character encoding. The generated scenario does not work on the original
+System, but it works on system3-sdl2 and in which you can use languages other
+than Japanese or English.
 
 == Translation workflow
 
@@ -27,14 +25,14 @@ English.
    scenario file has the same contents as the original, but is encoded in
    UTF-8.
 4. Overwrite the original scenario file with the generated one (don't forget to
-   back up the original file), and run it with `xsystem35`. It should just work
+   back up the original file), and run it with system3-sdl2. It should just work
    as before. (If not, report a bug!)
 5. Now you can put strings in the source files, in any languages. Modify the
    source files and repeat the steps 3-4.
 
 == Fonts
 
-The fonts come with xsystem35 only cover Japanese, so you will need to prepare a
+The fonts come with system3-sdl2 only cover Japanese, so you will need to prepare a
 font for your language.
 
 If you are translating from Japanese, it would be useful to have a font that
@@ -42,9 +40,9 @@ covers both Japanese and your language while translating.
 http://unifoundry.com/unifont/index.html[GNU Unifont] is a good candidate,
 which is used in the example at the top of this document.
 
-To change the font in xsystem35, put the font files (`.ttf` or `.otf`) in the
-game folder (where `*.ALD` files are), and create a file named `.xsys35rc` in
-the same folder with the following contents (replace the file names):
+To change the font in system3-sdl2, put the font files (`.ttf` or `.otf`) in the
+game folder (where `*.DAT` files are), and create a file named `system3.ini` in
+the same folder with the following contents (replace the file name with yours):
 
-  ttfont_gothic: your-sans-serif-font.ttf
-  ttfont_mincho: your-serif-font.ttf
+  [config]
+  fontfile = your-font.ttf
