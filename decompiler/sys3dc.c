@@ -52,7 +52,7 @@ static void version(void) {
 	puts("sys3dc " VERSION);
 }
 
-static Sco *sco_new(int page, const uint8_t *data, int len, int volume) {
+static Sco *sco_new(int page, const uint8_t *data, int len, uint32_t volume_bits) {
 	char name[10];
 	Sco *sco = calloc(1, sizeof(Sco));
 	sco->data = data;
@@ -61,7 +61,7 @@ static Sco *sco_new(int page, const uint8_t *data, int len, int volume) {
 	sco->sco_name = strdup(name);
 	sprintf(name, "%d.adv", page);
 	sco->src_name = strdup(name);
-	sco->dri_volume = volume;
+	sco->volume_bits = volume_bits;
 	sco->hdrsize = 2;
 	sco->filesize = len;  // `*(uint16_t*)data` is filesize, but don't trust it.
 	sco->page = page;
@@ -156,7 +156,7 @@ int main(int argc, char *argv[]) {
 		DriEntry *e = scos->data[i];
 		if (!e)
 			continue;
-		Sco *sco = sco_new(i + 1, e->data, e->size, e->volume);
+		Sco *sco = sco_new(i + 1, e->data, e->size, e->volume_bits);
 		scos->data[i] = sco;
 
 		// Detect unicode SCO.

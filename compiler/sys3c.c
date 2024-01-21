@@ -184,15 +184,14 @@ static void build(Vector *src_paths, Vector *variables, const char *adisk_name) 
 		const char *source = srcs->vals->data[i];
 		Sco *sco = compile(compiler, source, i);
 		DriEntry *e = calloc(1, sizeof(DriEntry));
-		e->volume = sco->dri_volume;
+		e->volume_bits = sco->volume_bits;
 		e->data = sco->buf->buf;
 		e->size = sco->buf->len;
 		vec_push(dri, e);
-		if (0 < e->volume && e->volume <= 26)
-			dri_mask |= 1 << e->volume;
+		dri_mask |= e->volume_bits;
 	}
 
-	for (int i = 1; i <= 26; i++) {
+	for (int i = 1; i <= DRI_MAX_VOLUME; i++) {
 		if (!(dri_mask & 1 << i))
 			continue;
 		char dri_path[PATH_MAX+1];

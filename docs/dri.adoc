@@ -24,16 +24,14 @@ dri - DAT archive utility
 Usage: *dri list* _drifile_...
 
 *dri list* lists files in the DAT archive. Since an DAT archive may consist of
-multiple files (`xxxA.DAT`, `xxxB.DAT`, ...), multiple DAT files can be
+multiple files (`Axxx.DAT`, `Bxxx.DAT`, ...), multiple DAT files can be
 specified.
 
 The following information are displayed for each file in the archive:
 
 * index
-* volume id (1 for `xxxA.DAT`, 2 for `xxxB.DAT`, etc.)
-* timestamp
+* volume id (1 for `Axxx.DAT`, 2 for `Bxxx.DAT`, etc.)
 * size
-* filename
 
 === dri create
 Usage: *dri create* _drifile_ _file_...
@@ -42,40 +40,40 @@ This form creates a new DAT archive containing the specified files.
 
 Usage: *dri create* _drifile_ -m _manifest-file_
 
-In this form, _drifile_ must end with "a.dri". This form creates a new DAT
+In this form, _drifile_ must begin with "A". This form creates a new DAT
 archive from the files listed in _manifest-file_. Here is an example of a
 manifest file:
 
-  1,001,cg001.qnt
-  1,002,cg002.qnt
-  2,003,cg003.qnt
+  A,001,cg001.qnt
+  B,002,cg002.qnt
+  AB,003,cg003.qnt
 
-The first number in each line is the volume number. Files with volume number 1
-are stored in `...a.dri`, files with volume number 2 are stored in `...b.dri`,
-and so on.
+The first letter in each line is the volume id. Files with volume id A
+are stored in `Axxx.DAT`, files with volume id B are stored in `Bxxx.DAT`,
+and so on. You can specify multiple volume ids in a single line. In this
+case, the file is stored in all DAT files specified in the line.
 
 The second number in each line is the link number. Game scripts specify assets
 by this number.
 
 === dri extract
-Usage: *dri extract* [_options_] _drifile_... [--] [(_index_|_filename_)...]
+Usage: *dri extract* [_options_] _drifile_... [--] [_index_...]
 
 *dri extract* extracts files from an DAT archive. Optionally you can pass a list
-of archive members to be processed, specified by _index_ or _filename_.
+of archive members to be processed, specified by _index_.
 
 If `-m` option is given, this also generates a manifest file for the archive.
 
 === dri dump
-Usage: *dri dump* _drifile_... [--] (_index_|_filename_)
+Usage: *dri dump* _drifile_... [--] _index_
 
-*dri dump* displays content of a file in the DAT archive, specified by _index_
-or _filename_, in hexadecimal bytes + SJIS-aware characters format.
+*dri dump* displays content of a file in the DAT archive, specified by _index_,
+in hexadecimal bytes + SJIS-aware characters format.
 
 === dri compare
 Usage: *dri compare* _drifile1_ _drifile2_
 
-*dri compare* compares contents of two DAT archives, ignoring timestamp
-differences and upper/lower case differences in file names.
+*dri compare* compares contents of two DAT archives.
 
 Exit status is 0 if the two archives are equivalent, 1 if different.
 

@@ -355,7 +355,13 @@ static void conditional(void) {
 
 static void pragma(void) {
 	if (consume_keyword("dri_volume")) {
-		compiler->scos[input_page].dri_volume = get_number();
+		char *volumes = get_identifier();
+		compiler->scos[input_page].volume_bits = 0;
+		for (char *p = volumes; *p; p++) {
+			if (!isalpha(*p))
+				error_at(input - strlen(p), "invalid volume letter '%c'", *p);
+			compiler->scos[input_page].volume_bits |= 1 << (toupper(*p) - 'A' + 1);
+		}
 		expect(':');
 	} else if (consume_keyword("address")) {
 		int address = get_number();
@@ -592,7 +598,7 @@ Sco *compile(Compiler *comp, const char *source, int pageno) {
 	compiling = true;
 	labels = new_map();
 
-	comp->scos[pageno].dri_volume = 1;
+	comp->scos[pageno].volume_bits = 1 << 1;
 	out = new_buf();
 	sco_init(out, basename_utf8(comp->src_paths->data[pageno]), pageno);
 	if (comp->dbg_info)

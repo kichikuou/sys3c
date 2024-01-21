@@ -25,7 +25,7 @@ typedef struct {
 	uint32_t page;
 	const char *src_name;
 	const char *sco_name;  // in SJIS
-	int dri_volume;
+	uint32_t volume_bits;
 	bool analyzed;
 } Sco;
 

@@ -55,7 +55,7 @@ void dri_write(Vector *entries, int volume, FILE *fp) {
 	int ptr_count = 0;
 	for (int i = 0; i < entries->len; i++) {
 		DriEntry *entry = entries->data[i];
-		if (entry && entry->volume == volume)
+		if (entry && entry->volume_bits & 1 << volume)
 			ptr_count++;
 	}
 
@@ -63,19 +63,26 @@ void dri_write(Vector *entries, int volume, FILE *fp) {
 	write_ptr(entries->len * 2 + 1, &sector, fp);
 	for (int i = 0; i < entries->len; i++) {
 		DriEntry *entry = entries->data[i];
-		if (entry && entry->volume == volume)
+		if (entry && entry->volume_bits & 1 << volume)
 			write_ptr(entry->size, &sector, fp);
 	}
 	pad(fp);
 
-	uint16_t link[256];
+	uint16_t link[DRI_MAX_VOLUME + 1];
 	memset(link, 0, sizeof(link));
 	for (int i = 0; i < entries->len; i++) {
 		DriEntry *entry = entries->data[i];
-		int vol = entry ? entry->volume : 0;
+		int vol = 0;
+		if (entry) {
+			for (int j = 1; j <= DRI_MAX_VOLUME; j++) {
+				if (entry->volume_bits & 1 << j) {
+					link[j]++;
+					if (!vol || j == volume)
+						vol = j;
+				}
+			}
+		}
 		fputc(vol, fp);
-		if (vol)
-			link[vol]++;
 		fputc(link[vol], fp);
 	}
 	fputc(0x1a, fp);  // EOF
@@ -83,7 +90,7 @@ void dri_write(Vector *entries, int volume, FILE *fp) {
 
 	for (int i = 0; i < entries->len; i++) {
 		DriEntry *entry = entries->data[i];
-		if (!entry || entry->volume != volume)
+		if (!entry || !(entry->volume_bits & 1 << volume))
 			continue;
 		write_entry(entry, fp);
 		pad(fp);
@@ -98,24 +105,33 @@ static inline uint8_t *dri_sector(uint8_t *dri, int size, int index) {
 	return dri + offset;
 }
 
-static void dri_read_entries(Vector *entries, int volume, uint8_t *data, int size) {
-	uint8_t *link_sector = dri_sector(data, size, 0);
-	uint8_t *link_sector_end = dri_sector(data, size, 1);
+static void dri_read_entries(Vector *entries, int volume, uint8_t *data, int dri_size) {
+	uint8_t *link_sector = dri_sector(data, dri_size, 0);
+	uint8_t *link_sector_end = dri_sector(data, dri_size, 1);
 
 	for (uint8_t *link = link_sector; link < link_sector_end; link += 2) {
 		uint8_t vol_nr = link[0];
 		uint8_t ptr_nr = link[1];
 		if (vol_nr != volume)
 			continue;
-		uint8_t *entry_ptr = dri_sector(data, size, ptr_nr);
-		DriEntry *e = calloc(1, sizeof(DriEntry));
-		e->id = (link - link_sector) / 2 + 1;
-		e->volume = volume;
-		e->data = entry_ptr;
-		e->size = dri_sector(data, size, ptr_nr + 1) - entry_ptr;
-		if (e->data + e->size > data + size)
+		uint8_t *entry_ptr = dri_sector(data, dri_size, ptr_nr);
+		int entry_size = dri_sector(data, dri_size, ptr_nr + 1) - entry_ptr;
+		if (entry_ptr + entry_size > data + dri_size)
 			error("entry size exceeds end of dri file");
-		vec_set(entries, e->id - 1, e);
+		int id = (link - link_sector) / 2 + 1;
+		DriEntry *e = id <= entries->len ? entries->data[id - 1] : NULL;
+		if (e) {
+			if (e->size != entry_size || memcmp(e->data, entry_ptr, entry_size))
+				error("duplicate entry with different content: %d", id);
+			e->volume_bits |= 1 << volume;
+		} else {
+			e = calloc(1, sizeof(DriEntry));
+			e->id = id;
+			e->volume_bits = 1 << volume;
+			e->data = entry_ptr;
+			e->size = entry_size;
+			vec_set(entries, id - 1, e);
+		}
 	}
 }
 

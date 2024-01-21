@@ -90,8 +90,12 @@ static DriEntry *find_entry(Vector *dri, const char *num_or_name) {
 static void write_manifest(Vector *dri, FILE *fp) {
 	for (int i = 0; i < dri->len; i++) {
 		DriEntry *e = dri->data[i];
-		if (e)
-			fprintf(fp, "%d,%d,%d.out\n", e->volume, i + 1, i + 1);
+		if (!e) continue;
+		for (int vol = 1; vol <= DRI_MAX_VOLUME; vol++) {
+			if (e->volume_bits & 1 << vol)
+				fputc(vol - 1 + 'A', fp);
+		}
+		fprintf(fp, ",%d,%d.out\n", i + 1, i + 1);
 	}
 }
 
@@ -113,7 +117,12 @@ static int do_list(int argc, char *argv[]) {
 		DriEntry *e = dri->data[i];
 		if (!e)
 			continue;
-		printf("%4d %2d  %8d\n", i + 1, e->volume, e->size);
+		printf("%4d\t", i + 1);
+		for (int vol = 1; vol <= DRI_MAX_VOLUME; vol++) {
+			if (e->volume_bits & 1 << vol)
+				putchar(vol - 1 + 'A');
+		}
+		printf("\t%5d\n", e->size);
 	}
 	return 0;
 }
@@ -133,7 +142,7 @@ static void help_create(void) {
 	puts("    -m, --manifest <file>    Read manifest from <file>");
 }
 
-static void add_file(Vector *dri, int volume, int no, const char *path) {
+static void add_file(Vector *dri, uint32_t volume_bits, int no, const char *path) {
 	FILE *fp = checked_fopen(path, "rb");
 	struct stat sbuf;
 	if (fstat(fileno(fp), &sbuf) < 0)
@@ -148,7 +157,7 @@ static void add_file(Vector *dri, int volume, int no, const char *path) {
 	DriEntry *e = calloc(1, sizeof(DriEntry));
 	e->data = data;
 	e->size = sbuf.st_size;
-	e->volume = volume;
+	e->volume_bits = volume_bits;
 	vec_set(dri, no - 1, e);
 }
 
@@ -156,33 +165,32 @@ static uint32_t add_files_from_manifest(Vector *dri, const char *manifest) {
 	FILE *fp = checked_fopen(manifest, "r");
 	char line[200];
 	int lineno = 0;
-	uint32_t vol_bits = 0;
-	int prev_link_no = 0;
+	uint32_t all_volumes = 0;
 	while (fgets(line, sizeof(line), fp)) {
 		lineno++;
 		if (line[0] == '\n')
 			continue;
-		int volume;
 		int link_no;
-		char fname[200];
-		if (sscanf(line, " %d, %d, %s", &volume, &link_no, fname) == 3)  // NL5 format
-			prev_link_no = link_no;
-		else if (sscanf(line, " %d, %s", &volume, fname) == 2)  // NL4 format
-			link_no = ++prev_link_no;
-		else
+		char volume_letters[27];
+		char fname[201];
+		if (sscanf(line, " %26[^,], %d, %200s", volume_letters, &link_no, fname) != 3)
 			error("%s:%d manifest syntax error", manifest, lineno);
 
-		if (volume < 1 || volume > 26)
-			error("%s:%d invalid volume id %d", manifest, lineno, volume);
+		uint32_t volume_bits = 0;
+		for (char *p = volume_letters; *p; p++) {
+			if (!isalpha(*p))
+				error("%s:%d invalid volume letter '%c'", manifest, lineno, *p);
+			volume_bits |= 1 << (toupper(*p) - 'A' + 1);
+		}
 		if (link_no < 1 || link_no > 65535)
 			error("%s:%d invalid link number %d", manifest, lineno, link_no);
 		if (link_no - 1 < dri->len && dri->data[link_no - 1])
 			error("%s:%d duplicated link number %d", manifest, lineno, link_no);
-		vol_bits |= 1 << volume;
-		add_file(dri, volume, link_no, fname);
+		all_volumes |= volume_bits;
+		add_file(dri, volume_bits, link_no, fname);
 	}
 	fclose(fp);
-	return vol_bits;
+	return all_volumes;
 }
 
 static int do_create(int argc, char *argv[]) {
@@ -209,18 +217,18 @@ static int do_create(int argc, char *argv[]) {
 	Vector *entries = new_vec();
 
 	if (manifest) {
-		int len = strlen(dri_path);
-		char *volume_letter = dri_path + len - 5;
-		if (strcasecmp(volume_letter, "a.dri"))
-			error("dri: output filename must end with \"a.dri\"");
-		char base = *volume_letter - 1;
+		char *dirname = dirname_utf8(dri_path);
+		char *basename = basename_utf8(dri_path);
+		if (toupper(basename[0]) != 'A')
+			error("dri: output filename must begin with 'A'");
+		char base = basename[0] - 1;
 
 		uint32_t vol_bits = add_files_from_manifest(entries, manifest);
-		for (int vol = 1; vol <= 26; vol++) {
+		for (int vol = 1; vol <= DRI_MAX_VOLUME; vol++) {
 			if ((vol_bits & 1 << vol) == 0)
 				continue;
-			*volume_letter = base + vol;
-			FILE *fp = checked_fopen(dri_path, "wb");
+			basename[0] = base + vol;
+			FILE *fp = checked_fopen(path_join(dirname, basename), "wb");
 			dri_write(entries, vol, fp);
 			fclose(fp);
 		}

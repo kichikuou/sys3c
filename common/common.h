@@ -137,11 +137,13 @@ HashItem *hash_iterate(HashMap *m, HashItem *item);
 
 // dri.c
 
+#define DRI_MAX_VOLUME 26
+
 typedef struct {
 	int id;      // 1-based
 	const uint8_t *data;
 	int size;
-	int volume;  // volume id (1 for *A.ALD, 2 for *B.ALD, ...)
+	uint32_t volume_bits;  // (1 << k) is set if the entry is present in the k-th volume
 } DriEntry;
 
 void dri_write(Vector *entries, int volume, FILE *fp);

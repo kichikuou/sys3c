@@ -545,8 +545,14 @@ void decompile(Vector *scos, const char *outdir, const char *adisk_name) {
 		if (config.verbose)
 			printf("Decompiling %s (page %d)...\n", sjis2utf(sco->sco_name), i);
 		dc.out = checked_fopen(path_join(outdir, to_utf8(sco->src_name)), "w+");
-		if (sco->dri_volume != 1)
-			fprintf(dc.out, "pragma dri_volume %d:\n", sco->dri_volume);
+		if (sco->volume_bits != 1 << 1) {
+			fputs("pragma dri_volume ", dc.out);
+			for (int v = 1; v <= DRI_MAX_VOLUME; v++) {
+				if (sco->volume_bits & (1 << v))
+					fputc(v + 'A' - 1, dc.out);
+			}
+			fputs(":\n", dc.out);
+		}
 		decompile_page(i);
 		if (!config.utf8_input && config.utf8_output)
 			convert_to_utf8(dc.out);
