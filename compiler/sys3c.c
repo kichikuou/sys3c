@@ -128,34 +128,11 @@ static Vector *read_var_list(const char *path) {
 static void read_hed(const char *path, Vector *sources) {
 	char *buf = read_file(path);
 	char *dir = dirname_utf8(path);
-	enum { INITIAL, SYSTEM35 } section = INITIAL;
 
 	char *line;
 	while ((line = next_line(&buf)) != NULL) {
-		if (line[0] == '\x1a')  // DOS EOF
-			break;
-		if (line[0] == '#') {  // Section header
-			trim_right(line);
-			if (!strcmp("#SYSTEM35", line))
-				section = SYSTEM35;
-			else
-				error("%s: unknown section %s", path, line);
-			continue;
-		}
-		char *sc = strchr(line, ';');
-		if (sc)
-			*sc = '\0';
 		trim_right(line);
-		if (!line[0])
-			continue;
-		switch (section) {
-		case INITIAL:
-			error("%s: syntax error", path);
-			break;
-		case SYSTEM35:
-			vec_push(sources, path_join(dir, line));
-			break;
-		}
+		vec_push(sources, *line ? path_join(dir, line) : NULL);
 	}
 }
 
@@ -163,7 +140,7 @@ static void build(Vector *src_paths, Vector *variables, const char *adisk_name) 
 	Map *srcs = new_map();
 	for (int i = 0; i < src_paths->len; i++) {
 		char *path = src_paths->data[i];
-		map_put(srcs, path, read_file(path));
+		map_put(srcs, path, path ? read_file(path) : NULL);
 	}
 
 	Compiler *compiler = new_compiler(srcs->keys, variables);
@@ -173,7 +150,8 @@ static void build(Vector *src_paths, Vector *variables, const char *adisk_name) 
 
 	for (int i = 0; i < srcs->keys->len; i++) {
 		const char *source = srcs->vals->data[i];
-		preprocess(compiler, source, i);
+		if (source)
+			preprocess(compiler, source, i);
 	}
 
 	preprocess_done(compiler);
@@ -182,6 +160,10 @@ static void build(Vector *src_paths, Vector *variables, const char *adisk_name) 
 	Vector *dri = new_vec();
 	for (int i = 0; i < srcs->keys->len; i++) {
 		const char *source = srcs->vals->data[i];
+		if (!source) {
+			vec_push(dri, NULL);
+			continue;
+		}
 		Sco *sco = compile(compiler, source, i);
 		DriEntry *e = calloc(1, sizeof(DriEntry));
 		e->volume_bits = sco->volume_bits;

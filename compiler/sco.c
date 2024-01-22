@@ -141,6 +141,5 @@ void sco_init(Buffer *b, const char *src_name_utf8, int pageno) {
 }
 
 void sco_finalize(Buffer *b) {
-	emit(b, 0x1a);  // EOF
 	swap_word(b, 0, b->len - 2);
 }

@@ -246,8 +246,17 @@ void compile_string(Buffer *b, char terminator, bool compact, bool forbid_ascii)
 			compile_sjis_codepoint(b);
 			continue;
 		}
-		if (*input == '\\')
+		if (*input == '\\') {
 			input++;
+			if (*input == 'x') {
+				char buf[3] = {input[1], input[2], 0};
+				if (!isxdigit(buf[0]) || !isxdigit(buf[1]))
+					error_at(input, "Invalid escape sequence");
+				input += 3;
+				emit(b, strtol(buf, NULL, 16));
+				continue;
+			}
+		}
 		if (!*input)
 			error_at(top, "unfinished string");
 		if (!isascii(*input))

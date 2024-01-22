@@ -291,7 +291,7 @@ static void decompile_page(int page) {
 	if (config.utf8_input && page == 0 && !memcmp(dc.p, "ZU\x41\x7f", 4))
 		dc.p += 4;
 
-	while (dc.p < sco->data + sco->filesize && *dc.p != 0x1a) {
+	while (dc.p < sco->data + sco->filesize) {
 		int topaddr = dc.p - sco->data;
 		uint8_t mark = sco->mark[dc.p - sco->data];
 		while (is_branch_end(topaddr, branch_end_stack)) {
@@ -315,7 +315,7 @@ static void decompile_page(int page) {
 			const uint8_t *begin = dc.p;
 			while (*dc.p == 0x20 || *dc.p > 0x80) {
 				dc.p = advance_char(dc.p);
-				if (*mark_at(dc.page, dc_addr()) != 0)
+				if (dc.p >= sco->data + sco->filesize || *mark_at(dc.page, dc_addr()) != 0)
 					break;
 			}
 			dc_put_string_n((const char *)begin, dc.p - begin, STRING_ESCAPE | STRING_EXPAND);
@@ -327,6 +327,21 @@ static void decompile_page(int page) {
 				dc_putc(*dc.p++);
 			}
 			dc_putc('\n');
+			continue;
+		}
+		if (*dc.p == 0 || *dc.p == 0x1a) {
+			dc_putc('"');
+			while (dc.p < sco->data + sco->filesize && (*dc.p == 0 || *dc.p == 0x1a))
+				dc_printf("\\x%02x", *dc.p++);
+			dc_puts("\"\n");
+			continue;
+		}
+		if (*dc.p == 0x7f) {
+			// Hack for page 23 address 0xe2 of Abunai Tengu Densetsu.
+			dc_putc('"');
+			while (*dc.p == 0x7f || *dc.p == 0x40)
+				dc_printf("\\x%02x", *dc.p++);
+			dc_puts("\"\n");
 			continue;
 		}
 		sco->mark[dc.p - sco->data] |= CODE;
@@ -443,12 +458,6 @@ static void decompile_page(int page) {
 		dc_printf("*L_%05x:\n", eofaddr);
 }
 
-char *missing_adv_name(int page) {
-	char buf[32];
-	sprintf(buf, "_missing%d.adv", page);
-	return strdup(buf);
-}
-
 static void write_config(const char *path, const char *adisk_name) {
 	if (dc.scos->len == 0)
 		return;
@@ -471,10 +480,9 @@ static void write_config(const char *path, const char *adisk_name) {
 
 static void write_hed(const char *path) {
 	FILE *fp = checked_fopen(path, "w+");
-	fputs("#SYSTEM35\n", fp);
 	for (int i = 0; i < dc.scos->len; i++) {
 		Sco *sco = dc.scos->data[i];
-		fprintf(fp, "%s\n", sco ? sco->src_name : missing_adv_name(i));
+		fprintf(fp, "%s\n", sco ? sco->src_name : "");
 	}
 
 	if (!config.utf8_input && config.utf8_output)

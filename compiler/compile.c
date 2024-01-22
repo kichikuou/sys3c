@@ -93,7 +93,8 @@ static void expr_prim(void) {
 		const char *top = input;
 		char *fname = get_filename();
 		for (int i = 0; i < compiler->src_paths->len; i++) {
-			if (!strcasecmp(fname, basename_utf8(compiler->src_paths->data[i]))) {
+			const char *path = compiler->src_paths->data[i];
+			if (path && !strcasecmp(fname, basename_utf8(path))) {
 				emit_number(out, i);
 				return;
 			}
@@ -402,6 +403,10 @@ static bool command(void) {
 		} else {
 			compile_string(out, '\'', true, true);
 		}
+		break;
+
+	case '"':  // raw string
+		compile_string(out, '"', false, false);
 		break;
 
 	case '!':  // Assign

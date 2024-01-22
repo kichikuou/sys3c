@@ -63,13 +63,13 @@ static Sco *sco_new(int page, const uint8_t *data, int len, uint32_t volume_bits
 	sco->src_name = strdup(name);
 	sco->volume_bits = volume_bits;
 	sco->hdrsize = 2;
-	sco->filesize = len;  // `*(uint16_t*)data` is filesize, but don't trust it.
 	sco->page = page;
 
-	if (len < sco->filesize) {
-		error("%s: unexpected file size in SCO header (expected %d, got %d)",
-			  sjis2utf(name), len, sco->filesize);
-	}
+	// Trim trailing 0x00.
+	while (len > 0 && data[len - 1] == 0)
+		len--;
+	sco->filesize = len;
+
 	return sco;
 }
 
