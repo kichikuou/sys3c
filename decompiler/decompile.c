@@ -282,7 +282,7 @@ static bool inline_menu_string(void) {
 static void decompile_page(int page) {
 	Sco *sco = dc.scos->data[page];
 	dc.page = page;
-	dc.p = sco->data + sco->hdrsize;
+	dc.p = sco->data + 2;
 	dc.indent = 1;
 	bool in_menu_item = false;
 	Vector *branch_end_stack = new_vec();
@@ -300,6 +300,10 @@ static void decompile_page(int page) {
 			assert(dc.indent > 0);
 			indent();
 			dc_puts("}\n");
+		}
+		if (dc.p - sco->data == sco->default_addr) {
+			print_address();
+			dc_printf("*default:\n");
 		}
 		if (mark & LABEL) {
 			print_address();

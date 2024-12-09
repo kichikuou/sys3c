@@ -62,7 +62,7 @@ static Sco *sco_new(int page, const uint8_t *data, int len, uint32_t volume_bits
 	sprintf(name, "%d.adv", page);
 	sco->src_name = strdup(name);
 	sco->volume_bits = volume_bits;
-	sco->hdrsize = 2;
+	sco->default_addr = le16(data);
 	sco->page = page;
 
 	// Trim trailing 0x00.
@@ -160,7 +160,7 @@ int main(int argc, char *argv[]) {
 		scos->data[i] = sco;
 
 		// Detect unicode SCO.
-		if (i == 0 && !memcmp(sco->data + sco->hdrsize, "ZU\x41\x7f", 4))
+		if (i == 0 && !memcmp(sco->data + 2, "ZU\x41\x7f", 4))
 			config.utf8_input = true;
 	}
 	if (config.utf8_input && !config.utf8_output)

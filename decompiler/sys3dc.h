@@ -20,7 +20,7 @@
 typedef struct {
 	const uint8_t *data;
 	uint8_t *mark;
-	uint32_t hdrsize;
+	uint16_t default_addr;
 	uint32_t filesize;
 	uint32_t page;
 	const char *src_name;

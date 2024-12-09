@@ -135,11 +135,3 @@ void emit_command(Buffer *b, int cmd) {
 	for (int n = cmd; n; n >>= 8)
 		emit(b, n & 0xff);
 }
-
-void sco_init(Buffer *b, const char *src_name_utf8, int pageno) {
-	emit_word(b, 0);  // File size (to be filled by sco_finalize)
-}
-
-void sco_finalize(Buffer *b) {
-	swap_word(b, 0, b->len - 2);
-}

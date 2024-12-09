@@ -63,8 +63,6 @@ void emit_var(Buffer *b, int var_id);
 void emit_number(Buffer *b, int n);
 void emit_command(Buffer *b, int cmd);
 int current_address(Buffer *b);
-void sco_init(Buffer *b, const char *src_name_utf8, int pageno);
-void sco_finalize(Buffer *b);
 
 // lexer.c
 

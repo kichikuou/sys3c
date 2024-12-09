@@ -605,7 +605,7 @@ Sco *compile(Compiler *comp, const char *source, int pageno) {
 
 	comp->scos[pageno].volume_bits = 1 << 1;
 	out = new_buf();
-	sco_init(out, basename_utf8(comp->src_paths->data[pageno]), pageno);
+	emit_word(out, 0);  // Default address (to be filled later)
 	if (comp->dbg_info)
 		debug_init_page(comp->dbg_info, pageno);
 
@@ -615,7 +615,11 @@ Sco *compile(Compiler *comp, const char *source, int pageno) {
 		error_at(menu_item_start, "unfinished menu item");
 	check_undefined_labels();
 
-	sco_finalize(out);
+	Label *default_label = map_get(labels, "default");
+	if (!default_label)
+		fprintf(stderr, "%s: no default label\n", (char*)comp->src_paths->data[pageno]);
+	swap_word(out, 0, default_label ? default_label->addr : out->len - 2);
+
 	if (comp->dbg_info)
 		debug_finish_page(comp->dbg_info, labels);
 	comp->scos[pageno].buf = out;

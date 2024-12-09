@@ -394,12 +394,11 @@ static void help_compare(void) {
 }
 
 static bool compare_entry(int page, DriEntry *e1, DriEntry *e2) {
-	// Ignore the first two bytes
-	if (e1->size == e2->size && !memcmp(e1->data + 2, e2->data + 2, e1->size - 2))
+	if (e1->size == e2->size && !memcmp(e1->data, e2->data, e1->size))
 		return false;
 
 	int i;
-	for (i = 2; i < e1->size && i < e2->size; i++) {
+	for (i = 0; i < e1->size && i < e2->size; i++) {
 		if (e1->data[i] != e2->data[i])
 			break;
 	}
