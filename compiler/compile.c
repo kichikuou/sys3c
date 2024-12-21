@@ -435,11 +435,8 @@ static bool command(void) {
 		emit(out, cmd);
 		if (consume('0'))
 			emit_word(out, 0);  // Return
-		else {
-			Label *l = label();
-			if (l)
-				l->is_function = true;
-		}
+		else
+			label();
 		expect(':');
 		break;
 

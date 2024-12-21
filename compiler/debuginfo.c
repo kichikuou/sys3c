@@ -52,20 +52,6 @@ struct DebugInfo *new_debug_info(Map *srcs) {
 	return di;
 }
 
-static void add_local_functions(struct DebugInfo *di, Map *labels, int page) {
-	for (int i = 0; i < labels->keys->len; i++) {
-		Label *label = labels->vals->data[i];
-		if (!label->is_function)
-			continue;
-		FuncInfo *fi = calloc(1, sizeof(FuncInfo));
-		fi->name = labels->keys->data[i];
-		fi->page = page;
-		fi->addr = label->addr;
-		fi->is_local = true;
-		vec_push(di->functions, fi);
-	}
-}
-
 void debug_init_page(DebugInfo *di, int page) {
 	if (!di->line_section) {
 		di->line_section = new_buf();
@@ -108,8 +94,6 @@ void debug_line_reset(DebugInfo *di) {
 }
 
 void debug_finish_page(DebugInfo *di, Map *labels) {
-	add_local_functions(di, labels, di->nr_files);
-
 	Vector *linemap = di->linemap;
 	assert(linemap);
 
@@ -153,38 +137,13 @@ int funcinfo_compare(const void *a, const void *b) {
 		return fa->addr - fb->addr;
 }
 
-static void write_func_section(Vector *functions, FILE *fp) {
-	fputs("FUNC", fp);
-	long section_length_offset = ftell(fp);
-	fputdw(0, fp);
-
-	// Sort by address.
-	qsort(functions->data, functions->len, sizeof(void *), funcinfo_compare);
-
-	fputdw(functions->len, fp);
-	for (int i = 0; i < functions->len; i++) {
-		FuncInfo *fi = functions->data[i];
-		fputs(fi->name, fp);
-		fputc(0, fp);
-		fputw(fi->page, fp);
-		fputdw(fi->addr, fp);
-		fputc(fi->is_local, fp);
-	}
-
-	long section_length = ftell(fp) - section_length_offset + 4;
-	fseek(fp, section_length_offset, SEEK_SET);
-	fputdw(section_length, fp);
-	fseek(fp, 0, SEEK_END);
-}
-
 void debug_info_write(struct DebugInfo *di, Compiler *compiler, FILE *fp) {
 	fputs("DSYM", fp);
 	fputdw(DSYM_VERSION, fp);
-	fputdw(5, fp);  // nr_sections
+	fputdw(4, fp);  // nr_sections
 
 	write_string_array_section("SRCS", di->srcs->keys, fp);
 	write_string_array_section("SCNT", di->srcs->vals, fp);
 	fwrite(di->line_section->buf, di->line_section->len, 1, fp);
-	write_func_section(di->functions, fp);
 	write_string_array_section("VARI", compiler->variables, fp);
 }

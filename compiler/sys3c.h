@@ -111,7 +111,6 @@ typedef struct {
 	uint32_t addr;
 	uint32_t hole_addr;
 	const char *source_loc;
-	bool is_function;
 } Label;
 
 Compiler *new_compiler(Vector *src_paths, Vector *variables);
