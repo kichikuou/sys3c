@@ -291,11 +291,18 @@ static void arguments(const char *sig) {
 				input++;  // Do not consume full-width spaces here
 			if (*input == '"') {
 				expect('"');
-				compile_string(out, '"', false, false);
+				if (config.quoted_strings) {
+					emit(out, '\'');
+					compile_string(out, '"', STRING_ESCAPE_SQUOTE);
+					emit(out, '\'');
+				} else {
+					compile_string(out, '"', 0);
+					emit(out, ':');
+				}
 			} else {
 				compile_bare_string(out);
+				emit(out, ':');
 			}
-			emit(out, ':');
 			break;
 		case 'v':
 			variable(get_identifier(), false);
@@ -396,17 +403,17 @@ static bool command(void) {
 		return false;
 
 	case '\'': // Message
-		if (config.ascii_messages){
+		if (config.quoted_strings) {
 			emit(out, cmd);
-			compile_string(out, '\'', false, false);
+			compile_string(out, '\'', STRING_ESCAPE_SQUOTE);
 			emit(out, cmd);
 		} else {
-			compile_string(out, '\'', true, true);
+			compile_string(out, '\'', STRING_COMPACT | STRING_FORBID_ASCII);
 		}
 		break;
 
 	case '"':  // raw string
-		compile_string(out, '"', false, false);
+		compile_string(out, '"', 0);
 		break;
 
 	case '!':  // Assign
@@ -465,7 +472,7 @@ static bool command(void) {
 		label();
 		expect('$');
 		if (!isascii(*input)) {
-			compile_string(out, '$', true, true);
+			compile_string(out, '$', STRING_COMPACT | STRING_FORBID_ASCII);
 			emit(out, '$');
 		} else {
 			menu_item_start = command_top;

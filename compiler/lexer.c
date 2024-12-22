@@ -239,7 +239,7 @@ void compile_sjis_codepoint(Buffer *b) {
 	expect('>');
 }
 
-void compile_string(Buffer *b, char terminator, bool compact, bool forbid_ascii) {
+void compile_string(Buffer *b, char terminator, unsigned flags) {
 	const char *top = input;
 	while (*input != terminator) {
 		if (*input == '<') {
@@ -260,12 +260,14 @@ void compile_string(Buffer *b, char terminator, bool compact, bool forbid_ascii)
 		if (!*input)
 			error_at(top, "unfinished string");
 		if (!isascii(*input))
-			compile_multibyte_string(b, compact);
-		else if (forbid_ascii)
+			compile_multibyte_string(b, flags & STRING_COMPACT);
+		else if (flags & STRING_FORBID_ASCII)
 			error_at(input, "ASCII characters cannot be used here");
 		else {
 			if (!b && *input < ' ')
 				warn_at(input, "Warning: Control character in string.");
+			if (*input == '\'' && flags & STRING_ESCAPE_SQUOTE)
+				emit(b, '\\');
 			echo(b);
 		}
 	}

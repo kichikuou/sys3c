@@ -38,7 +38,7 @@ typedef struct {
 	const uint8_t *p;  // Points inside scos->data[page]->data
 	int indent;
 
-	bool ascii_messages;
+	bool quoted_strings;
 } Decompiler;
 
 static Decompiler dc;
@@ -93,6 +93,7 @@ static void dc_printf(const char *fmt, ...) {
 enum dc_put_string_flags {
 	STRING_ESCAPE = 1 << 0,
 	STRING_EXPAND = 1 << 1,
+	STRING_SYSENG = 1 << 2,  // single-quotes are escaped in input
 };
 
 static void dc_put_string_n(const char *s, int len, unsigned flags) {
@@ -103,8 +104,12 @@ static void dc_put_string_n(const char *s, int len, unsigned flags) {
 	while (s < end) {
 		uint8_t c = *s++;
 		if (isgraph(c) || c == '\t') {
-			if (flags & STRING_ESCAPE && (c == '\\' || c == '\'' || c == '"' || c == '<'))
+			if (flags & STRING_SYSENG && c == '\\' && *s == '\'') {
+				dc_putc(c);
+				c = *s++;
+			} else if (flags & STRING_ESCAPE && (c == '\\' || c == '\'' || c == '"' || c == '<')) {
 				dc_putc('\\');
+			}
 			dc_putc(c);
 		} else if (config.utf8_input) {
 			dc_putc(c);
@@ -134,8 +139,16 @@ static void dc_put_string_n(const char *s, int len, unsigned flags) {
 }
 
 static const void *dc_put_string(const char *s, int terminator, unsigned flags) {
-	const char *end = strchr(s, terminator);
-	assert(end);
+	const char *end;
+	if (flags & STRING_SYSENG) {
+		for (end = s; *end != terminator; end++) {
+			if (end[0] == '\\' && end[1] == '\'')
+				end++;
+		}
+	} else {
+		end = strchr(s, terminator);
+		assert(end);
+	}
 	dc_put_string_n(s, end - s, flags);
 	return end + 1;
 }
@@ -238,7 +251,13 @@ static void arguments(const char *sig) {
 			dc_printf("%d", *dc.p++);
 			break;
 		case 's':
-			if (*dc.p == ' ') {
+			if (*dc.p == '\'') {  // SysEng-style string
+				dc.quoted_strings = true;
+				dc.p++;
+				dc_putc('"');
+				dc.p = dc_put_string((const char *)dc.p, '\'', STRING_ESCAPE | STRING_SYSENG);
+				dc_putc('"');
+			} else if (*dc.p == ' ') {
 				dc_putc('"');
 				dc.p = dc_put_string((const char *)dc.p, ':', STRING_ESCAPE);
 				dc_putc('"');
@@ -410,15 +429,9 @@ static void decompile_page(int page) {
 			break;
 
 		case '\'':  // SysEng-style message
-			dc.ascii_messages = true;
-			const uint8_t *begin = dc.p;
-			while (*dc.p != '\'') {
-				if (*dc.p == '\\')
-					dc.p++;
-				dc.p = advance_char(dc.p);
-			}
-			dc_put_string_n((const char *)begin, dc.p - begin, STRING_ESCAPE);
-			dc_putc(*dc.p++);  // '\''
+			dc.quoted_strings = true;
+			dc.p = dc_put_string((const char *)dc.p, '\'', STRING_ESCAPE | STRING_SYSENG);
+			dc_putc('\'');
 			break;
 
 		case 'A': break;
@@ -478,8 +491,8 @@ static void write_config(const char *path, const char *adisk_name) {
 
 	fputs("hed = sys3dc.hed\n", fp);
 	fputs("variables = variables.txt\n", fp);
-	if (dc.ascii_messages)
-		fputs("ascii_messages = true\n", fp);
+	if (dc.quoted_strings)
+		fputs("quoted_strings = true\n", fp);
 
 	fprintf(fp, "encoding = %s\n", config.utf8_output ? "utf8" : "sjis");
 	if (config.utf8_input)

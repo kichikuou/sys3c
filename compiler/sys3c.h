@@ -30,7 +30,7 @@ typedef struct {
 	bool debug;
 	bool unicode;
 	bool utf8;
-	bool ascii_messages;
+	bool quoted_strings;
 } Config;
 extern Config config;
 
@@ -73,6 +73,12 @@ extern const char *input_buf;
 extern const char *input;
 extern int input_line;
 
+enum {
+	STRING_COMPACT = 1 << 0,
+	STRING_FORBID_ASCII = 1 << 1,
+	STRING_ESCAPE_SQUOTE = 1 << 2,
+};
+
 #define error_at(...) (warn_at(__VA_ARGS__), exit(1))
 void warn_at(const char *pos, char *fmt, ...);
 void lexer_init(const char *source, const char *name, int pageno);
@@ -86,7 +92,7 @@ char *get_identifier(void);
 char *get_label(void);
 char *get_filename(void);
 int get_number(void);
-void compile_string(Buffer *b, char terminator, bool compact, bool forbid_ascii);
+void compile_string(Buffer *b, char terminator, unsigned flags);
 void compile_message(Buffer *b);
 void compile_bare_string(Buffer *b);
 int get_command(Buffer *b);

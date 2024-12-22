@@ -97,9 +97,9 @@ Here are the manuals for the commands:
 | prog_cd             | Supported   |       |
 | prog_omake          | Supported   |       |
 | rance41             | Supported   |       |
-| rance41_eng         |             |       |
+| rance41_eng         | Supported   |       |
 | rance42             | Supported   |       |
-| rance42_eng         |             |       |
+| rance42_eng         | Supported   |       |
 | ayumi_cd            | Supported   |       |
 | ayumi_live_256      |             |       |
 | ayumi_live_full     |             |       |
