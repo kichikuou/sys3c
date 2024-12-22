@@ -39,6 +39,7 @@ typedef struct {
 	int indent;
 
 	bool quoted_strings;
+	bool rev_marker;
 } Decompiler;
 
 static Decompiler dc;
@@ -306,9 +307,11 @@ static void decompile_page(int page) {
 	bool in_menu_item = false;
 	Vector *branch_end_stack = new_vec();
 
-	// Skip the "ZU 1:" command of unicode SCO.
-	if (config.utf8_input && page == 0 && !memcmp(dc.p, "ZU\x41\x7f", 4))
-		dc.p += 4;
+	// Skip the "REV" marker for old SysEng.
+	if (page == 0 && !memcmp(dc.p, "REV", 3)) {
+		dc.rev_marker = true;
+		dc.p += 3;
+	}
 
 	while (dc.p < sco->data + sco->filesize) {
 		int topaddr = dc.p - sco->data;
@@ -493,6 +496,10 @@ static void write_config(const char *path, const char *adisk_name) {
 	fputs("variables = variables.txt\n", fp);
 	if (dc.quoted_strings)
 		fputs("quoted_strings = true\n", fp);
+	if (dc.rev_marker)
+		fputs("rev_marker = true\n", fp);
+	if (sys0dc_offby1_error)
+		fputs("sys0dc_offby1_error = true\n", fp);
 
 	fprintf(fp, "encoding = %s\n", config.utf8_output ? "utf8" : "sjis");
 	if (config.utf8_input)

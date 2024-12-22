@@ -75,6 +75,10 @@ void load_config(FILE *fp, const char *cfg_dir) {
 			config.var_list = path_join(cfg_dir, val);
 		} else if (sscanf(line, "quoted_strings = %s", val)) {
 			config.quoted_strings = to_bool(val);
+		} else if (sscanf(line, "rev_marker = %s", val)) {
+			config.rev_marker = to_bool(val);
+		} else if (sscanf(line, "sys0dc_offby1_error = %s", val)) {
+			config.sys0dc_offby1_error = to_bool(val);
 		} else if (sscanf(line, "adisk_name = %s", val)) {
 			config.adisk_name = path_join(cfg_dir, val);
 		} else if (sscanf(line, "unicode = %s", val)) {

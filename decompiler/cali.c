@@ -21,6 +21,8 @@
 
 #define NODE_POOL_SIZE 1024
 
+bool sys0dc_offby1_error;
+
 static Cali node_pool[NODE_POOL_SIZE];
 static Cali *free_node;
 
@@ -91,6 +93,9 @@ static Cali *parse(const uint8_t **code, bool is_lhs) {
 					val = val << 8 | *p++;
 					if (val <= 0x33)
 						error_at(p, "unknown code 00 %02x", val);
+					if ((config.sys_ver == SYSTEM1 && val == 0x37) ||
+					    (config.sys_ver >= SYSTEM2 && val == 0x36))
+						sys0dc_offby1_error = true;
 				}
 				*top++ = new_node(NODE_NUMBER, val, NULL, NULL);
 			}

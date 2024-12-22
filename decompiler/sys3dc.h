@@ -51,6 +51,8 @@ typedef struct Cali {
 Cali *parse_cali(const uint8_t **code, bool is_lhs);
 void print_cali(Cali *node, Vector *variables, FILE *out);
 
+extern bool sys0dc_offby1_error;
+
 // decompile.c
 
 typedef struct {

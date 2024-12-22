@@ -551,15 +551,13 @@ static void commands(void) {
 
 // toplevel ::= commands
 static void toplevel(void) {
-	if (config.unicode && input_page == 0) {
-		// Inject "ZU 1:" command.
+	if (config.rev_marker && input_page == 0) {
 		skip_whitespaces();
 		if (out && compiler->dbg_info)
 			debug_line_add(compiler->dbg_info, input_line, current_address(out));
-		emit(out, 'Z');
-		emit(out, 'U');
-		emit(out, 0x41);
-		emit(out, 0x7f);
+		emit(out, 'R');
+		emit(out, 'E');
+		emit(out, 'V');
 	}
 
 	commands();

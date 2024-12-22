@@ -31,6 +31,8 @@ typedef struct {
 	bool unicode;
 	bool utf8;
 	bool quoted_strings;
+	bool rev_marker;
+	bool sys0dc_offby1_error;
 } Config;
 extern Config config;
 

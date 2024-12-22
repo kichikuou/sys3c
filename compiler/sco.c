@@ -122,8 +122,7 @@ void emit_number(Buffer *b, int n) {
 		n -= 0x3fff;
 		addop++;
 	}
-	// Note: Sys0Decompiler emits 0x00 0x36 instead of 0x76.
-	if (n <= (config.sys_ver == SYSTEM1 ? 0x37 : config.quoted_strings ? 0x35 : 0x36)) {
+	if (n <= (config.sys_ver == SYSTEM1 ? 0x37 : 0x36) - config.sys0dc_offby1_error) {
 		emit(b, n + 0x40);
 	} else {
 		emit_word_be(b, n);

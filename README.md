@@ -72,7 +72,7 @@ Here are the manuals for the commands:
 | tengu               | Supported   |       |
 | toushin_hint        |             |       |
 | little_vampire      | Supported   |       |
-| little_vampire_eng  |             |       |
+| little_vampire_eng  | Supported   |       |
 | yakata              |             |       |
 | gakuen              |             |       |
 | gakuen_eng          | Supported   |       |
