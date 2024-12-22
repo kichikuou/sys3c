@@ -23,10 +23,11 @@
 #include <string.h>
 #include <sys/stat.h>
 
-static const char short_options[] = "adE:ho:s:Vv";
+static const char short_options[] = "adE:g:ho:s:Vv";
 static const struct option long_options[] = {
 	{ "address",  no_argument,       NULL, 'a' },
 	{ "encoding", required_argument, NULL, 'E' },
+	{ "game",     required_argument, NULL, 'G' },
 	{ "help",     no_argument,       NULL, 'h' },
 	{ "outdir",   required_argument, NULL, 'o' },
 	{ "sys-ver",  required_argument, NULL, 's' },
@@ -41,6 +42,7 @@ static void usage(void) {
 	puts("    -a, --address             Prefix each line with address");
 	puts("    -Es, --encoding=sjis      Output files in SJIS encoding");
 	puts("    -Eu, --encoding=utf8      Output files in UTF-8 encoding (default)");
+	puts("    -G, --game <id>           Specify game ID");
 	puts("    -h, --help                Display this message and exit");
 	puts("    -o, --outdir <directory>  Write output into <directory>");
 	puts("    -s, --sys-ver <ver>       NACT system version (1|2|3(default))");
@@ -110,6 +112,12 @@ int main(int argc, char *argv[]) {
 			default: error("Unknown encoding %s", optarg);
 			}
 			break;
+		case 'G':
+			config.game_id = game_id_from_name(optarg);
+			if (config.game_id == UNKNOWN_GAME)
+				error("Unknown game ID %s", optarg);
+			config.sys_ver = get_sysver(config.game_id);
+			break;
 		case 'h':
 			usage();
 			return 0;
@@ -118,10 +126,20 @@ int main(int argc, char *argv[]) {
 			break;
 		case 's':
 			switch (optarg[0]) {
-			case '1': config.sys_ver = SYSTEM1; break;
-			case '2': config.sys_ver = SYSTEM2; break;
-			case '3': config.sys_ver = SYSTEM3; break;
-			default: error("Invalid system version '%s'", optarg);
+			case '1':
+				config.sys_ver = SYSTEM1;
+				config.game_id = SYSTEM1_GENERIC;
+				break;
+			case '2':
+				config.sys_ver = SYSTEM2;
+				config.game_id = SYSTEM2_GENERIC;
+				break;
+			case '3':
+				config.sys_ver = SYSTEM3;
+				config.game_id = SYSTEM3_GENERIC;
+				break;
+			default:
+				error("Invalid system version '%s'", optarg);
 			}
 			break;
 		case 'V':
@@ -145,11 +163,25 @@ int main(int argc, char *argv[]) {
 
 	Vector *scos = NULL;
 	const char *adisk_name = NULL;
+	uint32_t adisk_crc = 0, bdisk_crc = 0;
 	for (int i = 0; i < argc; i++) {
 		scos = dri_read(scos, argv[i]);
 		char *basename = basename_utf8(argv[i]);
-		if (toupper(basename[0]) == 'A')
+		switch (toupper(basename[0])) {
+		case 'A':
 			adisk_name = basename;
+			adisk_crc = calc_crc32(argv[i]);
+			break;
+		case 'B':
+			bdisk_crc = calc_crc32(argv[i]);
+			break;
+		}
+	}
+	if (config.game_id == UNKNOWN_GAME) {
+		config.game_id = detect_game_id(adisk_crc, bdisk_crc);
+		if (config.game_id == UNKNOWN_GAME)
+			error("Cannot detect game ID. Please specify --game or --sys-ver.");
+		config.sys_ver = get_sysver(config.game_id);
 	}
 
 	for (int i = 0; i < scos->len; i++) {

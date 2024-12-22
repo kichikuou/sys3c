@@ -35,9 +35,18 @@ static bool to_bool(const char *s) {
 
 void set_sys_ver(const char *ver) {
 	switch (ver[0]) {
-	case '1': config.sys_ver = SYSTEM1; break;
-	case '2': config.sys_ver = SYSTEM2; break;
-	case '3': config.sys_ver = SYSTEM3; break;
+	case '1':
+		config.sys_ver = SYSTEM1;
+		config.game_id = SYSTEM1_GENERIC;
+		break;
+	case '2':
+		config.sys_ver = SYSTEM2;
+		config.game_id = SYSTEM2_GENERIC;
+		break;
+	case '3':
+		config.sys_ver = SYSTEM3;
+		config.game_id = SYSTEM3_GENERIC;
+		break;
 	default: error("Unknown system version '%s'", ver);
 	}
 }
@@ -48,6 +57,11 @@ void load_config(FILE *fp, const char *cfg_dir) {
 		char val[256];
 		if (sscanf(line, "sys_ver = %s", val)) {
 			set_sys_ver(val);
+		} else if (sscanf(line, "game = %s", val)) {
+			config.game_id = game_id_from_name(val);
+			if (config.game_id == UNKNOWN_GAME)
+				error("Unknown game ID '%s'", val);
+			config.sys_ver = get_sysver(config.game_id);
 		} else if (sscanf(line, "encoding = %s", val)) {
 			if (!strcasecmp(val, "sjis"))
 				config.utf8 = false;

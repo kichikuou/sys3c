@@ -10,6 +10,7 @@ inc = include_directories('common')
 common_srcs = [
   'common/dri.c',
   'common/container.c',
+  'common/game_id.c',
   'common/sjisutf.c',
   'common/util.c',
 ]

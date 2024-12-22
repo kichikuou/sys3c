@@ -149,6 +149,89 @@ typedef struct {
 void dri_write(Vector *entries, int volume, FILE *fp);
 Vector *dri_read(Vector *entries, const char *path);
 
+// game_id.c
+
+typedef enum {
+	SYSTEM1 = 1,
+	SYSTEM2,
+	SYSTEM3,
+} SysVer;
+
+typedef enum {
+	UNKNOWN_GAME,
+
+	SYSTEM1_GENERIC,
+	BUNKASAI,
+	CRESCENT,
+	DPS,
+	DPS_SG_FAHREN,
+	DPS_SG_KATEI,
+	DPS_SG_NOBUNAGA,
+	DPS_SG2_ANTIQUE,
+	DPS_SG2_IKENAI,
+	DPS_SG2_AKAI,
+	DPS_SG3_RABBIT,
+	DPS_SG3_SHINKON,
+	DPS_SG3_SOTSUGYOU,
+	FUKEI,
+	INTRUDER,
+	TENGU,
+	TOUSHIN_HINT,
+	LITTLE_VAMPIRE,
+	LITTLE_VAMPIRE_ENG,
+	YAKATA,
+	GAKUEN,
+	GAKUEN_ENG,
+
+	SYSTEM2_GENERIC,
+	AYUMI_FD,
+	AYUMI_HINT,
+	AYUMI_PROTO,
+	DALK_HINT,
+	DRSTOP,
+	PROG_FD,
+	RANCE3_HINT,
+	SDPS_MARIA,
+	SDPS_TONO,
+	SDPS_KAIZOKU,
+	YAKATA2,
+
+	SYSTEM3_GENERIC,
+	AMBIVALENZ_FD,
+	AMBIVALENZ_CD,
+	DPS_ALL,
+	FUNNYBEE_CD,
+	FUNNYBEE_FD,
+	ONLYYOU,
+	ONLYYOU_DEMO,
+	PROG_CD,
+	PROG_OMAKE,
+	RANCE41,
+	RANCE41_ENG,
+	RANCE42,
+	RANCE42_ENG,
+	AYUMI_CD,
+	AYUMI_LIVE_256,
+	AYUMI_LIVE_FULL,
+	YAKATA3_CD,
+	YAKATA3_FD,
+	HASHIRIONNA2,
+	TOUSHIN2_GD,
+	TOUSHIN2_SP,
+	OTOME,
+	NINGYO,
+	MUGEN,
+} GameId;
+
+static inline SysVer get_sysver(GameId id) {
+	return id < SYSTEM2_GENERIC ? SYSTEM1 : id < SYSTEM3_GENERIC ? SYSTEM2 : SYSTEM3;
+}
+
+GameId game_id_from_name(const char *name);
+const char *game_id_to_name(GameId id);
+uint32_t calc_crc32(const char* fname);
+GameId detect_game_id(uint32_t adisk_crc, uint32_t bdisk_crc);
+
 // opcodes
 
 enum {
@@ -169,9 +252,3 @@ enum {
 	COMMAND_CONST = 0x81,
 	COMMAND_PRAGMA = 0x82,
 };
-
-typedef enum {
-	SYSTEM1 = 1,
-	SYSTEM2,
-	SYSTEM3,
-} SysVer;

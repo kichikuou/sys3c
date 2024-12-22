@@ -55,6 +55,7 @@ void print_cali(Cali *node, Vector *variables, FILE *out);
 
 typedef struct {
 	SysVer sys_ver;
+	GameId game_id;
 	bool address;
 	bool utf8_input;
 	bool utf8_output;

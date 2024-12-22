@@ -23,6 +23,7 @@ typedef struct {
 	const char *adisk_name;
 
 	SysVer sys_ver;
+	GameId game_id;
 	const char *hed;
 	const char *var_list;
 

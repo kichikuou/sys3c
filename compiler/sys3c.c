@@ -26,11 +26,12 @@
 
 #define DEFAULT_ADISK_NAME "ADISK.DAT"
 
-static const char short_options[] = "a:E:ghi:Io:p:s:uV:v";
+static const char short_options[] = "a:E:G:ghi:Io:p:s:uV:v";
 static const struct option long_options[] = {
 	{ "dri",       required_argument, NULL, 'o' },
 	{ "debug",     no_argument,       NULL, 'g' },
 	{ "encoding",  required_argument, NULL, 'E' },
+	{ "game",      required_argument, NULL, 'G' },
 	{ "hed",       required_argument, NULL, 'i' },
 	{ "help",      no_argument,       NULL, 'h' },
 	{ "init",      no_argument,       NULL, 'I' },
@@ -47,6 +48,7 @@ static void usage(void) {
 	puts("Options:");
 	puts("    -o, --dri <name>          Write output to <name> (default: " DEFAULT_ADISK_NAME ")");
 	puts("    -g, --debug               Generate debug information");
+	puts("    -G, --game <id>           Specify game ID");
 	puts("    -Es, --encoding=sjis      Set input coding system to SJIS");
 	puts("    -Eu, --encoding=utf8      Set input coding system to UTF-8 (default)");
 	puts("    -i, --hed <file>          Read compile header (.hed) from <file>");
@@ -220,6 +222,12 @@ int main(int argc, char *argv[]) {
 			break;
 		case 'g':
 			config.debug = true;
+			break;
+		case 'G':
+			config.game_id = game_id_from_name(optarg);
+			if (config.game_id == UNKNOWN_GAME)
+				error("Unknown game ID '%s'", optarg);
+			config.sys_ver = get_sysver(config.game_id);
 			break;
 		case 'h':
 			usage();
