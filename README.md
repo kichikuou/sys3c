@@ -86,7 +86,7 @@ Here are the manuals for the commands:
 | sdps_maria          | Supported   |       |
 | sdps_tono           | Supported   |       |
 | sdps_kaizoku        | Supported   |       |
-| yakata2             |             |       |
+| yakata2             | Supported   |       |
 | ambivalenz_fd       | Supported   |       |
 | ambivalenz_cd       | Supported   |       |
 | dps_all             | Supported   |       |
