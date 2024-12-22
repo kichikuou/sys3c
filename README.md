@@ -50,3 +50,64 @@ Here are the manuals for the commands:
 - [docs/sys3c.adoc](docs/sys3c.adoc)
 - [docs/sys3dc.adoc](docs/sys3dc.adoc)
 - [docs/dri.adoc](docs/dri.adoc)
+
+## Supported Games
+
+|         Game        |   Status    | Notes |
+| ------------------- | ----------- | ----- |
+| bunkasai            |             |       |
+| crescent            |             |       |
+| dps                 |             |       |
+| dps_sg_fahren       |             |       |
+| dps_sg_katei        |             |       |
+| dps_sg_nobunaga     |             |       |
+| dps_sg2_antique     |             |       |
+| dps_sg2_ikenai      |             |       |
+| dps_sg2_akai        |             |       |
+| dps_sg3_rabbit      |             |       |
+| dps_sg3_shinkon     |             |       |
+| dps_sg3_sotsugyou   |             |       |
+| fukei               |             |       |
+| intruder            | Supported   |       |
+| tengu               | Supported   |       |
+| toushin_hint        |             |       |
+| little_vampire      | Supported   |       |
+| little_vampire_eng  |             |       |
+| yakata              |             |       |
+| gakuen              |             |       |
+| gakuen_eng          | Supported   |       |
+| ayumi_fd            | Supported   |       |
+| ayumi_hint          |             |       |
+| ayumi_proto         |             |       |
+| dalk_hint           |             |       |
+| drstop              | Supported   |       |
+| prog_fd             | Supported   |       |
+| rance3_hint         |             |       |
+| sdps_maria          | Supported   |       |
+| sdps_tono           | Supported   |       |
+| sdps_kaizoku        | Supported   |       |
+| yakata2             |             |       |
+| ambivalenz_fd       | Supported   |       |
+| ambivalenz_cd       | Supported   |       |
+| dps_all             | Supported   |       |
+| funnybee_cd         | Supported   |       |
+| funnybee_fd         | Supported   |       |
+| onlyyou             | Supported   |       |
+| onlyyou_demo        |             |       |
+| prog_cd             | Supported   |       |
+| prog_omake          | Supported   |       |
+| rance41             | Supported   |       |
+| rance41_eng         |             |       |
+| rance42             | Supported   |       |
+| rance42_eng         |             |       |
+| ayumi_cd            | Supported   |       |
+| ayumi_live_256      |             |       |
+| ayumi_live_full     |             |       |
+| yakata3_cd          | Supported   |       |
+| yakata3_fd          | Supported   |       |
+| hashirionna2        | Supported   |       |
+| toushin2_gd         |             |       |
+| toushin2_sp         |             |       |
+| otome               | Supported   |       |
+| ningyo              |             |       |
+| mugen               | Supported   |       |
