@@ -56,7 +56,7 @@ Here are the manuals for the commands:
 |         Game        |   Status    | Notes |
 | ------------------- | ----------- | ----- |
 | bunkasai            |             |       |
-| crescent            |             |       |
+| crescent            | Supported   |       |
 | dps                 | Supported   |       |
 | dps_sg_fahren       |             |       |
 | dps_sg_katei        |             |       |

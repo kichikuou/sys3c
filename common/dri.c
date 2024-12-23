@@ -24,9 +24,6 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#ifdef _POSIX_MAPPED_FILES
-#include <sys/mman.h>
-#endif
 #ifndef _O_BINARY
 #define _O_BINARY 0
 #endif
@@ -145,12 +142,8 @@ Vector *dri_read(Vector *entries, const char *path) {
 	if (fstat(fd, &sbuf) < 0)
 		error("%s: %s", path, strerror(errno));
 
-#ifdef _POSIX_MAPPED_FILES
-	uint8_t *p = mmap(NULL, sbuf.st_size, PROT_READ, MAP_SHARED, fd, 0);
-	if (p == MAP_FAILED)
-		error("%s: %s", path, strerror(errno));
-#else
-	uint8_t *p = malloc(sbuf.st_size);
+	size_t size = (sbuf.st_size + 0xff) & ~0xff;
+	uint8_t *p = calloc(1, size);
 	size_t bytes = 0;
 	while (bytes < sbuf.st_size) {
 		ssize_t ret = read(fd, p + bytes, sbuf.st_size - bytes);
@@ -158,11 +151,10 @@ Vector *dri_read(Vector *entries, const char *path) {
 			error("%s: %s", path, strerror(errno));
 		bytes += ret;
 	}
-#endif
 	close(fd);
 
 	int volume = toupper(basename_utf8(path)[0]) - 'A' + 1;
-	dri_read_entries(entries, volume, p, sbuf.st_size);
+	dri_read_entries(entries, volume, p, size);
 
 	return entries;
 }
