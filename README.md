@@ -58,15 +58,15 @@ Here are the manuals for the commands:
 | bunkasai            |             |       |
 | crescent            | Supported   |       |
 | dps                 | Supported   |       |
-| dps_sg_fahren       |             |       |
-| dps_sg_katei        |             |       |
-| dps_sg_nobunaga     |             |       |
-| dps_sg2_antique     |             |       |
-| dps_sg2_ikenai      |             |       |
-| dps_sg2_akai        |             |       |
-| dps_sg3_rabbit      |             |       |
-| dps_sg3_shinkon     |             |       |
-| dps_sg3_sotsugyou   |             |       |
+| dps_sg_fahren       | Supported   |       |
+| dps_sg_katei        | Supported   |       |
+| dps_sg_nobunaga     | Supported   |       |
+| dps_sg2_antique     | Supported   |       |
+| dps_sg2_ikenai      | Supported   |       |
+| dps_sg2_akai        | Supported   |       |
+| dps_sg3_rabbit      | Supported   |       |
+| dps_sg3_shinkon     | Supported   |       |
+| dps_sg3_sotsugyou   | Supported   |       |
 | fukei               |             |       |
 | intruder            | Supported   |       |
 | tengu               | Supported   |       |
