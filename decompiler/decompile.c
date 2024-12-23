@@ -357,8 +357,11 @@ static void decompile_page(int page) {
 		}
 		if (*dc.p == 0 || *dc.p == 0x1a) {
 			dc_putc('"');
-			while (dc.p < sco->data + sco->filesize && (*dc.p == 0 || *dc.p == 0x1a))
+			while (dc.p < sco->data + sco->filesize) {
 				dc_printf("\\x%02x", *dc.p++);
+				if (sco->mark[dc.p - sco->data])
+					break;
+			}
 			dc_puts("\"\n");
 			continue;
 		}

@@ -57,7 +57,7 @@ Here are the manuals for the commands:
 | ------------------- | ----------- | ----- |
 | bunkasai            |             |       |
 | crescent            |             |       |
-| dps                 |             |       |
+| dps                 | Supported   |       |
 | dps_sg_fahren       |             |       |
 | dps_sg_katei        |             |       |
 | dps_sg_nobunaga     |             |       |
