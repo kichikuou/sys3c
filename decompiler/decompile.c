@@ -561,6 +561,24 @@ void decompile(Vector *scos, const char *outdir, const char *adisk_name) {
 	memset(&dc, 0, sizeof(dc));
 	dc.scos = scos;
 	dc.variables = new_vec();
+	vec_push(dc.variables, "RND");
+	if (config.sys_ver == SYSTEM3) {
+		char buf[4];
+		for (int i = 1; i <= 20; i++) {
+			sprintf(buf, "D%02d", i);
+			vec_push(dc.variables, strdup(buf));
+		}
+		for (int i = 1; i <= 20; i++) {
+			sprintf(buf, "U%02d", i);
+			vec_push(dc.variables, strdup(buf));
+		}
+		for (int i = 1; i <= 16; i++) {
+			sprintf(buf, "B%02d", i);
+			vec_push(dc.variables, strdup(buf));
+		}
+		vec_push(dc.variables, "M_X");
+		vec_push(dc.variables, "M_Y");
+	}
 
 	// Analyze
 	bool done = false;
