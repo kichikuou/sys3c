@@ -1,6 +1,20 @@
 project('sys3c', 'c')
 fs = import('fs')
 
+if host_machine.system() == 'emscripten'
+  common_link_args = [
+    '-sENVIRONMENT=node',
+    '-sMODULARIZE',
+    '-sEXIT_RUNTIME',
+    '-sALLOW_MEMORY_GROWTH',
+    '-sEXPORTED_RUNTIME_METHODS=FS,NODEFS',
+    '-O' + get_option('optimization'),
+    '-lnodefs.js'
+  ]
+else
+  common_link_args = []
+endif
+
 #
 # common
 #
@@ -16,7 +30,7 @@ common_srcs = [
 ]
 
 libcommon = static_library('common', common_srcs, include_directories : inc)
-common = declare_dependency(include_directories : inc, link_with : libcommon)
+common = declare_dependency(include_directories : inc, link_with : libcommon, link_args : common_link_args)
 
 common_tests_srcs = [
   'common/common_tests.c',
