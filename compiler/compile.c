@@ -402,6 +402,10 @@ static bool command(void) {
 	case '\0':
 		return false;
 
+	case '\x1a':  // EOF
+		emit(out, cmd);
+		break;
+
 	case '\'': // Message
 		if (config.quoted_strings) {
 			emit(out, cmd);

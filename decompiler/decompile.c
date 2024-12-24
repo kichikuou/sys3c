@@ -356,13 +356,22 @@ static void decompile_page(int page) {
 			continue;
 		}
 		if (*dc.p == 0 || *dc.p == 0x1a) {
-			dc_putc('"');
-			while (dc.p < sco->data + sco->filesize) {
-				dc_printf("\\x%02x", *dc.p++);
-				if (sco->mark[dc.p - sco->data])
-					break;
+			int len = 1;
+			while (dc_addr() + len < sco->filesize && !sco->mark[dc_addr() + len]) {
+				len++;
 			}
-			dc_puts("\"\n");
+			while (len > 0 && *dc.p == 0x1a) {
+				dc_puts("EOF\n");
+				dc.p++;
+				if (--len > 0)
+					indent();
+			}
+			if (len > 0) {
+				dc_putc('"');
+				while (len-- > 0)
+					dc_printf("\\x%02x", *dc.p++);
+				dc_puts("\" ; Junk data (can be removed safely)\n");
+			}
 			continue;
 		}
 		if (*dc.p == 0x7f) {

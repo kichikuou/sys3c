@@ -313,6 +313,10 @@ int get_command(Buffer *b) {
 		return *input;
 	if (*input == 'A' || *input == 'R')
 		return echo(b);
+	if (input[0] == 'E' && input[1] == 'O' && input[2] == 'F') {
+		input += 3;
+		return 0x1a;
+	}
 	if (isupper(*input)) {
 		int cmd = *input++;
 		if (isupper(*input))
