@@ -88,11 +88,12 @@ static char *read_file(const char *path) {
 		error("%s: %s", path, strerror(errno));
 	if (fseek(fp, 0, SEEK_SET) != 0)
 		error("%s: %s", path, strerror(errno));
-	char *buf = malloc(size + 1);
+	char *buf = malloc(size + 2);
 	if (size > 0 && fread(buf, size, 1, fp) != 1)
 		error("%s: read error", path);
 	fclose(fp);
-	buf[size] = '\0';
+	buf[size] = '\n';
+	buf[size + 1] = '\0';
 
 	if (config.utf8) {
 		const char *err = validate_utf8(buf);
@@ -124,6 +125,9 @@ static Vector *read_var_list(const char *path) {
 	char *line;
 	while ((line = next_line(&buf)) != NULL)
 		vec_push(vars, trim_right(line));
+	// Drop empty lines at the end
+	while (vars->len > 0 && !((char *)vars->data[vars->len - 1])[0])
+		vars->len--;
 	return vars;
 }
 
