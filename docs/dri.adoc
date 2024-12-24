@@ -1,7 +1,7 @@
 = dri(1)
 :doctype: manpage
 :manmanual: sys3c manual
-:mansource: sys3c
+:mansource: sys3c {sys3c-version}
 
 == Name
 dri - DAT archive utility

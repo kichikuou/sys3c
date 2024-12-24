@@ -1,6 +1,8 @@
 project('sys3c', 'c')
 fs = import('fs')
 
+sys3c_version = '0.0.1'
+
 if host_machine.system() == 'emscripten'
   common_link_args = [
     '-sENVIRONMENT=node',
@@ -100,7 +102,8 @@ if asciidoctor.found()
       custom_target(manpages[0],
         output : manpages,
         input : adoc,
-        command : [asciidoctor, '-b', 'manpage', '@INPUT@', '-o', '@OUTPUT0@'],
+        command : [asciidoctor, '-b', 'manpage', '@INPUT@', '-o', '@OUTPUT0@',
+                   '-a', 'sys3c-version=' + sys3c_version],
         install : true,
         install_dir : get_option('mandir') / 'man1')
     endif
