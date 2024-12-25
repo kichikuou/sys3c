@@ -149,6 +149,18 @@ typedef struct {
 void dri_write(Vector *entries, int volume, FILE *fp);
 Vector *dri_read(Vector *entries, const char *path);
 
+// ag00.c
+
+typedef struct {
+	Vector *verbs;
+	Vector *objs;
+	int uk1;
+	int uk2;
+} AG00;
+
+AG00 *ag00_read(const char *path);
+void ag00_write(AG00 *ag00, const char *path);
+
 // game_id.c
 
 typedef enum {

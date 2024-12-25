@@ -162,11 +162,16 @@ int main(int argc, char *argv[]) {
 	}
 
 	Vector *scos = NULL;
+	AG00 *ag00 = NULL;
 	const char *adisk_name = NULL;
 	uint32_t adisk_crc = 0, bdisk_crc = 0;
 	for (int i = 0; i < argc; i++) {
-		scos = dri_read(scos, argv[i]);
 		char *basename = basename_utf8(argv[i]);
+		if (!strcasecmp(basename, "AG00.DAT")) {
+			ag00 = ag00_read(argv[i]);
+			continue;
+		}
+		scos = dri_read(scos, argv[i]);
 		switch (toupper(basename[0])) {
 		case 'A':
 			adisk_name = basename;
@@ -201,7 +206,7 @@ int main(int argc, char *argv[]) {
 	if (outdir && make_dir(outdir) != 0 && errno != EEXIST)
 		error("cannot create directory %s: %s", outdir, strerror(errno));
 
-	decompile(scos, outdir, adisk_name);
+	decompile(scos, ag00, outdir, adisk_name);
 
 	return 0;
 }

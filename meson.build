@@ -24,6 +24,7 @@ endif
 inc = include_directories('common')
 
 common_srcs = [
+  'common/ag00.c',
   'common/dri.c',
   'common/container.c',
   'common/game_id.c',

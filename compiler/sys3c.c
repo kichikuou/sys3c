@@ -119,7 +119,7 @@ static char *trim_right(char *str) {
 	return str;
 }
 
-static Vector *read_var_list(const char *path) {
+static Vector *read_txt(const char *path) {
 	char *buf = read_file(path);
 	Vector *vars = new_vec();
 	char *line;
@@ -142,14 +142,14 @@ static void read_hed(const char *path, Vector *sources) {
 	}
 }
 
-static void build(Vector *src_paths, Vector *variables, const char *adisk_name) {
+static void build(Vector *src_paths, Vector *variables, Vector *verbs, Vector *objs, const char *adisk_name) {
 	Map *srcs = new_map();
 	for (int i = 0; i < src_paths->len; i++) {
 		char *path = src_paths->data[i];
 		map_put(srcs, path, path ? read_file(path) : NULL);
 	}
 
-	Compiler *compiler = new_compiler(srcs->keys, variables);
+	Compiler *compiler = new_compiler(srcs->keys, variables, verbs, objs);
 
 	if (config.debug)
 		compiler->dbg_info = new_debug_info(srcs);
@@ -194,6 +194,22 @@ static void build(Vector *src_paths, Vector *variables, const char *adisk_name) 
 		FILE *fp = checked_fopen(dri_path, "wb");
 		dri_write(dri, i, fp);
 		fclose(fp);
+	}
+
+	if (verbs) {
+		if (!config.unicode) {
+			for (int i = 0; i < verbs->len; i++)
+				verbs->data[i] = utf2sjis(verbs->data[i]);
+			for (int i = 0; i < objs->len; i++)
+				objs->data[i] = utf2sjis(objs->data[i]);
+		}
+		AG00 ag00 = {
+			.verbs = verbs,
+			.objs = objs,
+			.uk1 = config.ag00_uk1,
+			.uk2 = config.ag00_uk2,
+		};
+		ag00_write(&ag00, path_join(dirname_utf8(adisk_name), "AG00.DAT"));
 	}
 
 	if (config.debug) {
@@ -305,8 +321,10 @@ int main(int argc, char *argv[]) {
 	if (srcs->len == 0)
 		error("sys3c: No source file specified.");
 
-	Vector *vars = var_list ? read_var_list(var_list) : NULL;
+	Vector *vars = var_list ? read_txt(var_list) : NULL;
+	Vector *verbs = config.verb_list ? read_txt(config.verb_list) : NULL;
+	Vector *objs = config.obj_list ? read_txt(config.obj_list) : NULL;
 
-	build(srcs, vars, adisk_name);
+	build(srcs, vars, verbs, objs, adisk_name);
 	return 0;
 }

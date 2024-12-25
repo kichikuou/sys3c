@@ -569,10 +569,12 @@ static void toplevel(void) {
 		error_at(input, "unexpected '%c'", *input);
 }
 
-Compiler *new_compiler(Vector *src_paths, Vector *variables) {
+Compiler *new_compiler(Vector *src_paths, Vector *variables, Vector *verbs, Vector *objs) {
 	Compiler *comp = calloc(1, sizeof(Compiler));
 	comp->src_paths = src_paths;
 	comp->variables = variables ? variables : new_vec();
+	comp->verbs = verbs;
+	comp->objs = objs;
 	comp->symbols = new_string_hash();
 	comp->scos = calloc(src_paths->len, sizeof(Sco));
 

@@ -406,6 +406,43 @@ static bool compare_entry(int page, DriEntry *e1, DriEntry *e2) {
 	return true;
 }
 
+static bool compare_ag00(const char *file1, const char *file2) {
+	AG00 *ag00_1 = ag00_read(file1);
+	AG00 *ag00_2 = ag00_read(file2);
+
+	if (ag00_1->verbs->len != ag00_2->verbs->len) {
+		printf("number of verbs differ (%d vs %d)\n", ag00_1->verbs->len, ag00_2->verbs->len);
+		return 1;
+	} else {
+		for (int i = 0; i < ag00_1->verbs->len; i++) {
+			if (strcmp(ag00_1->verbs->data[i], ag00_2->verbs->data[i])) {
+				printf("verb %d differ\n", i);
+				return 1;
+			}
+		}
+	}
+	if (ag00_1->objs->len != ag00_2->objs->len) {
+		printf("number of objects differ (%d vs %d)\n", ag00_1->objs->len, ag00_2->objs->len);
+		return 1;
+	} else {
+		for (int i = 0; i < ag00_1->objs->len; i++) {
+			if (strcmp(ag00_1->objs->data[i], ag00_2->objs->data[i])) {
+				printf("object %d differ\n", i);
+				return 1;
+			}
+		}
+	}
+	if (ag00_1->uk1 != ag00_2->uk1) {
+		printf("uk1 differ (%d vs %d)\n", ag00_1->uk1, ag00_2->uk1);
+		return 1;
+	}
+	if (ag00_1->uk2 != ag00_2->uk2) {
+		printf("uk2 differ (%d vs %d)\n", ag00_1->uk2, ag00_2->uk2);
+		return 1;
+	}
+	return 0;
+}
+
 static int do_compare(int argc, char *argv[]) {
 	if (argc != 3) {
 		help_compare();
@@ -413,6 +450,11 @@ static int do_compare(int argc, char *argv[]) {
 	}
 	const char *drifile1 = argv[1];
 	const char *drifile2 = argv[2];
+	if (!strcasecmp(basename_utf8(drifile1), "AG00.DAT") &&
+	    !strcasecmp(basename_utf8(drifile2), "AG00.DAT")) {
+		return compare_ag00(drifile1, drifile2);
+	}
+
 	Vector *dri1 = dri_read(NULL, drifile1);
 	Vector *dri2 = dri_read(NULL, drifile2);
 

@@ -26,6 +26,9 @@ typedef struct {
 	GameId game_id;
 	const char *hed;
 	const char *var_list;
+	const char *verb_list;
+	const char *obj_list;
+	int ag00_uk1, ag00_uk2;
 
 	bool debug;
 	bool unicode;
@@ -111,6 +114,8 @@ struct DebugInfo;
 typedef struct {
 	Vector *src_paths;
 	Vector *variables;
+	Vector *verbs;
+	Vector *objs;
 	HashMap *symbols;   // variables and constants
 	Sco *scos;
 	struct DebugInfo *dbg_info;
@@ -122,7 +127,7 @@ typedef struct {
 	const char *source_loc;
 } Label;
 
-Compiler *new_compiler(Vector *src_paths, Vector *variables);
+Compiler *new_compiler(Vector *src_paths, Vector *variables, Vector *verbs, Vector *objs);
 void preprocess(Compiler *comp, const char *source, int pageno);
 void preprocess_done(Compiler *comp);
 Sco *compile(Compiler *comp, const char *source, int pageno);

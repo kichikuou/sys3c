@@ -31,6 +31,7 @@ Config config = {
 
 typedef struct {
 	Vector *scos;
+	AG00 *ag00;
 	Vector *variables;
 	FILE *out;
 
@@ -506,6 +507,12 @@ static void write_config(const char *path, const char *adisk_name) {
 
 	fputs("hed = sys3dc.hed\n", fp);
 	fputs("variables = variables.txt\n", fp);
+	if (dc.ag00) {
+		fputs("verbs = verbs.txt\n", fp);
+		fputs("objects = objects.txt\n", fp);
+		fprintf(fp, "ag00_uk1 = %d\n", dc.ag00->uk1);
+		fprintf(fp, "ag00_uk2 = %d\n", dc.ag00->uk2);
+	}
 	if (dc.quoted_strings)
 		fputs("quoted_strings = true\n", fp);
 	if (dc.rev_marker)
@@ -532,10 +539,10 @@ static void write_hed(const char *path) {
 	fclose(fp);
 }
 
-static void write_variables(const char *path) {
+static void write_txt(const char *path, Vector *lines) {
 	FILE *fp = checked_fopen(path, "w+");
-	for (int i = 0; i < dc.variables->len; i++) {
-		const char *s = dc.variables->data[i];
+	for (int i = 0; i < lines->len; i++) {
+		const char *s = lines->data[i];
 		fprintf(fp, "%s\n", s ? s : "");
 	}
 	if (!config.utf8_input && config.utf8_output)
@@ -566,9 +573,10 @@ void warning_at(const uint8_t *pos, char *fmt, ...) {
 	fputc('\n', stderr);
 }
 
-void decompile(Vector *scos, const char *outdir, const char *adisk_name) {
+void decompile(Vector *scos, AG00 *ag00, const char *outdir, const char *adisk_name) {
 	memset(&dc, 0, sizeof(dc));
 	dc.scos = scos;
+	dc.ag00 = ag00;
 	dc.variables = new_vec();
 	vec_push(dc.variables, "RND");
 	if (config.sys_ver == SYSTEM3) {
@@ -632,7 +640,11 @@ void decompile(Vector *scos, const char *outdir, const char *adisk_name) {
 
 	write_config(path_join(outdir, "sys3c.cfg"), adisk_name);
 	write_hed(path_join(outdir, "sys3dc.hed"));
-	write_variables(path_join(outdir, "variables.txt"));
+	write_txt(path_join(outdir, "variables.txt"), dc.variables);
+	if (dc.ag00) {
+		write_txt(path_join(outdir, "verbs.txt"), dc.ag00->verbs);
+		write_txt(path_join(outdir, "objects.txt"), dc.ag00->objs);
+	}
 
 	if (config.verbose)
 		puts("Done!");

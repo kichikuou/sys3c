@@ -66,7 +66,7 @@ typedef struct {
 
 extern Config config;
 
-void decompile(Vector *scos, const char *outdir, const char *adisk_name);
+void decompile(Vector *scos, AG00 *ag00, const char *outdir, const char *adisk_name);
 noreturn void error_at(const uint8_t *pos, char *fmt, ...);
 void warning_at(const uint8_t *pos, char *fmt, ...);
 

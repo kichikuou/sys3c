@@ -73,6 +73,12 @@ void load_config(FILE *fp, const char *cfg_dir) {
 			config.hed = path_join(cfg_dir, val);
 		} else if (sscanf(line, "variables = %s", val)) {
 			config.var_list = path_join(cfg_dir, val);
+		} else if (sscanf(line, "verbs = %s", val)) {
+			config.verb_list = path_join(cfg_dir, val);
+		} else if (sscanf(line, "objects = %s", val)) {
+			config.obj_list = path_join(cfg_dir, val);
+		} else if (sscanf(line, "ag00_uk1 = %d", &config.ag00_uk1)) {
+		} else if (sscanf(line, "ag00_uk2 = %d", &config.ag00_uk2)) {
 		} else if (sscanf(line, "quoted_strings = %s", val)) {
 			config.quoted_strings = to_bool(val);
 		} else if (sscanf(line, "rev_marker = %s", val)) {
