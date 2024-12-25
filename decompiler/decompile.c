@@ -225,12 +225,14 @@ static void verb_obj(void) {
 		dc_printf("/* %s */ %d", dc.ag00->verbs->data[verb], verb);
 	else
 		dc_printf("\"%s\"", dc.ag00->verbs->data[verb]);
-	dc_puts(", ");
 
-	if (dc.non_unique_objs[obj])
-		dc_printf("/* %s */ %d", dc.ag00->objs->data[obj], obj);
-	else
-		dc_printf("\"%s\"", dc.ag00->objs->data[obj]);
+	if (obj) {
+		dc_puts(", ");
+		if (dc.non_unique_objs[obj])
+			dc_printf("/* %s */ %d", dc.ag00->objs->data[obj], obj);
+		else
+			dc_printf("\"%s\"", dc.ag00->objs->data[obj]);
+	}
 	dc_putc(':');
 }
 

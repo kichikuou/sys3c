@@ -279,9 +279,10 @@ static void verb_obj(void) {
 	expect(',');
 
 	set_byte(out, loc, verb_or_obj(compiler->verb_list, compiler->verb_map, "verb"));
-	expect(',');
 
-	set_byte(out, loc + 1, verb_or_obj(compiler->obj_list, compiler->obj_map, "object"));
+	if (consume(',')) {
+		set_byte(out, loc + 1, verb_or_obj(compiler->obj_list, compiler->obj_map, "object"));
+	}
 	expect(':');
 }
 
