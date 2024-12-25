@@ -164,6 +164,20 @@ char *get_filename(void) {
 	return strndup_(top, input - top);
 }
 
+char *get_string(void) {
+	skip_whitespaces();
+	expect('"');
+	const char *top = input;
+	while (*input != '"') {
+		if (*input == '\n')
+			error_at(top, "unfinished string");
+		advance_to_next_char();
+	}
+	char *key = strndup_(top, input - top);
+	expect('"');
+	return key;
+}
+
 // number ::= [0-9]+ | '0' [xX] [0-9a-fA-F]+ | '0' [bB] [01]+
 int get_number(void) {
 	if (!isdigit(next_char()))

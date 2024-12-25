@@ -96,6 +96,7 @@ uint8_t echo(Buffer *b);
 char *get_identifier(void);
 char *get_label(void);
 char *get_filename(void);
+char *get_string(void);
 int get_number(void);
 void compile_string(Buffer *b, char terminator, unsigned flags);
 void compile_message(Buffer *b);
@@ -114,9 +115,11 @@ struct DebugInfo;
 typedef struct {
 	Vector *src_paths;
 	Vector *variables;
-	Vector *verbs;
-	Vector *objs;
 	HashMap *symbols;   // variables and constants
+	Vector *verb_list;
+	HashMap *verb_map;
+	Vector *obj_list;
+	HashMap *obj_map;
 	Sco *scos;
 	struct DebugInfo *dbg_info;
 } Compiler;

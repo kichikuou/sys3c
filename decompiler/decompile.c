@@ -33,6 +33,8 @@ typedef struct {
 	Vector *scos;
 	AG00 *ag00;
 	Vector *variables;
+	bool non_unique_verbs[256];
+	bool non_unique_objs[256];
 	FILE *out;
 
 	int page;
@@ -209,8 +211,27 @@ static void label(void) {
 static void verb_obj(void) {
 	uint8_t verb = *dc.p++;
 	uint8_t obj = *dc.p++;
+	if (!dc.ag00)
+		error("AG00.DAT is required to decompile this file");
+	if (verb >= dc.ag00->verbs->len)
+		error("invalid verb %d", verb);
+	if (obj >= dc.ag00->objs->len)
+		error("invalid obj %d", obj);
+
 	label();
-	dc_printf(", %d, %d:", verb, obj);
+	dc_puts(", ");
+
+	if (dc.non_unique_verbs[verb])
+		dc_printf("/* %s */ %d", dc.ag00->verbs->data[verb], verb);
+	else
+		dc_printf("\"%s\"", dc.ag00->verbs->data[verb]);
+	dc_puts(", ");
+
+	if (dc.non_unique_objs[obj])
+		dc_printf("/* %s */ %d", dc.ag00->objs->data[obj], obj);
+	else
+		dc_printf("\"%s\"", dc.ag00->objs->data[obj]);
+	dc_putc(':');
 }
 
 static void conditional(Vector *branch_end_stack) {
@@ -573,10 +594,25 @@ void warning_at(const uint8_t *pos, char *fmt, ...) {
 	fputc('\n', stderr);
 }
 
+static void find_duplicates(Vector *list, bool *duplicates) {
+	for (int i = 0; i < list->len; i++) {
+		const char *s = list->data[i];
+		for (int j = i + 1; j < list->len; j++) {
+			if (!strcmp(s, list->data[j])) {
+				duplicates[i] = duplicates[j] = true;
+			}
+		}
+	}
+}
+
 void decompile(Vector *scos, AG00 *ag00, const char *outdir, const char *adisk_name) {
 	memset(&dc, 0, sizeof(dc));
 	dc.scos = scos;
-	dc.ag00 = ag00;
+	if (ag00) {
+		dc.ag00 = ag00;
+		find_duplicates(ag00->verbs, dc.non_unique_verbs);
+		find_duplicates(ag00->objs, dc.non_unique_objs);
+	}
 	dc.variables = new_vec();
 	vec_push(dc.variables, "RND");
 	if (config.sys_ver == SYSTEM3) {
@@ -641,9 +677,9 @@ void decompile(Vector *scos, AG00 *ag00, const char *outdir, const char *adisk_n
 	write_config(path_join(outdir, "sys3c.cfg"), adisk_name);
 	write_hed(path_join(outdir, "sys3dc.hed"));
 	write_txt(path_join(outdir, "variables.txt"), dc.variables);
-	if (dc.ag00) {
-		write_txt(path_join(outdir, "verbs.txt"), dc.ag00->verbs);
-		write_txt(path_join(outdir, "objects.txt"), dc.ag00->objs);
+	if (ag00) {
+		write_txt(path_join(outdir, "verbs.txt"), ag00->verbs);
+		write_txt(path_join(outdir, "objects.txt"), ag00->objs);
 	}
 
 	if (config.verbose)

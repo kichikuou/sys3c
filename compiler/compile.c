@@ -21,6 +21,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define DUPLICATE 1000
+
 static Compiler *compiler;
 static const char *menu_item_start;
 static bool compiling;
@@ -252,14 +254,34 @@ static Label *label(void) {
 	return l;
 }
 
+static int verb_or_obj(Vector *list, HashMap *map, const char *type) {
+	skip_whitespaces();
+	const char *top = input;
+	if (*input == '"') {
+		char *key = get_string();
+		int idx = (intptr_t)hash_get(map, key) - 1;
+		if (idx < 0)
+			error_at(top, "undefined %s: \"%s\"", type, key);
+		if (idx == DUPLICATE)
+			error_at(top, "\"%s\" is not unique in %ss.txt. use an index instead", key, type);
+		return idx;
+	}
+	int idx = get_number();
+	if (idx >= list->len)
+		error_at(top, "invalid %s index %d", type, idx);
+	return idx;
+}
+
 static void verb_obj(void) {
 	int loc = current_address(out);
 	emit_word(out, 0);  // dummy
 	label();
 	expect(',');
-	set_byte(out, loc, get_number());  // verb
+
+	set_byte(out, loc, verb_or_obj(compiler->verb_list, compiler->verb_map, "verb"));
 	expect(',');
-	set_byte(out, loc + 1, get_number());  // obj
+
+	set_byte(out, loc + 1, verb_or_obj(compiler->obj_list, compiler->obj_map, "object"));
 	expect(':');
 }
 
@@ -569,17 +591,33 @@ static void toplevel(void) {
 		error_at(input, "unexpected '%c'", *input);
 }
 
+HashMap *init_verbobj_hash(Vector *list) {
+	HashMap *map = new_string_hash();
+	if (!list)
+		return map;
+
+	for (int i = 0; i < list->len; i++) {
+		intptr_t val = i;
+		if (hash_get(map, list->data[i]))
+			val = DUPLICATE;
+		hash_put(map, list->data[i], (void*)(val + 1));  // +1 to avoid NULL
+	}
+	return map;
+}
+
 Compiler *new_compiler(Vector *src_paths, Vector *variables, Vector *verbs, Vector *objs) {
 	Compiler *comp = calloc(1, sizeof(Compiler));
 	comp->src_paths = src_paths;
 	comp->variables = variables ? variables : new_vec();
-	comp->verbs = verbs;
-	comp->objs = objs;
 	comp->symbols = new_string_hash();
 	comp->scos = calloc(src_paths->len, sizeof(Sco));
 
 	for (int i = 0; i < comp->variables->len; i++)
 		hash_put(comp->symbols, comp->variables->data[i], new_symbol(VARIABLE, i));
+	comp->verb_list = verbs ? verbs : new_vec();
+	comp->verb_map = init_verbobj_hash(verbs);
+	comp->obj_list = objs ? objs : new_vec();
+	comp->obj_map = init_verbobj_hash(objs);
 
 	return comp;
 }

@@ -323,7 +323,11 @@ int main(int argc, char *argv[]) {
 
 	Vector *vars = var_list ? read_txt(var_list) : NULL;
 	Vector *verbs = config.verb_list ? read_txt(config.verb_list) : NULL;
+	if (verbs && verbs->len > 256)
+		error("Too many verbs");
 	Vector *objs = config.obj_list ? read_txt(config.obj_list) : NULL;
+	if (objs && objs->len > 256)
+		error("Too many objects");
 
 	build(srcs, vars, verbs, objs, adisk_name);
 	return 0;

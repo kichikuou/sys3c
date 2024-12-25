@@ -42,19 +42,21 @@ AG00 *ag00_read(const char *path) {
 	char buf[64];
 
 	ag00_gets(fp, buf, sizeof(buf));
-	int uk1, nr_verbs, nr_objs, uk2;
-	if (sscanf(buf, "%d,%d,%d,%d", &uk1, &nr_verbs, &nr_objs, &uk2) != 4)
+	unsigned uk1, nr_verbs, nr_objs, uk2;
+	if (sscanf(buf, "%u,%u,%u,%u", &uk1, &nr_verbs, &nr_objs, &uk2) != 4)
 		error("Invalid AG00 header");
+	if (nr_verbs > 256 || nr_objs > 256)
+		error("Invalid AG00 data");
 
 	Vector *verbs = new_vec();
-	for (int i = 0; i < nr_verbs; i++) {
+	for (unsigned i = 0; i < nr_verbs; i++) {
 		if (!ag00_gets(fp, buf, sizeof(buf)))
 			error("Invalid AG00 file");
 		vec_push(verbs, strdup(buf));
 	}
 
 	Vector *objs = new_vec();
-	for (int i = 0; i < nr_objs; i++) {
+	for (unsigned i = 0; i < nr_objs; i++) {
 		if (!ag00_gets(fp, buf, sizeof(buf)))
 			error("Invalid AG00 file");
 		vec_push(objs, strdup(buf));
