@@ -23,14 +23,14 @@ dri - DAT archive utility
 === dri list
 Usage: *dri list* _drifile_...
 
-*dri list* lists files in the DAT archive. Since an DAT archive may consist of
+*dri list* lists files in the DAT archive. Since a DAT archive may consist of
 multiple files (`Axxx.DAT`, `Bxxx.DAT`, ...), multiple DAT files can be
 specified.
 
 The following information are displayed for each file in the archive:
 
 * index
-* volume id (1 for `Axxx.DAT`, 2 for `Bxxx.DAT`, etc.)
+* volume letter (A, B, ...)
 * size
 
 === dri create
@@ -48,9 +48,9 @@ manifest file:
   B,002,cg002.qnt
   AB,003,cg003.qnt
 
-The first letter in each line is the volume id. Files with volume id A
-are stored in `Axxx.DAT`, files with volume id B are stored in `Bxxx.DAT`,
-and so on. You can specify multiple volume ids in a single line. In this
+The first column in each line is the volume letter. Files with volume letter A
+are stored in `Axxx.DAT`, files with volume letter B are stored in `Bxxx.DAT`,
+and so on. You can specify multiple volume letters in a single line. In this
 case, the file is stored in all DAT files specified in the line.
 
 The second number in each line is the link number. Game scripts specify assets
@@ -59,7 +59,7 @@ by this number.
 === dri extract
 Usage: *dri extract* [_options_] _drifile_... [--] [_index_...]
 
-*dri extract* extracts files from an DAT archive. Optionally you can pass a list
+*dri extract* extracts files from a DAT archive. Optionally you can pass a list
 of archive members to be processed, specified by _index_.
 
 If `-m` option is given, this also generates a manifest file for the archive.

@@ -32,12 +32,16 @@ First, decompile the game by giving the scenario file (`ADISK.DAT`) to `sys3dc`.
 ```
 sys3dc -o src ADISK.DAT
 ```
+If the game includes a `AG00.DAT` file, provide that as well:
+```
+sys3dc -o src ADISK.DAT AG00.DAT
+```
 
 The decompiled source files will be generated in the `src` directory. Edit them as you like.
 
-Once you've finished editing the source files, you can compile them back to the `ADISK.DAT` using the following command:
+Once you've finished editing the source files, you can compile them back to the `ADISK.DAT`/`AG00.DAT` using the following command:
 ```
-sys3c -p src/sys3c.cfg -o foo
+sys3c -p src/sys3c.cfg
 ```
 
 ## Unicode mode

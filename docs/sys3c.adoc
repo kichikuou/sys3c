@@ -12,7 +12,6 @@ sys3c - System 1-3 compiler
 *sys3c* [_options_] --project _cfgfile_
 *sys3c* [_options_] --hed _hedfile_
 *sys3c* [_options_] _advfile_...
-*sys3c* [_options_] --init
 
 == Description
 `sys3c` is a compiler for AliceSoft's System 1-3 game engine.
@@ -30,15 +29,12 @@ sys3c - System 1-3 compiler
 *sys3c* [_options_] _advfile_...::
   This form compiles the source files listed in the command line.
 
-*sys3c* [_options_] --init::
-  This form creates a new sys3c project in current directory.
-
 == Options
 *-o, --dri*=_name_::
-  Write ALD output to __name__``SA.ALD``, __name__``SB.ALD``, ... (default: `out`)
+  Write output to an archive named __name__. (default: `ADISK.DAT`)
 
 *-g, --debug*::
-  Generate debug information for xsystem35-sdl2.
+  Generate debug information for system3-sdl2.
 
 *-E, --encoding*=_enc_::
   Specify text encoding of input files. Possible values are `sjis` and `utf8`
@@ -50,19 +46,70 @@ sys3c - System 1-3 compiler
 *-h, --help*::
   Display help message about `sys3c` and exit.
 
-*-I, --init*::
-  Creates a new project in current directory. This includes a project
-  configuration file, a compile header file, and a sample source file. Other
-  command line options are reflected in the project settings. For example,
-  *sys3c --init --sys-ver=3.8* will generate a project that targets System
-  3.8.
-
 *-p, --project*=_file_::
   Read project configuration from _file_.
 
-*-s, --sys-ver*=_ver_::
-  Sets target System version. Available values are `3.5`, `3.6`, `3.8` and `3.9`
-  (default).
+*-G, --game*=_game_::
+  Compile for the system used in _game_. Possible values are
+	`system1_generic`,
+	`bunkasai`,
+	`crescent`,
+	`dps`,
+	`dps_sg_fahren`,
+	`dps_sg_katei`,
+	`dps_sg_nobunaga`,
+	`dps_sg2_antique`,
+	`dps_sg2_ikenai`,
+	`dps_sg2_akai`,
+	`dps_sg3_rabbit`,
+	`dps_sg3_shinkon`,
+	`dps_sg3_sotsugyou`,
+	`fukei`,
+	`intruder`,
+	`tengu`,
+	`toushin_hint`,
+	`little_vampire`,
+	`little_vampire_eng`,
+	`yakata`,
+	`gakuen`,
+	`gakuen_eng`,
+	`system2_generic`,
+	`ayumi_fd`,
+	`ayumi_hint`,
+	`ayumi_proto`,
+	`dalk_hint`,
+	`drstop`,
+	`prog_fd`,
+	`rance3_hint`,
+	`sdps_maria`,
+	`sdps_tono`,
+	`sdps_kaizoku`,
+	`yakata2`,
+	`system3_generic`,
+	`ambivalenz_fd`,
+	`ambivalenz_cd`,
+	`dps_all`,
+	`funnybee_cd`,
+	`funnybee_fd`,
+	`onlyyou`,
+	`onlyyou_demo`,
+	`prog_cd`,
+	`prog_omake`,
+	`rance41`,
+	`rance41_eng`,
+	`rance42`,
+	`rance42_eng`,
+	`ayumi_cd`,
+	`ayumi_live_256`,
+	`ayumi_live_full`,
+	`yakata3_cd`,
+	`yakata3_fd`,
+	`hashirionna2`,
+	`toushin2_gd`,
+	`toushin2_sp`,
+	`otome`,
+	`ningyo`,
+	`mugen`.
 
 *-u, --unicode*::
   Generate output in UTF-8 character encoding. See xref:unicode.adoc[Unicode
@@ -79,11 +126,11 @@ The project configuration file (`sys3c.cfg`) specifies a compile header file
 and the other options used to compile the project. Here is an example
 configuration file:
 
-  sys_ver = 3.9
+  game = rance41
   hed = comp.hed
 
-This instructs `sys3c` to compile for System 3.9 using the compile header
-`comp.hed`.
+This instructs `sys3c` to compile for the game `rance41` (Rance 4.1) and to use
+the compile header file `comp.hed`.
 
 Relative paths in configuration file are resolved based on the directory of the
 configuration file.
@@ -92,12 +139,10 @@ configuration file.
 The compile header (`.hed`) file specifies a list of source files to compile.
 Here is an example compile header:
 
-  #SYSTEM35
   start.adv
   sub.adv
 
-A compile header file starts with a `#SYSTEM35` line, followed by a list of
-source files. The order in the list is important; execution starts from the
+The order in the list is important; execution starts from the
 beginning of the first source file.
 
 == See also

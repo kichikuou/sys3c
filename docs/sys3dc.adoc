@@ -7,14 +7,79 @@
 sys3dc - System 1-3 decompiler
 
 == Synopsis
-*sys3dc* [_options_] _drifile_... [_system39.ain_]
+*sys3dc* [_options_] _drifile_... [_AG00.DAT_]
 
 == Description
 `sys3dc` is a decompiler for AliceSoft's System 1-3 game engine. It reads
-scenario files (`ADISK.DAT`, `BDISK.DAT`, ...), and generates source files that
-can be compiled with xref:sys3c.adoc[*sys3c(1)*].
+scenario files (`ADISK.DAT`, `BDISK.DAT`, ...) and optional `AG00.DAT` file.
+It then generates source files that can be compiled with
+xref:sys3c.adoc[*sys3c(1)*].
 
 == Options
+*-G, --game*=_game_::
+  Specify the game to decompile. Possible values are
+	`system1_generic`,
+	`bunkasai`,
+	`crescent`,
+	`dps`,
+	`dps_sg_fahren`,
+	`dps_sg_katei`,
+	`dps_sg_nobunaga`,
+	`dps_sg2_antique`,
+	`dps_sg2_ikenai`,
+	`dps_sg2_akai`,
+	`dps_sg3_rabbit`,
+	`dps_sg3_shinkon`,
+	`dps_sg3_sotsugyou`,
+	`fukei`,
+	`intruder`,
+	`tengu`,
+	`toushin_hint`,
+	`little_vampire`,
+	`little_vampire_eng`,
+	`yakata`,
+	`gakuen`,
+	`gakuen_eng`,
+	`system2_generic`,
+	`ayumi_fd`,
+	`ayumi_hint`,
+	`ayumi_proto`,
+	`dalk_hint`,
+	`drstop`,
+	`prog_fd`,
+	`rance3_hint`,
+	`sdps_maria`,
+	`sdps_tono`,
+	`sdps_kaizoku`,
+	`yakata2`,
+	`system3_generic`,
+	`ambivalenz_fd`,
+	`ambivalenz_cd`,
+	`dps_all`,
+	`funnybee_cd`,
+	`funnybee_fd`,
+	`onlyyou`,
+	`onlyyou_demo`,
+	`prog_cd`,
+	`prog_omake`,
+	`rance41`,
+	`rance41_eng`,
+	`rance42`,
+	`rance42_eng`,
+	`ayumi_cd`,
+	`ayumi_live_256`,
+	`ayumi_live_full`,
+	`yakata3_cd`,
+	`yakata3_fd`,
+	`hashirionna2`,
+	`toushin2_gd`,
+	`toushin2_sp`,
+	`otome`,
+	`ningyo`,
+	`mugen`.
+  If this option is not specified, `sys3dc` will try to guess the game from the
+  input files.
+
 *-a, --address*::
   Prefix each line with address.
 
@@ -29,9 +94,8 @@ can be compiled with xref:sys3c.adoc[*sys3c(1)*].
   Generate output files under _directory_. By default, output files are
   generated in current directory.
 
-*-s, --seq*::
-  Output ADV files with sequential filenames (`0.adv`, `1.adv`, ...) instead of
-  their original names.
+*-u, --unicode*::
+  Generate output in the Unicode mode.
 
 *-V, --verbose*::
   Turn on verbose output.
@@ -40,7 +104,7 @@ can be compiled with xref:sys3c.adoc[*sys3c(1)*].
   Display the `sys3dc` version number and exit.
 
 == Output
-In addition to System 1-3 source files (`*DISK.DAT`), `sys3dc` also generates
+In addition to System 1-3 source files (`.adv`), `sys3dc` also generates
 `sys3c.cfg` file which is a configuration file for
 xref:sys3c.adoc[*sys3c(1)*]. Using this, the original scenario file can be
 reconstructed by this command:

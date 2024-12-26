@@ -16,8 +16,7 @@ than Japanese or English.
 == Translation workflow
 
 1. Decompile the game with xref:sys3dc.adoc[`sys3dc`].
-2. Open `sys3c.cfg` file in the `decompiled` folder, and add the following
-   line:
+2. Open `sys3c.cfg` file in the `src` folder, and add the following line:
 
      unicode = true
 
