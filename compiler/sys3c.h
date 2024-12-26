@@ -41,7 +41,6 @@ extern Config config;
 
 void set_sys_ver(const char *ver);
 void load_config(FILE *fp, const char *cfg_dir);
-int init_project(const char *project, const char *hed, const char *adisk_name);
 
 static inline const char *to_output_encoding(const char *str_utf8) {
 	return config.unicode ? str_utf8 : utf2sjis_sub(str_utf8, '?');

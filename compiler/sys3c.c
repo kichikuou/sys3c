@@ -26,7 +26,7 @@
 
 #define DEFAULT_ADISK_NAME "ADISK.DAT"
 
-static const char short_options[] = "a:E:G:ghi:Io:p:s:uV:v";
+static const char short_options[] = "a:E:G:ghi:o:p:s:uV:v";
 static const struct option long_options[] = {
 	{ "dri",       required_argument, NULL, 'o' },
 	{ "debug",     no_argument,       NULL, 'g' },
@@ -34,7 +34,6 @@ static const struct option long_options[] = {
 	{ "game",      required_argument, NULL, 'G' },
 	{ "hed",       required_argument, NULL, 'i' },
 	{ "help",      no_argument,       NULL, 'h' },
-	{ "init",      no_argument,       NULL, 'I' },
 	{ "project",   required_argument, NULL, 'p' },
 	{ "sys-ver",   required_argument, NULL, 's' },
 	{ "unicode",   no_argument,       NULL, 'u' },
@@ -53,7 +52,6 @@ static void usage(void) {
 	puts("    -Eu, --encoding=utf8      Set input coding system to UTF-8 (default)");
 	puts("    -i, --hed <file>          Read compile header (.hed) from <file>");
 	puts("    -h, --help                Display this message and exit");
-	puts("    -I, --init                Create a new sys3c project");
 	puts("    -p, --project <file>      Read project configuration from <file>");
 	puts("    -s, --sys-ver <ver>       Target System version (1|2|3(default))");
 	puts("    -u, --unicode             Generate Unicode output (can only be run on xsystem35)");
@@ -228,7 +226,6 @@ int main(int argc, char *argv[]) {
 	const char *adisk_name = NULL;
 	const char *hed = NULL;
 	const char *var_list = NULL;
-	bool init_mode = false;
 
 	int opt;
 	while ((opt = getopt_long(argc, argv, short_options, long_options, NULL)) != -1) {
@@ -255,9 +252,6 @@ int main(int argc, char *argv[]) {
 		case 'i':
 			hed = optarg;
 			break;
-		case 'I':
-			init_mode = true;
-			break;
 		case 'o':
 			adisk_name = optarg;
 			break;
@@ -283,9 +277,6 @@ int main(int argc, char *argv[]) {
 	}
 	argc -= optind;
 	argv += optind;
-
-	if (init_mode)
-		return init_project(project, hed, adisk_name);
 
 	if (project) {
 		FILE *fp = checked_fopen(project, "r");
