@@ -134,6 +134,9 @@ static void dc_put_string_n(const char *s, int len, unsigned flags) {
 			uint8_t c2 = *s++;
 			if (config.utf8_output && (flags & STRING_ESCAPE) && !is_unicode_safe(c, c2)) {
 				dc_printf("<0x%04X>", c << 8 | c2);
+			} else if ((flags & STRING_EXPAND) && compact_sjis(c, c2)) {
+				// Fukei has some uncompacted characters. Emit them as character references.
+				dc_printf("<0x%04X>", c << 8 | c2);
 			} else {
 				dc_putc(c);
 				dc_putc(c2);
@@ -329,6 +332,7 @@ static void decompile_page(int page) {
 	dc.p = sco->data + 2;
 	dc.indent = 1;
 	bool in_menu_item = false;
+	bool default_label_defined = false;
 	Vector *branch_end_stack = new_vec();
 
 	// Skip the "REV" marker for old SysEng.
@@ -350,6 +354,7 @@ static void decompile_page(int page) {
 		if (dc.p - sco->data == sco->default_addr) {
 			print_address();
 			dc_printf("*default:\n");
+			default_label_defined = true;
 		}
 		if (mark & LABEL) {
 			print_address();
@@ -518,6 +523,8 @@ static void decompile_page(int page) {
 	}
 	if (sco->mark[eofaddr] & LABEL)
 		dc_printf("*L_%05x:\n", eofaddr);
+	if (!default_label_defined)
+		dc_printf("pragma default_address 0x%04x:\n", sco->default_addr);
 }
 
 static void write_config(const char *path, const char *adisk_name) {

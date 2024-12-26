@@ -394,18 +394,15 @@ static void pragma(void) {
 			compiler->scos[input_page].volume_bits |= 1 << (toupper(*p) - 'A' + 1);
 		}
 		expect(':');
-	} else if (consume_keyword("address")) {
+	} else if (consume_keyword("default_address")) {
 		int address = get_number();
-		if (out) {
-			if (out->len > address)
-				out->len = address;
-			while (out->len < address)
-				emit(out, 0);
-			// Addresses in LINE debug table must be monotonically increasing,
-			// but address pragma breaks this condition. So clear the LINE info
-			// for this page.
-			if (compiler->dbg_info)
-				debug_line_reset(compiler->dbg_info);
+		if (compiling) {
+			Label *l = lookup_label("default");
+			if (l->addr)
+				error_at(input, "label 'default' redefined");
+			l->addr = address;
+			while (l->hole_addr)
+				l->hole_addr = swap_word(out, l->hole_addr, l->addr);
 		}
 		expect(':');
 	} else {

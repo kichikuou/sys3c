@@ -55,7 +55,7 @@ Here are the manuals for the commands:
 
 |         Game        |   Status    | Notes |
 | ------------------- | ----------- | ----- |
-| bunkasai            |             |       |
+| bunkasai            | Supported   |       |
 | crescent            | Supported   |       |
 | dps                 | Supported   |       |
 | dps_sg_fahren       | Supported   |       |
@@ -67,22 +67,22 @@ Here are the manuals for the commands:
 | dps_sg3_rabbit      | Supported   |       |
 | dps_sg3_shinkon     | Supported   |       |
 | dps_sg3_sotsugyou   | Supported   |       |
-| fukei               |             |       |
+| fukei               | Supported   |       |
 | intruder            | Supported   |       |
 | tengu               | Supported   |       |
-| toushin_hint        |             |       |
+| toushin_hint        | Supported   |       |
 | little_vampire      | Supported   |       |
 | little_vampire_eng  | Supported   |       |
 | yakata              |             |       |
 | gakuen              |             |       |
 | gakuen_eng          | Supported   |       |
 | ayumi_fd            | Supported   |       |
-| ayumi_hint          |             |       |
+| ayumi_hint          | Supported   |       |
 | ayumi_proto         |             |       |
-| dalk_hint           |             |       |
+| dalk_hint           | Supported   |       |
 | drstop              | Supported   |       |
 | prog_fd             | Supported   |       |
-| rance3_hint         |             |       |
+| rance3_hint         | Supported   |       |
 | sdps_maria          | Supported   |       |
 | sdps_tono           | Supported   |       |
 | sdps_kaizoku        | Supported   |       |
@@ -106,8 +106,8 @@ Here are the manuals for the commands:
 | yakata3_cd          | Supported   |       |
 | yakata3_fd          | Supported   |       |
 | hashirionna2        | Supported   |       |
-| toushin2_gd         |             |       |
+| toushin2_gd         | Supported   |       |
 | toushin2_sp         |             |       |
 | otome               | Supported   |       |
-| ningyo              |             |       |
+| ningyo              | Supported   |       |
 | mugen               | Supported   |       |
