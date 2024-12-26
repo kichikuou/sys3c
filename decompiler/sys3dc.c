@@ -23,7 +23,7 @@
 #include <string.h>
 #include <sys/stat.h>
 
-static const char short_options[] = "adE:g:ho:s:Vv";
+static const char short_options[] = "adE:g:ho:s:uVv";
 static const struct option long_options[] = {
 	{ "address",  no_argument,       NULL, 'a' },
 	{ "encoding", required_argument, NULL, 'E' },
@@ -31,6 +31,7 @@ static const struct option long_options[] = {
 	{ "help",     no_argument,       NULL, 'h' },
 	{ "outdir",   required_argument, NULL, 'o' },
 	{ "sys-ver",  required_argument, NULL, 's' },
+	{ "unicode",  no_argument,       NULL, 'u' },
 	{ "verbose",  no_argument,       NULL, 'V' },
 	{ "version",  no_argument,       NULL, 'v' },
 	{ 0, 0, 0, 0 }
@@ -46,6 +47,7 @@ static void usage(void) {
 	puts("    -h, --help                Display this message and exit");
 	puts("    -o, --outdir <directory>  Write output into <directory>");
 	puts("    -s, --sys-ver <ver>       NACT system version (1|2|3(default))");
+	puts("    -u, --unicode             Decompile Unicode game data");
 	puts("    -V, --verbose             Be verbose");
 	puts("    -v, --version             Print version information and exit");
 }
@@ -142,6 +144,9 @@ int main(int argc, char *argv[]) {
 				error("Invalid system version '%s'", optarg);
 			}
 			break;
+		case 'u':
+			config.utf8_input = true;
+			break;
 		case 'V':
 			config.verbose = true;
 			break;
@@ -195,10 +200,6 @@ int main(int argc, char *argv[]) {
 			continue;
 		Sco *sco = sco_new(i + 1, e->data, e->size, e->volume_bits);
 		scos->data[i] = sco;
-
-		// Detect unicode SCO.
-		if (i == 0 && !memcmp(sco->data + 2, "ZU\x41\x7f", 4))
-			config.utf8_input = true;
 	}
 	if (config.utf8_input && !config.utf8_output)
 		error("Unicode game data cannot be decompiled with -Es.");
