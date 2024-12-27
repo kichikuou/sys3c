@@ -29,8 +29,6 @@ Buffer *new_buf(void) {
 }
 
 void emit(Buffer *b, uint8_t c) {
-	if (!b)
-		return;
 	if (b->len == b->cap) {
 		b->cap *= 2;
 		b->buf = realloc(b->buf, b->cap);
@@ -61,27 +59,19 @@ void emit_string(Buffer *b, const char *s) {
 }
 
 int current_address(Buffer *b) {
-	if (!b)
-		return 0;
 	return b->len;
 }
 
 void set_byte(Buffer *b, uint32_t addr, uint8_t val) {
-	if (!b)
-		return;
 	b->buf[addr] = val;
 }
 
 uint8_t get_byte(Buffer *b, uint32_t addr) {
-	if (!b)
-		return 0;
 	assert(addr < b->len);
 	return b->buf[addr];
 }
 
 uint16_t swap_word(Buffer *b, uint32_t addr, uint16_t val) {
-	if (!b)
-		return 0;
 	uint8_t *p = &b->buf[addr];
 	uint16_t oldval = p[0] | (p[1] << 8);
 	p[0] = val & 0xff;
@@ -90,8 +80,6 @@ uint16_t swap_word(Buffer *b, uint32_t addr, uint16_t val) {
 }
 
 uint32_t swap_dword(Buffer *b, uint32_t addr, uint32_t val) {
-	if (!b)
-		return 0;
 	uint8_t *p = &b->buf[addr];
 	uint32_t oldval = p[0] | (p[1] << 8) | (p[2] << 16) | (p[3] << 24);
 	p[0] = val & 0xff;

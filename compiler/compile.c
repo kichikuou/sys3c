@@ -25,7 +25,6 @@
 
 static Compiler *compiler;
 static const char *menu_item_start;
-static bool compiling;
 
 typedef enum {
 	VARIABLE,
@@ -75,7 +74,7 @@ static void commands(void);
 
 static void variable(char *id, bool create) {
 	int var = lookup_var(id, create);
-	if (compiling && var < 0)
+	if (var < 0)
 		error_at(input - strlen(id), "Undefined variable '%s'", id);
 	emit_var(out, var);
 }
@@ -200,18 +199,16 @@ static void define_const(void) {
 		char *id = get_identifier();
 		consume('=');
 		int val = get_number();  // TODO: Allow expressions
-		if (!compiling) {
-			Symbol *sym = hash_get(compiler->symbols, id);
-			if (sym) {
-				switch (sym->type) {
-				case VARIABLE:
-					error_at(top, "'%s' is already defined as a variable", id);
-				case CONST:
-					error_at(top, "constant '%s' redefined", id);
-				}
+		Symbol *sym = hash_get(compiler->symbols, id);
+		if (sym) {
+			switch (sym->type) {
+			case VARIABLE:
+				error_at(top, "'%s' is already defined as a variable", id);
+			case CONST:
+				error_at(top, "constant '%s' redefined", id);
 			}
-			hash_put(compiler->symbols, id, new_symbol(CONST, val));
 		}
+		hash_put(compiler->symbols, id, new_symbol(CONST, val));
 	} while (consume(','));
 	expect(':');
 }
@@ -228,8 +225,6 @@ static Label *lookup_label(char *id) {
 
 static void add_label(void) {
 	char *id = get_label();
-	if (!compiling)
-		return;
 	Label *l = lookup_label(id);
 	if (l->addr)
 		error_at(input - strlen(id), "label '%s' redefined", id);
@@ -241,8 +236,6 @@ static void add_label(void) {
 
 static Label *label(void) {
 	char *id = get_label();
-	if (!compiling)
-		return NULL;
 	Label *l = lookup_label(id);
 	if (!l->addr) {
 		emit_word(out, l->hole_addr);
@@ -396,14 +389,12 @@ static void pragma(void) {
 		expect(':');
 	} else if (consume_keyword("default_address")) {
 		int address = get_number();
-		if (compiling) {
-			Label *l = lookup_label("default");
-			if (l->addr)
-				error_at(input, "label 'default' redefined");
-			l->addr = address;
-			while (l->hole_addr)
-				l->hole_addr = swap_word(out, l->hole_addr, l->addr);
-		}
+		Label *l = lookup_label("default");
+		if (l->addr)
+			error_at(input, "label 'default' redefined");
+		l->addr = address;
+		while (l->hole_addr)
+			l->hole_addr = swap_word(out, l->hole_addr, l->addr);
 		expect(':');
 	} else {
 		error_at(input, "unknown pragma");
@@ -412,7 +403,7 @@ static void pragma(void) {
 
 static bool command(void) {
 	skip_whitespaces();
-	if (out && compiler->dbg_info)
+	if (compiler->dbg_info)
 		debug_line_add(compiler->dbg_info, input_line, current_address(out));
 
 	const char *command_top = input;
@@ -577,7 +568,7 @@ static void commands(void) {
 static void toplevel(void) {
 	if (config.rev_marker && input_page == 0) {
 		skip_whitespaces();
-		if (out && compiler->dbg_info)
+		if (compiler->dbg_info)
 			debug_line_add(compiler->dbg_info, input_line, current_address(out));
 		emit(out, 'R');
 		emit(out, 'E');
@@ -634,23 +625,8 @@ static void check_undefined_labels(void) {
 	}
 }
 
-void preprocess(Compiler *comp, const char *source, int pageno) {
-	prepare(comp, source, pageno);
-	compiling = false;
-	labels = NULL;
-
-	toplevel();
-
-	if (menu_item_start)
-		error_at(menu_item_start, "unfinished menu item");
-}
-
-void preprocess_done(Compiler *comp) {
-}
-
 Sco *compile(Compiler *comp, const char *source, int pageno) {
 	prepare(comp, source, pageno);
-	compiling = true;
 	labels = new_map();
 
 	comp->scos[pageno].volume_bits = 1 << 1;

@@ -150,14 +150,6 @@ static void build(Vector *src_paths, Vector *variables, Vector *verbs, Vector *o
 	if (config.debug)
 		compiler->dbg_info = new_debug_info(srcs);
 
-	for (int i = 0; i < srcs->keys->len; i++) {
-		const char *source = srcs->vals->data[i];
-		if (source)
-			preprocess(compiler, source, i);
-	}
-
-	preprocess_done(compiler);
-
 	uint32_t dri_mask = 0;
 	Vector *dri = new_vec();
 	for (int i = 0; i < srcs->keys->len; i++) {

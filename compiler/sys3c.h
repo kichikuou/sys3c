@@ -129,8 +129,6 @@ typedef struct {
 } Label;
 
 Compiler *new_compiler(Vector *src_paths, Vector *variables, Vector *verbs, Vector *objs);
-void preprocess(Compiler *comp, const char *source, int pageno);
-void preprocess_done(Compiler *comp);
 Sco *compile(Compiler *comp, const char *source, int pageno);
 
 // debuginfo.c
