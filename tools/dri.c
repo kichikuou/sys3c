@@ -479,6 +479,17 @@ static int do_compare(int argc, char *argv[]) {
 		printf("page %d only exists in %s\n", i + 1, drifile2);
 		differs = true;
 	}
+
+	if (!differs) {
+		// Make sure the CRC32 of the first 256 bytes are the same.
+		uint32_t crc1 = calc_crc32(drifile1);
+		uint32_t crc2 = calc_crc32(drifile2);
+		if (crc1 != crc2) {
+			printf("CRC32 of the first 256 bytes differ: %08x vs %08x\n", crc1, crc2);
+			differs = true;
+		}
+	}
+
 	return differs ? 1 : 0;
 }
 

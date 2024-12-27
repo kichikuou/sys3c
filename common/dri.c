@@ -56,13 +56,15 @@ void dri_write(Vector *entries, int volume, FILE *fp) {
 			ptr_count++;
 	}
 
-	write_ptr((ptr_count + 2) * 2, &sector, fp);
+	write_ptr((ptr_count + 3) * 2, &sector, fp);
 	write_ptr(entries->len * 2 + 1, &sector, fp);
 	for (int i = 0; i < entries->len; i++) {
 		DriEntry *entry = entries->data[i];
 		if (entry && entry->volume_bits & 1 << volume)
 			write_ptr(entry->size, &sector, fp);
 	}
+	fputc(0, fp);
+	fputc(0, fp);
 	pad(fp);
 
 	uint16_t link[DRI_MAX_VOLUME + 1];
