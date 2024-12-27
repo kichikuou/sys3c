@@ -196,12 +196,6 @@ uint32_t fgetdw(FILE *fp) {
 	return lo | hi << 16;
 }
 
-uint64_t fget64(FILE *fp) {
-	uint32_t lo = fgetdw(fp);
-	uint32_t hi = fgetdw(fp);
-	return lo | (uint64_t)hi << 32;
-}
-
 void fputw(uint16_t n, FILE *fp) {
 	fputc(n, fp);
 	fputc(n >> 8, fp);
@@ -212,9 +206,4 @@ void fputdw(uint32_t n, FILE *fp) {
 	fputc(n >> 8, fp);
 	fputc(n >> 16, fp);
 	fputc(n >> 24, fp);
-}
-
-void fput64(uint64_t n, FILE *fp) {
-	fputdw(n, fp);
-	fputdw(n >> 32, fp);
 }

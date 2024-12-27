@@ -27,14 +27,6 @@ static inline uint32_t le16(const uint8_t *p) {
 	return p[0] | p[1] << 8;
 }
 
-static inline uint32_t le32(const uint8_t *p) {
-	return p[0] | p[1] << 8 | p[2] << 16 | p[3] << 24;
-}
-
-static inline uint64_t le64(const uint8_t *p) {
-	return le32(p) | (uint64_t)le32(p + 4) << 32;
-}
-
 // util.c
 
 void init(int *argc, char ***argv);
@@ -50,10 +42,8 @@ int make_dir(const char *path_utf8);
 
 extern uint16_t fgetw(FILE *fp);
 extern uint32_t fgetdw(FILE *fp);
-extern uint64_t fget64(FILE *fp);
 extern void fputw(uint16_t n, FILE *fp);
 extern void fputdw(uint32_t n, FILE *fp);
-extern void fput64(uint64_t n, FILE *fp);
 
 // sjisutf.c
 
