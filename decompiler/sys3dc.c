@@ -23,14 +23,13 @@
 #include <string.h>
 #include <sys/stat.h>
 
-static const char short_options[] = "adE:g:ho:s:uVv";
+static const char short_options[] = "adE:g:ho:uVv";
 static const struct option long_options[] = {
 	{ "address",  no_argument,       NULL, 'a' },
 	{ "encoding", required_argument, NULL, 'E' },
 	{ "game",     required_argument, NULL, 'G' },
 	{ "help",     no_argument,       NULL, 'h' },
 	{ "outdir",   required_argument, NULL, 'o' },
-	{ "sys-ver",  required_argument, NULL, 's' },
 	{ "unicode",  no_argument,       NULL, 'u' },
 	{ "verbose",  no_argument,       NULL, 'V' },
 	{ "version",  no_argument,       NULL, 'v' },
@@ -46,7 +45,6 @@ static void usage(void) {
 	puts("    -G, --game <id>           Specify game ID");
 	puts("    -h, --help                Display this message and exit");
 	puts("    -o, --outdir <directory>  Write output into <directory>");
-	puts("    -s, --sys-ver <ver>       NACT system version (1|2|3(default))");
 	puts("    -u, --unicode             Decompile Unicode game data");
 	puts("    -V, --verbose             Be verbose");
 	puts("    -v, --version             Print version information and exit");
@@ -126,24 +124,6 @@ int main(int argc, char *argv[]) {
 		case 'o':
 			outdir = optarg;
 			break;
-		case 's':
-			switch (optarg[0]) {
-			case '1':
-				config.sys_ver = SYSTEM1;
-				config.game_id = SYSTEM1_GENERIC;
-				break;
-			case '2':
-				config.sys_ver = SYSTEM2;
-				config.game_id = SYSTEM2_GENERIC;
-				break;
-			case '3':
-				config.sys_ver = SYSTEM3;
-				config.game_id = SYSTEM3_GENERIC;
-				break;
-			default:
-				error("Invalid system version '%s'", optarg);
-			}
-			break;
 		case 'u':
 			config.utf8_input = true;
 			break;
@@ -190,7 +170,7 @@ int main(int argc, char *argv[]) {
 	if (config.game_id == UNKNOWN_GAME) {
 		config.game_id = detect_game_id(adisk_crc, bdisk_crc);
 		if (config.game_id == UNKNOWN_GAME)
-			error("Cannot detect game ID. Please specify --game or --sys-ver.");
+			error("Cannot detect game ID. Please specify --game.");
 		config.sys_ver = get_sysver(config.game_id);
 	}
 

@@ -39,7 +39,6 @@ typedef struct {
 } Config;
 extern Config config;
 
-void set_sys_ver(const char *ver);
 void load_config(FILE *fp, const char *cfg_dir);
 
 static inline const char *to_output_encoding(const char *str_utf8) {

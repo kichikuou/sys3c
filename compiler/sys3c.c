@@ -26,7 +26,7 @@
 
 #define DEFAULT_ADISK_NAME "ADISK.DAT"
 
-static const char short_options[] = "a:E:G:ghi:o:p:s:uV:v";
+static const char short_options[] = "a:E:G:ghi:o:p:uV:v";
 static const struct option long_options[] = {
 	{ "dri",       required_argument, NULL, 'o' },
 	{ "debug",     no_argument,       NULL, 'g' },
@@ -35,7 +35,6 @@ static const struct option long_options[] = {
 	{ "hed",       required_argument, NULL, 'i' },
 	{ "help",      no_argument,       NULL, 'h' },
 	{ "project",   required_argument, NULL, 'p' },
-	{ "sys-ver",   required_argument, NULL, 's' },
 	{ "unicode",   no_argument,       NULL, 'u' },
 	{ "variables", required_argument, NULL, 'V' },
 	{ "version",   no_argument,       NULL, 'v' },
@@ -53,7 +52,6 @@ static void usage(void) {
 	puts("    -i, --hed <file>          Read compile header (.hed) from <file>");
 	puts("    -h, --help                Display this message and exit");
 	puts("    -p, --project <file>      Read project configuration from <file>");
-	puts("    -s, --sys-ver <ver>       Target System version (1|2|3(default))");
 	puts("    -u, --unicode             Generate Unicode output (can only be run on xsystem35)");
 	puts("    -V, --variables <file>    Read list of variables from <file>");
 	puts("    -v, --version             Print version information and exit");
@@ -257,9 +255,6 @@ int main(int argc, char *argv[]) {
 			break;
 		case 'p':
 			project = optarg;
-			break;
-		case 's':
-			set_sys_ver(optarg);
 			break;
 		case 'u':
 			config.unicode = true;

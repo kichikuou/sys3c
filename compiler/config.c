@@ -33,31 +33,11 @@ static bool to_bool(const char *s) {
 	error("Invalid boolean value '%s'", s);
 }
 
-void set_sys_ver(const char *ver) {
-	switch (ver[0]) {
-	case '1':
-		config.sys_ver = SYSTEM1;
-		config.game_id = SYSTEM1_GENERIC;
-		break;
-	case '2':
-		config.sys_ver = SYSTEM2;
-		config.game_id = SYSTEM2_GENERIC;
-		break;
-	case '3':
-		config.sys_ver = SYSTEM3;
-		config.game_id = SYSTEM3_GENERIC;
-		break;
-	default: error("Unknown system version '%s'", ver);
-	}
-}
-
 void load_config(FILE *fp, const char *cfg_dir) {
 	char line[256];
 	while (fgets(line, sizeof(line), fp)) {
 		char val[256];
-		if (sscanf(line, "sys_ver = %s", val)) {
-			set_sys_ver(val);
-		} else if (sscanf(line, "game = %s", val)) {
+		if (sscanf(line, "game = %s", val)) {
 			config.game_id = game_id_from_name(val);
 			if (config.game_id == UNKNOWN_GAME)
 				error("Unknown game ID '%s'", val);
