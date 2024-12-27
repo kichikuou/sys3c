@@ -560,8 +560,10 @@ static bool command(void) {
 
 // commands ::= command*
 static void commands(void) {
-	while (command())
-		;
+	while (command()) {
+		if (current_address(out) > 0xffff)
+			error_at(input, "Maximum page size exceeded. Consider splitting the source file.");
+	}
 }
 
 // toplevel ::= commands
