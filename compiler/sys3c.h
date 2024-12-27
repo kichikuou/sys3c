@@ -136,6 +136,5 @@ Sco *compile(Compiler *comp, const char *source, int pageno);
 struct DebugInfo *new_debug_info(Map *srcs);
 void debug_init_page(struct DebugInfo *di, int page);
 void debug_line_add(struct DebugInfo *di, int line, int addr);
-void debug_line_reset(struct DebugInfo *di);
-void debug_finish_page(struct DebugInfo *di, Map *labels);
+void debug_finish_page(struct DebugInfo *di);
 void debug_info_write(struct DebugInfo *di, Compiler *compiler, FILE *fp);

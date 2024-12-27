@@ -46,8 +46,11 @@ typedef struct DebugInfo {
 struct DebugInfo *new_debug_info(Map *srcs) {
 	DebugInfo *di = calloc(1, sizeof(DebugInfo));
 	di->srcs = new_map();
-	for (int i = 0; i < srcs->keys->len; i++)
-		map_put(di->srcs, basename_utf8(srcs->keys->data[i]), srcs->vals->data[i]);
+	for (int i = 0; i < srcs->keys->len; i++) {
+		char *key = srcs->keys->data[i] ? basename_utf8(srcs->keys->data[i]) : "";
+		char *val = srcs->vals->data[i] ? srcs->vals->data[i] : "";
+		map_put(di->srcs, key, val);
+	}
 	di->functions = new_vec();
 	return di;
 }
@@ -89,11 +92,7 @@ void debug_line_add(DebugInfo *di, int line, int addr) {
 	return;
 }
 
-void debug_line_reset(DebugInfo *di) {
-	di->linemap->len = 0;
-}
-
-void debug_finish_page(DebugInfo *di, Map *labels) {
+void debug_finish_page(DebugInfo *di) {
 	Vector *linemap = di->linemap;
 	assert(linemap);
 

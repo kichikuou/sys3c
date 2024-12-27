@@ -649,7 +649,7 @@ Sco *compile(Compiler *comp, const char *source, int pageno) {
 	swap_word(out, 0, default_label ? default_label->addr : out->len - 2);
 
 	if (comp->dbg_info)
-		debug_finish_page(comp->dbg_info, labels);
+		debug_finish_page(comp->dbg_info);
 	comp->scos[pageno].buf = out;
 	out = NULL;
 	return &comp->scos[pageno];

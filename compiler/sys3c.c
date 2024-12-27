@@ -136,6 +136,9 @@ static void read_hed(const char *path, Vector *sources) {
 		trim_right(line);
 		vec_push(sources, *line ? path_join(dir, line) : NULL);
 	}
+	// Drop empty lines at the end
+	while (sources->len > 0 && !sources->data[sources->len - 1])
+		sources->len--;
 }
 
 static void build(Vector *src_paths, Vector *variables, Vector *verbs, Vector *objs, const char *adisk_name) {
@@ -156,6 +159,10 @@ static void build(Vector *src_paths, Vector *variables, Vector *verbs, Vector *o
 		const char *source = srcs->vals->data[i];
 		if (!source) {
 			vec_push(dri, NULL);
+			if (config.debug) {
+				debug_init_page(compiler->dbg_info, i);
+				debug_finish_page(compiler->dbg_info);
+			}
 			continue;
 		}
 		Sco *sco = compile(compiler, source, i);
