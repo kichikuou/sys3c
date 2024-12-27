@@ -25,7 +25,6 @@ jobs:
           gcc:p
           meson:p
           pkgconf:p
-          libpng:p
           asciidoctor:p
 
     - name: Checkout
