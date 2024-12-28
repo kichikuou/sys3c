@@ -52,7 +52,7 @@ static void usage(void) {
 	puts("    -i, --hed <file>          Read compile header (.hed) from <file>");
 	puts("    -h, --help                Display this message and exit");
 	puts("    -p, --project <file>      Read project configuration from <file>");
-	puts("    -u, --unicode             Generate Unicode output (can only be run on xsystem35)");
+	puts("    -u, --unicode             Generate Unicode output (can only be run on system3-sdl2)");
 	puts("    -V, --variables <file>    Read list of variables from <file>");
 	puts("    -v, --version             Print version information and exit");
 }
