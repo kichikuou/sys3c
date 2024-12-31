@@ -26,14 +26,15 @@
 
 #define DEFAULT_ADISK_NAME "ADISK.DAT"
 
-static const char short_options[] = "a:E:G:ghi:o:p:uV:v";
+static const char short_options[] = "d:E:G:ghi:o:p:uV:v";
 static const struct option long_options[] = {
-	{ "dri",       required_argument, NULL, 'o' },
-	{ "debug",     no_argument,       NULL, 'g' },
+	{ "outdir",    required_argument, NULL, 'd' },
 	{ "encoding",  required_argument, NULL, 'E' },
 	{ "game",      required_argument, NULL, 'G' },
-	{ "hed",       required_argument, NULL, 'i' },
+	{ "debug",     no_argument,       NULL, 'g' },
 	{ "help",      no_argument,       NULL, 'h' },
+	{ "hed",       required_argument, NULL, 'i' },
+	{ "dri",       required_argument, NULL, 'o' },
 	{ "project",   required_argument, NULL, 'p' },
 	{ "unicode",   no_argument,       NULL, 'u' },
 	{ "variables", required_argument, NULL, 'V' },
@@ -44,6 +45,7 @@ static const struct option long_options[] = {
 static void usage(void) {
 	puts("Usage: sys3c [options] file...");
 	puts("Options:");
+	puts("    -d, --outdir <dir>        Specify output directory");
 	puts("    -o, --dri <name>          Write output to <name> (default: " DEFAULT_ADISK_NAME ")");
 	puts("    -g, --debug               Generate debug information");
 	puts("    -G, --game <id>           Specify game ID");
@@ -221,12 +223,16 @@ int main(int argc, char *argv[]) {
 
 	const char *project = NULL;
 	const char *adisk_name = NULL;
+	const char *outdir = NULL;
 	const char *hed = NULL;
 	const char *var_list = NULL;
 
 	int opt;
 	while ((opt = getopt_long(argc, argv, short_options, long_options, NULL)) != -1) {
 		switch (opt) {
+		case 'd':
+			outdir = optarg;
+			break;
 		case 'E':
 			switch (optarg[0]) {
 			case 's': case 'S': config.utf8 = false; break;
@@ -294,6 +300,14 @@ int main(int argc, char *argv[]) {
 		adisk_name = config.adisk_name ? config.adisk_name
 			: project ? path_join(dirname_utf8(project), DEFAULT_ADISK_NAME)
 			: DEFAULT_ADISK_NAME;
+	}
+	if (!outdir && config.outdir)
+		outdir = config.outdir;
+	if (outdir) {
+		if (make_dir(outdir) != 0 && errno != EEXIST)
+			error("cannot create directory %s: %s", outdir, strerror(errno));
+		// If outdir is specified, the directory part of adisk_name is ignored
+		adisk_name = path_join(outdir, basename_utf8(adisk_name));
 	}
 
 	Vector *srcs = new_vec();

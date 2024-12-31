@@ -33,6 +33,11 @@ sys3c - System 1-3 compiler
 *-o, --dri*=_name_::
   Write output to an archive named __name__. (default: `ADISK.DAT`)
 
+*-d, --outdir*=_directory_::
+  Generate output files in the specified _directory_. By default, output files
+  are created in the project directory, or the current directory if no project
+  is specified.
+
 *-g, --debug*::
   Generate debug information for system3-sdl2.
 

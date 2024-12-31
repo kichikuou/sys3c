@@ -28,6 +28,7 @@ typedef struct {
 	const char *var_list;
 	const char *verb_list;
 	const char *obj_list;
+	const char *outdir;
 	int ag00_uk1, ag00_uk2;
 
 	bool debug;

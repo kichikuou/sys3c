@@ -30,14 +30,15 @@ Here are the steps for decompiling a game, editing the source, and compiling bac
 
 First, in the game directory (the directory containing `ADISK.DAT`), run `sys3dc` with the following command:
 ```
-sys3dc . -o src
+sys3dc . --outdir=src
 ```
 
 The decompiled source files will be generated in the `src` directory. Edit them as you like.
 
-Once you've finished editing the source files, you can compile them back to the `ADISK.DAT`/`AG00.DAT` using the following command:
+Once you've finished editing the source files, you can compile them back to the
+`DAT` files using the following command:
 ```
-sys3c -p src/sys3c.cfg
+sys3c --project=src/sys3c.cfg --outdir=.
 ```
 
 ## Unicode mode
