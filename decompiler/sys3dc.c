@@ -17,11 +17,13 @@
 */
 #include "sys3dc.h"
 #include <ctype.h>
+#include <dirent.h>
 #include <errno.h>
 #include <getopt.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 
 static const char short_options[] = "adE:g:ho:uVv";
 static const struct option long_options[] = {
@@ -37,7 +39,7 @@ static const struct option long_options[] = {
 };
 
 static void usage(void) {
-	puts("Usage: sys3dc [options] drifile(s)");
+	puts("Usage: sys3dc [options] gamedir|datfile(s)");
 	puts("Options:");
 	puts("    -a, --address             Prefix each line with address");
 	puts("    -Es, --encoding=sjis      Output files in SJIS encoding");
@@ -94,6 +96,30 @@ const char *to_utf8(const char *s) {
 	return sjis2utf(s);
 }
 
+static bool is_directory(const char *path) {
+	struct stat st;
+	return stat(path, &st) == 0 && S_ISDIR(st.st_mode);
+}
+
+static void find_input_files(const char *dir, int *argc, char ***argv) {
+	Vector *files = new_vec();
+	DIR *dp = opendir(dir);
+	if (!dp)
+		error("%s: %s", dir, strerror(errno));
+	struct dirent *d;
+	while ((d = readdir(dp))) {
+		if ((isalpha(d->d_name[0]) && !strcasecmp(d->d_name + 1, "DISK.DAT")) ||
+				!strcasecmp(d->d_name, "AG00.DAT")) {
+			vec_push(files, path_join(dir, d->d_name));
+		}
+	}
+	closedir(dp);
+	*argc = files->len;
+	*argv = calloc(files->len, sizeof(char *));
+	for (int i = 0; i < files->len; i++)
+		(*argv)[i] = files->data[i];
+}
+
 int main(int argc, char *argv[]) {
 	init(&argc, &argv);
 
@@ -144,6 +170,12 @@ int main(int argc, char *argv[]) {
 	if (argc == 0) {
 		usage();
 		return 1;
+	}
+
+	if (argc == 1 && is_directory(argv[0])) {
+		find_input_files(argv[0], &argc, &argv);
+		if (argc == 0)
+			error("ADISK.DAT is not found in %s", argv[0]);
 	}
 
 	Vector *scos = NULL;

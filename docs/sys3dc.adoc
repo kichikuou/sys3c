@@ -7,13 +7,15 @@
 sys3dc - System 1-3 decompiler
 
 == Synopsis
-*sys3dc* [_options_] _drifile_... [_AG00.DAT_]
+*sys3dc* [_options_] _directory_|_datfiles_...
 
 == Description
-`sys3dc` is a decompiler for AliceSoft's System 1-3 game engine. It reads
-scenario files (`ADISK.DAT`, `BDISK.DAT`, ...) and optional `AG00.DAT` file.
-It then generates source files that can be compiled with
-xref:sys3c.adoc[*sys3c(1)*].
+`sys3dc` is a decompiler for AliceSoft's System 1-3 game engine. It processes
+scenario files (`ADISK.DAT`, `BDISK.DAT`, etc., along with an optional
+`AG00.DAT`) either from a specified directory or directly from files provided
+on the command line. The decompiler generates source files that are compatible
+with xref:sys3c.adoc[*sys3c(1)*], enabling reconstruction of the original game
+scenarios.
 
 == Options
 *-G, --game*=_game_::

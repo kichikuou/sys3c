@@ -28,13 +28,9 @@ running meson.
 ## Basic Workflow
 Here are the steps for decompiling a game, editing the source, and compiling back to the scenario file.
 
-First, decompile the game by giving the scenario file (`ADISK.DAT`) to `sys3dc`.
+First, in the game directory (the directory containing `ADISK.DAT`), run `sys3dc` with the following command:
 ```
-sys3dc -o src ADISK.DAT
-```
-If the game includes a `AG00.DAT` file, provide that as well:
-```
-sys3dc -o src ADISK.DAT AG00.DAT
+sys3dc . -o src
 ```
 
 The decompiled source files will be generated in the `src` directory. Edit them as you like.
