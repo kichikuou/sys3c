@@ -186,11 +186,13 @@ static void page_name(int cmd) {
 		return;
 	if (node->type == NODE_NUMBER) {
 		int page = node->val;
-		if ((cmd != '%' || page != 0) && page < dc.scos->len) {
-			Sco *sco = dc.scos->data[page];
+		if (cmd != '%' || page != 0) {
+			Sco *sco = page < dc.scos->len ? dc.scos->data[page] : NULL;
 			if (sco) {
 				fprintf(dc.out, "#%s", sco->src_name);
 				return;
+			} else {
+				warning_at(dc.p, "%s to non-existent page %d", cmd == '%' ? "call" : "jump", page + 1);
 			}
 		}
 	}
