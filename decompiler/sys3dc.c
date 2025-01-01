@@ -203,6 +203,8 @@ int main(int argc, char *argv[]) {
 			break;
 		}
 	}
+	if (config.verbose)
+		printf("adisk_crc = %08x, bdisk_crc = %08x\n", adisk_crc, bdisk_crc);
 	if (config.game_id == UNKNOWN_GAME) {
 		config.game_id = detect_game_id(adisk_crc, bdisk_crc);
 		if (config.game_id == UNKNOWN_GAME)

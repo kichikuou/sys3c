@@ -54,6 +54,7 @@ scenarios.
 	`sdps_tono`,
 	`sdps_kaizoku`,
 	`yakata2`,
+	`rance4_opt`,
 	`system3_generic`,
 	`ambivalenz_fd`,
 	`ambivalenz_cd`,

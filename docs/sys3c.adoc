@@ -90,6 +90,7 @@ sys3c - System 1-3 compiler
 	`sdps_tono`,
 	`sdps_kaizoku`,
 	`yakata2`,
+	`rance4_opt`,
 	`system3_generic`,
 	`ambivalenz_fd`,
 	`ambivalenz_cd`,

@@ -482,7 +482,9 @@ static void decompile_page(int page) {
 
 		case 'A': break;
 		case 'B': arguments_by_sysver(NULL, "eeeeeee", "neeeeee"); break;
-		case 'D': arguments_by_sysver(NULL, "eeeeeeee", NULL); break;
+		case 'D':
+			arguments_by_sysver(NULL, config.game_id >= RANCE4_OPT ? "eee" : "eeeeeeee", NULL);
+			break;
 		case 'E': arguments_by_sysver(NULL, "eee", "eeeeee"); break;
 		case 'F': break;
 		case 'G': arguments_by_sysver("n", "e", "e"); break;
@@ -500,10 +502,7 @@ static void decompile_page(int page) {
 		case 'S': arguments("n"); break;
 		case 'T': arguments_by_sysver(NULL, "eee", "ee"); break;
 		case 'U':
-			if (config.game_id == YAKATA2)
-				arguments("ee");
-			else
-				arguments_by_sysver("nn", "nn", "ee");
+			arguments_by_sysver("nn", config.game_id >= YAKATA2 ? "ee" : "nn", "ee");
 			break;
 		case 'V': arguments_by_sysver(NULL, "neeeeeeeeeeeeeeeeeeeeeeeeeeeee", "ee"); break;
 		case 'W': arguments_by_sysver(NULL, "eeee", "eee"); break;
