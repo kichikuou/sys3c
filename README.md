@@ -3,6 +3,8 @@ This is a companion tool for [system3-sdl2](https://github.com/kichikuou/system3
 It can decompile and compile the scenario files of System 1-3 games that are
 supported by system3-sdl2.
 
+For System 3.5 - 3.9 games, check out [xsys35c](https://github.com/kichikuou/xsys35c).
+
 ## Download
 Prebuilt Windows executables are available from the
 [release page](https://github.com/kichikuou/sys3c/releases). The 64-bit version
