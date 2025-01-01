@@ -26,7 +26,7 @@ typedef struct {
 	const char *src_name;
 	const char *sco_name;  // in SJIS
 	uint32_t volume_bits;
-	bool analyzed;
+	bool needs_reanalysis;
 } Sco;
 
 // Sco.mark[i] stores annotation for Sco.data[i].

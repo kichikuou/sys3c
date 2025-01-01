@@ -202,14 +202,15 @@ static void page_name(int cmd) {
 static void label(void) {
 	uint16_t addr = le16(dc.p);
 	dc.p += 2;
-	if (addr == 0)
+	if (addr == 0) {
 		dc_putc('0');
-	else
-		dc_printf("L_%05x", addr);
+		return;
+	}
+	dc_printf("L_%05x", addr);
 
 	uint8_t *mark = mark_at(dc.page, addr);
-	if (!(*mark & LABEL) && addr < dc_addr())
-		current_sco()->analyzed = false;
+	if (!*mark && addr < dc_addr())
+		current_sco()->needs_reanalysis = true;
 	*mark |= LABEL;
 }
 
@@ -644,19 +645,16 @@ void decompile(Vector *scos, AG00 *ag00, const char *outdir, const char *adisk_n
 	}
 
 	// Analyze
-	bool done = false;
-	while (!done) {
-		done = true;
-		for (int i = 0; i < scos->len; i++) {
-			Sco *sco = scos->data[i];
-			if (!sco || sco->analyzed)
-				continue;
-			if (config.verbose)
-				printf("Analyzing %s (page %d)...\n", sjis2utf(sco->sco_name), i);
-			done = false;
-			sco->analyzed = true;
+	for (int i = 0; i < scos->len; i++) {
+		Sco *sco = scos->data[i];
+		if (!sco)
+			continue;
+		if (config.verbose)
+			printf("Analyzing %s (page %d)...\n", sjis2utf(sco->sco_name), i);
+		do {
+			sco->needs_reanalysis = false;
 			decompile_page(i);
-		}
+		} while (sco->needs_reanalysis);
 	}
 
 	// Decompile
