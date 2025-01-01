@@ -3,7 +3,12 @@ This is a companion tool for [system3-sdl2](https://github.com/kichikuou/system3
 It can decompile and compile the scenario files of System 1-3 games that are
 supported by system3-sdl2.
 
-## Build & Install
+## Download
+Prebuilt Windows executables are available from the
+[release page](https://github.com/kichikuou/sys3c/releases). The 64-bit version
+supports Windows 10 or later. For older Windows, please use the 32-bit version.
+
+## Build from Source
 First install the dependencies (corresponding Debian package in parentheses):
 - meson (`meson`)
 - asciidoctor (`asciidoctor`) [optional, for generating manual pages]
@@ -27,6 +32,15 @@ running meson.
 
 ## Basic Workflow
 Here are the steps for decompiling a game, editing the source, and compiling back to the scenario file.
+
+### Windows
+
+1. Copy all files in the sys3c archive to the game directory (the directory containing `ADISK.DAT`).
+2. Run `decompile.bat`. The decompiled source files will be generated in the `src` directory.
+3. Edit the source files in the `src` directory as you like.
+4. Run `compile.bat`. The scenario files in the game directory will be updated.
+
+### Other Platforms
 
 First, in the game directory (the directory containing `ADISK.DAT`), run `sys3dc` with the following command:
 ```
