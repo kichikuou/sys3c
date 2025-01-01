@@ -70,6 +70,8 @@ static char *next_line(char **buf) {
 	char *p = strchr(line, '\n');
 	if (p) {
 		*p = '\0';
+		if (p > line && p[-1] == '\r')
+			p[-1] = '\0';
 		*buf = p + 1;
 	} else {
 		*buf += strlen(line);
@@ -117,12 +119,15 @@ static char *trim_right(char *str) {
 	return str;
 }
 
-static Vector *read_txt(const char *path) {
+static Vector *read_txt(const char *path, bool strip) {
 	char *buf = read_file(path);
 	Vector *vars = new_vec();
 	char *line;
-	while ((line = next_line(&buf)) != NULL)
-		vec_push(vars, trim_right(line));
+	while ((line = next_line(&buf)) != NULL) {
+		if (strip)
+			line = trim_right(line);
+		vec_push(vars, line);
+	}
 	// Drop empty lines at the end
 	while (vars->len > 0 && !((char *)vars->data[vars->len - 1])[0])
 		vars->len--;
@@ -320,11 +325,11 @@ int main(int argc, char *argv[]) {
 	if (srcs->len == 0)
 		error("sys3c: No source file specified.");
 
-	Vector *vars = var_list ? read_txt(var_list) : NULL;
-	Vector *verbs = config.verb_list ? read_txt(config.verb_list) : NULL;
+	Vector *vars = var_list ? read_txt(var_list, true) : NULL;
+	Vector *verbs = config.verb_list ? read_txt(config.verb_list, false) : NULL;
 	if (verbs && verbs->len > 256)
 		error("Too many verbs");
-	Vector *objs = config.obj_list ? read_txt(config.obj_list) : NULL;
+	Vector *objs = config.obj_list ? read_txt(config.obj_list, false) : NULL;
 	if (objs && objs->len > 256)
 		error("Too many objects");
 
