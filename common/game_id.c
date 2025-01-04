@@ -35,6 +35,7 @@
 #define ADISK_FUKEI		0x026de326	// 婦警さんＶＸ
 #define ADISK_INTRUDER		0xa7520fb2	// Intruder -桜屋敷の探索-
 #define ADISK_TENGU		0xc942ff58	// あぶないてんぐ伝説
+#define ADISK_TOUSHIN		0x62327908	// 闘神都市
 #define ADISK_TOUSHIN_HINT	0xac337537	// 闘神都市 ヒントディスク
 #define ADISK_VAMPIRE		0x957bcfbf	// Little Vampire
 #define ADISK_VAMPIRE_ENG		0x61985a7f	// Little Vampire (English) Patch 1.5
@@ -100,6 +101,7 @@ static const struct GameTable {
 	{"fukei", FUKEI},
 	{"intruder", INTRUDER},
 	{"tengu", TENGU},
+	{"toushin", TOUSHIN},
 	{"toushin_hint", TOUSHIN_HINT},
 	{"little_vampire", LITTLE_VAMPIRE},
 	{"little_vampire_eng", LITTLE_VAMPIRE_ENG},
@@ -217,6 +219,7 @@ GameId detect_game_id(uint32_t adisk_crc, uint32_t bdisk_crc) {
 	case ADISK_FUKEI: return FUKEI;
 	case ADISK_INTRUDER: return INTRUDER;
 	case ADISK_TENGU: return TENGU;
+	case ADISK_TOUSHIN: return TOUSHIN;
 	case ADISK_TOUSHIN_HINT: return TOUSHIN_HINT;
 	case ADISK_VAMPIRE: return LITTLE_VAMPIRE;
 	case ADISK_VAMPIRE_ENG: return LITTLE_VAMPIRE_ENG;
