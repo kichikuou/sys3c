@@ -225,6 +225,8 @@ typedef enum {
 	OTOME,
 	NINGYO,
 	MUGEN,
+
+	GAKUEN_KING,
 } GameId;
 
 static inline SysVer get_sysver(GameId id) {

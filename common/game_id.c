@@ -80,6 +80,7 @@
 #define ADISK_OTOMESENKI	0x49a4db15	// 乙女戦記
 #define ADISK_NINGYO		0xd491e7ab	// 人魚 -蘿子-
 #define ADISK_MUGENHOUYOU	0xbb27d1ba	// 夢幻泡影
+#define ADISK_GAKUEN_KING	0xd1bf243b	// 学園KING -日出彦 学校をつくる-
 
 static const struct GameTable {
 	const char* name;
@@ -148,6 +149,8 @@ static const struct GameTable {
 	{"otome", OTOME},
 	{"ningyo", NINGYO},
 	{"mugen", MUGEN},
+
+	{"gakuen_king", GAKUEN_KING},
 	{NULL},
 };
 
@@ -266,6 +269,7 @@ GameId detect_game_id(uint32_t adisk_crc, uint32_t bdisk_crc) {
 	case ADISK_OTOMESENKI: return OTOME;
 	case ADISK_NINGYO: return NINGYO;
 	case ADISK_MUGENHOUYOU: return MUGEN;
+	case ADISK_GAKUEN_KING: return GAKUEN_KING;
 	}
 	return UNKNOWN_GAME;
 }
