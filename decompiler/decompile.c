@@ -307,7 +307,7 @@ static void arguments_by_sysver(const char *sig1, const char *sig2, const char *
 	switch (config.sys_ver) {
 	case SYSTEM1: arguments(sig1); break;
 	case SYSTEM2: arguments(sig2); break;
-	case SYSTEM3: arguments(config.game_id < GAKUEN_KING ? sig3 : sig3t); break;
+	case SYSTEM3: arguments(config.game_id < TOUSHIN2 ? sig3 : sig3t); break;
 	}
 }
 
@@ -495,7 +495,7 @@ static void decompile_page(int page) {
 		case 'K': arguments_by_sysver(NULL, "", "n", "n"); break;
 		case 'L': arguments_by_sysver("n", "n", "e", "e"); break;
 		case 'M': arguments_by_sysver(NULL, "s", "s", "s"); break;
-		case 'N': arguments_by_sysver(NULL, "ee", "nee", "nee"); break;
+		case 'N': arguments_by_sysver(NULL, "ee", "nee", "ee"); break;
 		case 'O': arguments_by_sysver(NULL, "eee", "ev", "ev"); break;
 		case 'P': arguments_by_sysver("n", "n", "eeee", "e"); break;
 		case 'Q': arguments_by_sysver("n", "n", "e", "e"); break;
@@ -645,6 +645,7 @@ void decompile(Vector *scos, AG00 *ag00, const char *outdir, const char *adisk_n
 	}
 
 	// Analyze
+	dc.out = stdout;
 	for (int i = 0; i < scos->len; i++) {
 		Sco *sco = scos->data[i];
 		if (!sco)
