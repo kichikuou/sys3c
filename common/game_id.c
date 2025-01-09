@@ -20,6 +20,8 @@
 
 #define ADISK_BUNKASAI		0xc80f99b8	// あぶない文化祭前夜
 #define ADISK_CRESCENT		0x42351f2c	// クレセントムーンがぁる
+#define ADISK_RANCE2		0x28f8298f	// Rance 2
+#define ADISK_RANCE2_HINT	0x2a85e5fa	// Rance 2 ヒントディスク (GDISK.DAT)
 #define ADISK_DPS		0x69ea4865	// D.P.S. - Dream Program System
 #define ADISK_DPS_SG		0xab4cda48	// D.P.S. SG / D.P.S. SG set2
 #define BDISK_DPS_SG_FAHREN	0xe405d57c	//	D.P.S. SG - Fahren Fliegen
@@ -91,6 +93,8 @@ static const struct GameTable {
 	{"system1_generic", SYSTEM1_GENERIC},
 	{"bunkasai", BUNKASAI},
 	{"crescent", CRESCENT},
+	{"ranec2", RANCE2},
+	{"rance2_hint", RANCE2_HINT},
 	{"dps", DPS},
 	{"dps_sg_fahren", DPS_SG_FAHREN},
 	{"dps_sg_katei", DPS_SG_KATEI},
@@ -205,6 +209,8 @@ GameId detect_game_id(uint32_t adisk_crc, uint32_t bdisk_crc) {
 	switch (adisk_crc) {
 	case ADISK_BUNKASAI: return BUNKASAI;
 	case ADISK_CRESCENT: return CRESCENT;
+	case ADISK_RANCE2: return RANCE2;
+	case ADISK_RANCE2_HINT: return RANCE2_HINT;
 	case ADISK_DPS: return DPS;
 	case ADISK_DPS_SG:
 		switch (bdisk_crc) {
