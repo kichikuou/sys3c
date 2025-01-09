@@ -23,6 +23,8 @@ scenarios.
 	`system1_generic`,
 	`bunkasai`,
 	`crescent`,
+	`rance2`,
+	`rance2_hint`,
 	`dps`,
 	`dps_sg_fahren`,
 	`dps_sg_katei`,
@@ -79,7 +81,10 @@ scenarios.
 	`toushin2_sp`,
 	`otome`,
 	`ningyo`,
-	`mugen`.
+	`mugen`,
+	`toushin2`,
+	`nise_naguri`,
+	`gakuen_king`.
   If this option is not specified, `sys3dc` will try to guess the game from the
   input files.
 
