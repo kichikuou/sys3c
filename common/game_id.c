@@ -81,6 +81,7 @@
 #define ADISK_NINGYO		0xd491e7ab	// 人魚 -蘿子-
 #define ADISK_MUGENHOUYOU	0xbb27d1ba	// 夢幻泡影
 #define ADISK_TOUSHIN2		0xe27dd441	// 闘神都市２
+#define ADISK_NISE_NAGURI	0xfabe6302	// にせなぐりまくりたわぁ (ADISK.PAT)
 #define ADISK_GAKUEN_KING	0xd1bf243b	// 学園KING -日出彦 学校をつくる-
 
 static const struct GameTable {
@@ -152,6 +153,7 @@ static const struct GameTable {
 	{"mugen", MUGEN},
 
 	{"toushin2", TOUSHIN2},
+	{"nise_naguri", NISE_NAGURI},
 	{"gakuen_king", GAKUEN_KING},
 	{NULL},
 };
@@ -272,6 +274,7 @@ GameId detect_game_id(uint32_t adisk_crc, uint32_t bdisk_crc) {
 	case ADISK_NINGYO: return NINGYO;
 	case ADISK_MUGENHOUYOU: return MUGEN;
 	case ADISK_TOUSHIN2: return TOUSHIN2;
+	case ADISK_NISE_NAGURI: return NISE_NAGURI;
 	case ADISK_GAKUEN_KING: return GAKUEN_KING;
 	}
 	return UNKNOWN_GAME;

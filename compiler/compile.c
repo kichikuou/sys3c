@@ -507,7 +507,7 @@ static bool command(void) {
 		break;
 
 	case 'A': break;
-	case 'B': arguments_by_sysver(NULL, "eeeeeee", "neeeeee", "neeeeee"); break;
+	case 'B': arguments_by_sysver(NULL, "eeeeeee", "neeeeee", "ee"); break;
 	case 'D':
 		arguments_by_sysver(NULL, config.game_id >= RANCE4_OPT ? "eee" : "eeeeeeee", NULL, NULL);
 		break;
