@@ -226,6 +226,7 @@ typedef enum {
 	NINGYO,
 	MUGEN,
 
+	TOUSHIN2,
 	GAKUEN_KING,
 } GameId;
 

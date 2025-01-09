@@ -100,7 +100,7 @@ enum dc_put_string_flags {
 	STRING_SYSENG = 1 << 2,  // single-quotes are escaped in input
 };
 
-static void dc_put_string_n(const char *s, int len, unsigned flags) {
+static void dc_put_string(const char *s, int len, unsigned flags) {
 	if (!dc.out)
 		return;
 
@@ -145,18 +145,28 @@ static void dc_put_string_n(const char *s, int len, unsigned flags) {
 	}
 }
 
-static const void *dc_put_string(const char *s, int terminator, unsigned flags) {
+static const void *decompile_syseng_string(const char *s) {
 	const char *end;
-	if (flags & STRING_SYSENG) {
-		for (end = s; *end != terminator; end++) {
-			if (end[0] == '\\' && end[1] == '\'')
-				end++;
-		}
-	} else {
-		end = strchr(s, terminator);
-		assert(end);
+	for (end = s; *end != '\''; end++) {
+		if (end[0] == '\\' && end[1] == '\'')
+			end++;
 	}
-	dc_put_string_n(s, end - s, flags);
+	dc_put_string(s, end - s, STRING_ESCAPE | STRING_SYSENG);
+	return end + 1;
+}
+
+static const void *decompile_string_arg(const char *s) {
+	const char *end = strchr(s, ':');
+	assert(end);
+	for (const char *p = s; p < end; p++) {
+		if ((p == s && *p == ' ') || *p == ',') {
+			dc_putc('"');
+			dc_put_string(s, end - s, STRING_ESCAPE);
+			dc_putc('"');
+			return end + 1;
+		}
+	}
+	dc_put_string(s, end - s, 0);
 	return end + 1;
 }
 
@@ -286,14 +296,10 @@ static void arguments(const char *sig) {
 				dc.quoted_strings = true;
 				dc.p++;
 				dc_putc('"');
-				dc.p = dc_put_string((const char *)dc.p, '\'', STRING_ESCAPE | STRING_SYSENG);
-				dc_putc('"');
-			} else if (*dc.p == ' ') {
-				dc_putc('"');
-				dc.p = dc_put_string((const char *)dc.p, ':', STRING_ESCAPE);
+				dc.p = decompile_syseng_string((const char *)dc.p);
 				dc_putc('"');
 			} else {
-				dc.p = dc_put_string((const char *)dc.p, ':', 0);
+				dc.p = decompile_string_arg((const char *)dc.p);
 			}
 			break;
 		default:
@@ -307,7 +313,7 @@ static void arguments_by_sysver(const char *sig1, const char *sig2, const char *
 	switch (config.sys_ver) {
 	case SYSTEM1: arguments(sig1); break;
 	case SYSTEM2: arguments(sig2); break;
-	case SYSTEM3: arguments(config.game_id < GAKUEN_KING ? sig3 : sig3t); break;
+	case SYSTEM3: arguments(config.game_id < TOUSHIN2 ? sig3 : sig3t); break;
 	}
 }
 
@@ -323,7 +329,7 @@ static bool inline_menu_string(void) {
 	if (*end != '$')
 		return false;
 
-	dc_put_string_n((const char *)dc.p, end - dc.p, STRING_EXPAND);
+	dc_put_string((const char *)dc.p, end - dc.p, STRING_EXPAND);
 	dc.p = end;
 	dc_putc(*dc.p++);  // '$'
 	return true;
@@ -376,7 +382,7 @@ static void decompile_page(int page) {
 				if (dc.p >= sco->data + sco->filesize || *mark_at(dc.page, dc_addr()) != 0)
 					break;
 			}
-			dc_put_string_n((const char *)begin, dc.p - begin, STRING_ESCAPE | STRING_EXPAND);
+			dc_put_string((const char *)begin, dc.p - begin, STRING_ESCAPE | STRING_EXPAND);
 			dc_putc('\'');
 			// Print subsequent R/A command on the same line if possible.
 			if ((*dc.p == 'R' || *dc.p == 'A') &&
@@ -477,7 +483,7 @@ static void decompile_page(int page) {
 
 		case '\'':  // SysEng-style message
 			dc.quoted_strings = true;
-			dc.p = dc_put_string((const char *)dc.p, '\'', STRING_ESCAPE | STRING_SYSENG);
+			dc.p = decompile_syseng_string((const char *)dc.p);
 			dc_putc('\'');
 			break;
 
@@ -495,7 +501,7 @@ static void decompile_page(int page) {
 		case 'K': arguments_by_sysver(NULL, "", "n", "n"); break;
 		case 'L': arguments_by_sysver("n", "n", "e", "e"); break;
 		case 'M': arguments_by_sysver(NULL, "s", "s", "s"); break;
-		case 'N': arguments_by_sysver(NULL, "ee", "nee", "nee"); break;
+		case 'N': arguments_by_sysver(NULL, "ee", "nee", "ee"); break;
 		case 'O': arguments_by_sysver(NULL, "eee", "ev", "ev"); break;
 		case 'P': arguments_by_sysver("n", "n", "eeee", "e"); break;
 		case 'Q': arguments_by_sysver("n", "n", "e", "e"); break;
