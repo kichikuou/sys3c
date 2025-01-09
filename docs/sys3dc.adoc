@@ -51,6 +51,7 @@ scenarios.
 	`dalk_hint`,
 	`drstop`,
 	`prog_fd`,
+	`rance3`,
 	`rance3_hint`,
 	`sdps_maria`,
 	`sdps_tono`,

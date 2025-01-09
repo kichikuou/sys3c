@@ -50,6 +50,7 @@
 #define ADISK_DALK_HINT		0x4793b843	// DALK ヒントディスク
 #define ADISK_DRSTOP		0x73fa86c4	// Dr. STOP!
 #define ADISK_PROSTUDENTG_FD	0x5ffbfee7	// Prostudent -G- (FD)
+#define ADISK_RANCE3		0x47a399a1	// Rance 3
 #define ADISK_RANCE3_HINT	0x8d5ec610	// Rance3 ヒントディスク
 #define ADISK_SDPS		0xc7a20cdf	// Super D.P.S
 #define BDISK_SDPS_MARIA	0x80d4eaca	//	Super D.P.S - マリアとカンパン
@@ -123,6 +124,7 @@ static const struct GameTable {
 	{"dalk_hint", DALK_HINT},
 	{"drstop", DRSTOP},
 	{"prog_fd", PROG_FD},
+	{"rance3", RANCE3},
 	{"rance3_hint", RANCE3_HINT},
 	{"sdps_maria", SDPS_MARIA},
 	{"sdps_tono", SDPS_TONO},
@@ -245,6 +247,7 @@ GameId detect_game_id(uint32_t adisk_crc, uint32_t bdisk_crc) {
 	case ADISK_DALK_HINT: return DALK_HINT;
 	case ADISK_DRSTOP: return DRSTOP;
 	case ADISK_PROSTUDENTG_FD: return PROG_FD;
+	case ADISK_RANCE3: return RANCE3;
 	case ADISK_RANCE3_HINT: return RANCE3_HINT;
 	case ADISK_SDPS:
 		switch (bdisk_crc) {

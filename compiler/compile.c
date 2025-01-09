@@ -515,7 +515,7 @@ static bool command(void) {
 	case 'F': break;
 	case 'G': arguments_by_sysver("n", "e", "e", "e"); break;
 	case 'H': arguments_by_sysver(NULL, "ne", "ne", "ne"); break;
-	case 'I': arguments_by_sysver(NULL, "eee", "eeeeee", "eee"); break;
+	case 'I': arguments_by_sysver(NULL, config.game_id < DALK_HINT ? "een" : "eee", "eeeeee", "eee"); break;
 	case 'J': arguments_by_sysver(NULL, "ee", "ee", "ee"); break;
 	case 'K': arguments_by_sysver(NULL, "", "n", "n"); break;
 	case 'L': arguments_by_sysver("n", "n", "e", "e"); break;
@@ -528,7 +528,7 @@ static bool command(void) {
 	case 'S': arguments("n"); break;
 	case 'T': arguments_by_sysver(NULL, "eee", "ee", "eee"); break;
 	case 'U':
-		arguments_by_sysver("nn", config.game_id >= YAKATA2 ? "ee" : "nn", "ee", "ee");
+		arguments_by_sysver("nn", config.game_id < RANCE3 ? "nn" : "ee", "ee", "ee");
 		break;
 	case 'V': arguments_by_sysver(NULL, "neeeeeeeeeeeeeeeeeeeeeeeeeeeee", "ee", "ee"); break;
 	case 'W': arguments_by_sysver(NULL, "eeee", "eee", "eee"); break;
