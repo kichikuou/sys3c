@@ -59,6 +59,7 @@
 #define BDISK_SDPS_TONO		0xbb1edff1	//	Super D.P.S - 遠野の森
 #define BDISK_SDPS_KAIZOKU	0xf81829e3	//	Super D.P.S - うれしたのし海賊稼業
 #define ADISK_YAKATA2		0x2df591ff	// ALICEの館II
+#define ADISK_RANCE4		0xebcfaff1	// Rance 4
 #define ADISK_RANCE4_OPT    0xbe91c161  // Rance 4 オプションディスク
 #define ADISK_AMBIVALENZ_FD	0xa6b48dfe	// AmbivalenZ (FD)
 #define ADISK_AMBIVALENZ_CD	0x4b10db69	// AmbivalenZ (CD)
@@ -134,6 +135,7 @@ static const struct GameTable {
 	{"sdps_tono", SDPS_TONO},
 	{"sdps_kaizoku", SDPS_KAIZOKU},
 	{"yakata2", YAKATA2},
+	{"rance4", RANCE4},
 	{"rance4_opt", RANCE4_OPT},
 
 	{"system3_generic", SYSTEM3_GENERIC},
@@ -263,6 +265,7 @@ GameId detect_game_id(uint32_t adisk_crc, uint32_t bdisk_crc) {
 		}
 		break;
 	case ADISK_YAKATA2: return YAKATA2;
+	case ADISK_RANCE4: return RANCE4;
 	case ADISK_RANCE4_OPT: return RANCE4_OPT;
 	case ADISK_AMBIVALENZ_FD: return AMBIVALENZ_FD;
 	case ADISK_AMBIVALENZ_CD: return AMBIVALENZ_CD;

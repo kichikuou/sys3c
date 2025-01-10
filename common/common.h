@@ -203,6 +203,7 @@ typedef enum {
 	YAKATA2,
 	DALK,
 	DALK_HINT,
+	RANCE4,
 	RANCE4_OPT,
 
 	SYSTEM3_GENERIC,

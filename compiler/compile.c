@@ -338,10 +338,10 @@ static void arguments(const char *sig) {
 	expect(':');
 }
 
-static void arguments_by_sysver(const char *sig1, const char *sig2, const char *sig3, const char *sig3t) {
+static void arguments_by_sysver(const char *sig1, const char *sig2, const char *sig2r, const char *sig3, const char *sig3t) {
 	switch (config.sys_ver) {
 	case SYSTEM1: arguments(sig1); break;
-	case SYSTEM2: arguments(sig2); break;
+	case SYSTEM2: arguments(config.game_id < RANCE4 ? sig2 : sig2r); break;
 	case SYSTEM3: arguments(config.game_id < TOUSHIN2 ? sig3 : sig3t); break;
 	}
 }
@@ -507,34 +507,34 @@ static bool command(void) {
 		break;
 
 	case 'A': break;
-	case 'B': arguments_by_sysver(NULL, "eeeeeee", "neeeeee", "ee"); break;
+	case 'B': arguments_by_sysver(NULL, "eeeeeee", "ne", "neeeeee", "ee"); break;
 	case 'D':
-		arguments_by_sysver(NULL, config.game_id >= RANCE4_OPT ? "eee" : "eeeeeeee", NULL, NULL);
+		arguments_by_sysver(NULL, "eeeeeeee", "eee", NULL, NULL);
 		break;
-	case 'E': arguments_by_sysver(NULL, "eee", "eeeeee", "eeeeee"); break;
+	case 'E': arguments_by_sysver(NULL, "eee", "eeeeee", "eeeeee", "eeeeee"); break;
 	case 'F': break;
-	case 'G': arguments_by_sysver("n", "e", "e", "e"); break;
-	case 'H': arguments_by_sysver(NULL, "ne", "ne", "ne"); break;
-	case 'I': arguments_by_sysver(NULL, config.game_id < DALK ? "een" : "eee", "eeeeee", "eee"); break;
-	case 'J': arguments_by_sysver(NULL, "ee", "ee", "ee"); break;
-	case 'K': arguments_by_sysver(NULL, "", "n", "n"); break;
-	case 'L': arguments_by_sysver("n", "n", "e", "e"); break;
-	case 'M': arguments_by_sysver(NULL, "s", "s", "s"); break;
-	case 'N': arguments_by_sysver(NULL, "ee", "nee", "ee"); break;
-	case 'O': arguments_by_sysver(NULL, "eee", "ev", "ev"); break;
-	case 'P': arguments_by_sysver("n", "n", "eeee", "e"); break;
-	case 'Q': arguments_by_sysver("n", "n", "e", "e"); break;
+	case 'G': arguments_by_sysver("n", "e", "e", "e", "e"); break;
+	case 'H': arguments_by_sysver(NULL, "ne", "ne", "ne", "ne"); break;
+	case 'I': arguments_by_sysver(NULL, config.game_id < DALK ? "een" : "eee", "ee", "eeeeee", "eee"); break;
+	case 'J': arguments_by_sysver(NULL, "ee", "ee", "ee", "ee"); break;
+	case 'K': arguments_by_sysver(NULL, "", "", "n", "n"); break;
+	case 'L': arguments_by_sysver("n", "n", "n", "e", "e"); break;
+	case 'M': arguments_by_sysver(NULL, "s", "s", "s", "s"); break;
+	case 'N': arguments_by_sysver(NULL, "ee", "ee", "nee", "ee"); break;
+	case 'O': arguments_by_sysver(NULL, "eee", "eee", "ev", "ev"); break;
+	case 'P': arguments_by_sysver("n", "n", "n", "eeee", "e"); break;
+	case 'Q': arguments_by_sysver("n", "n", "n", "e", "e"); break;
 	case 'R': break;
 	case 'S': arguments("n"); break;
-	case 'T': arguments_by_sysver(NULL, "eee", "ee", "eee"); break;
+	case 'T': arguments_by_sysver(NULL, "eee", "eee", "ee", "eee"); break;
 	case 'U':
-		arguments_by_sysver("nn", config.game_id < RANCE3 ? "nn" : "ee", "ee", "ee");
+		arguments_by_sysver("nn", config.game_id < RANCE3 ? "nn" : "ee", "ee", "ee", "ee");
 		break;
-	case 'V': arguments_by_sysver(NULL, "neeeeeeeeeeeeeeeeeeeeeeeeeeeee", "ee", "ee"); break;
-	case 'W': arguments_by_sysver(NULL, "eeee", "eee", "eee"); break;
+	case 'V': arguments_by_sysver(NULL, "neeeeeeeeeeeeeeeeeeeeeeeeeeeee", "ne", "ee", "ee"); break;
+	case 'W': arguments_by_sysver(NULL, "eeee", "eee", "eee", "eee"); break;
 	case 'X': arguments("n"); break;
 	case 'Y': arguments("ee"); break;
-	case 'Z': arguments_by_sysver("ee", "ee", "ee", "eee"); break;
+	case 'Z': arguments_by_sysver("ee", "ee", "eee", "ee", "eee"); break;
 
 	case COMMAND_IF:
 		expect('{');
