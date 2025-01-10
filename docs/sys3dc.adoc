@@ -49,6 +49,7 @@ scenarios.
 	`ayumi_fd`,
 	`ayumi_hint`,
 	`ayumi_proto`,
+	`dalk`,
 	`dalk_hint`,
 	`drstop`,
 	`prog_fd`,

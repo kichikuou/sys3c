@@ -201,6 +201,7 @@ typedef enum {
 	SDPS_KAIZOKU,
 	RANCE3,
 	YAKATA2,
+	DALK,
 	DALK_HINT,
 	RANCE4_OPT,
 

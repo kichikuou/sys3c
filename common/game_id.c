@@ -48,6 +48,7 @@
 #define ADISK_AYUMI_FD		0x4e2fed2a	// あゆみちゃん物語 (FD)
 #define ADISK_AYUMI_HINT	0xf6bd963a	// あゆみちゃん物語 ヒントディスク
 #define ADISK_AYUMI_PROTO	0x4e2f5678	// あゆみちゃん物語 PROTO
+#define ADISK_DALK			0x77227088	// DALK
 #define ADISK_DALK_HINT		0x4793b843	// DALK ヒントディスク
 #define ADISK_DRSTOP		0x73fa86c4	// Dr. STOP!
 #define ADISK_PROSTUDENTG_FD	0x5ffbfee7	// Prostudent -G- (FD)
@@ -123,6 +124,7 @@ static const struct GameTable {
 	{"ayumi_fd", AYUMI_FD},
 	{"ayumi_hint", AYUMI_HINT},
 	{"ayumi_proto", AYUMI_PROTO},
+	{"dalk", DALK},
 	{"dalk_hint", DALK_HINT},
 	{"drstop", DRSTOP},
 	{"prog_fd", PROG_FD},
@@ -247,6 +249,7 @@ GameId detect_game_id(uint32_t adisk_crc, uint32_t bdisk_crc) {
 	case ADISK_AYUMI_FD: return AYUMI_FD;
 	case ADISK_AYUMI_HINT: return AYUMI_HINT;
 	case ADISK_AYUMI_PROTO: return AYUMI_PROTO;
+	case ADISK_DALK: return DALK;
 	case ADISK_DALK_HINT: return DALK_HINT;
 	case ADISK_DRSTOP: return DRSTOP;
 	case ADISK_PROSTUDENTG_FD: return PROG_FD;
