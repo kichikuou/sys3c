@@ -23,6 +23,7 @@ scenarios.
 	`system1_generic`,
 	`bunkasai`,
 	`crescent`,
+	`rance`,
 	`rance2`,
 	`rance2_hint`,
 	`dps`,
