@@ -278,6 +278,8 @@ static bool is_branch_end(int addr, Vector *branch_end_stack) {
 static void arguments(const char *sig) {
 	if (!sig)
 		error_at(dc.p, "invalid command");
+	if (!*sig)
+		return;  // no colon
 
 	const char *sep = " ";
 	for (; *sig; sig++) {
@@ -488,13 +490,11 @@ static void decompile_page(int page) {
 			dc_putc('\'');
 			break;
 
-		case 'A': break;
+		case 'A': arguments(""); break;
 		case 'B': arguments_by_sysver(NULL, "eeeeeee", "ne", "neeeeee", "ee"); break;
-		case 'D':
-			arguments_by_sysver(NULL, "eeeeeeee", "eee", NULL, NULL);
-			break;
+		case 'D': arguments_by_sysver(NULL, "eeeeeeee", "eee", NULL, NULL); break;
 		case 'E': arguments_by_sysver(NULL, "eee", "eeeeee", "eeeeee", "eeeeee"); break;
-		case 'F': break;
+		case 'F': arguments(""); break;
 		case 'G': arguments_by_sysver("n", "e", "e", "e", "e"); break;
 		case 'H': arguments_by_sysver(NULL, "ne", "ne", "ne", "ne"); break;
 		case 'I': arguments_by_sysver(NULL, config.game_id < DALK ? "een" : "eee", "ee", "eeeeee", "eee"); break;
@@ -506,12 +506,10 @@ static void decompile_page(int page) {
 		case 'O': arguments_by_sysver(NULL, "eee", "eee", "ev", "ev"); break;
 		case 'P': arguments_by_sysver("n", "n", "n", "eeee", "e"); break;
 		case 'Q': arguments_by_sysver("n", "n", "n", "e", "e"); break;
-		case 'R': break;
+		case 'R': arguments(""); break;
 		case 'S': arguments("n"); break;
 		case 'T': arguments_by_sysver(NULL, "eee", "eee", "ee", "eee"); break;
-		case 'U':
-			arguments_by_sysver("nn", config.game_id < RANCE3 ? "nn" : "ee", "ee", "ee", "ee");
-			break;
+		case 'U': arguments_by_sysver("nn", "ee", "ee", "ee", "ee"); break;
 		case 'V': arguments_by_sysver(NULL, "neeeeeeeeeeeeeeeeeeeeeeeeeeeee", "ne", "ee", "ee"); break;
 		case 'W': arguments_by_sysver(NULL, "eeee", "eee", "eee", "eee"); break;
 		case 'X': arguments("n"); break;
