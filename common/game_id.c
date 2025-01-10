@@ -26,7 +26,7 @@
 #define ADISK_DPS		0x69ea4865	// D.P.S. - Dream Program System
 #define ADISK_DPS_SG		0xab4cda48	// D.P.S. SG / D.P.S. SG set2
 #define BDISK_DPS_SG_FAHREN	0xe405d57c	//	D.P.S. SG - Fahren Fliegen
-#define BDISK_DPS_SG_KATEI	 0x23e67d18	//	D.P.S. SG - 家庭教師はステキなお仕事
+#define BDISK_DPS_SG_KATEI	0x23e67d18	//	D.P.S. SG - 家庭教師はステキなお仕事
 #define BDISK_DPS_SG_NOBUNAGA	0x2ec116f2	//	D.P.S. SG - 信長の淫謀
 #define BDISK_DPS_SG2_ANTIQUE	0x41fe8b3d	//	D.P.S. SG set2 - ANTIQUE HOUSE
 #define BDISK_DPS_SG2_IKENAI	0x6b562c09	//	D.P.S. SG set2 - いけない内科検診再び
@@ -41,14 +41,14 @@
 #define ADISK_TOUSHIN		0x62327908	// 闘神都市
 #define ADISK_TOUSHIN_HINT	0xac337537	// 闘神都市 ヒントディスク
 #define ADISK_VAMPIRE		0x957bcfbf	// Little Vampire
-#define ADISK_VAMPIRE_ENG		0x61985a7f	// Little Vampire (English) Patch 1.5
+#define ADISK_VAMPIRE_ENG	0x61985a7f	// Little Vampire (English) Patch 1.5
 #define ADISK_YAKATA		0x8cef6fa6	// ALICEの館
-#define ADISK_GAKUEN		0xe4d6ec66  // 学園戦記 (unofficial system1 port) 1.0JP
-#define ADISK_GAKUEN_ENG	0x6ba8c102  // Gakuen Senki (English) 1.0
+#define ADISK_GAKUEN		0xe4d6ec66	// 学園戦記 (unofficial system1 port) 1.0JP
+#define ADISK_GAKUEN_ENG	0x6ba8c102	// Gakuen Senki (English) 1.0
 #define ADISK_AYUMI_FD		0x4e2fed2a	// あゆみちゃん物語 (FD)
 #define ADISK_AYUMI_HINT	0xf6bd963a	// あゆみちゃん物語 ヒントディスク
 #define ADISK_AYUMI_PROTO	0x4e2f5678	// あゆみちゃん物語 PROTO
-#define ADISK_DALK			0x77227088	// DALK
+#define ADISK_DALK		0x77227088	// DALK
 #define ADISK_DALK_HINT		0x4793b843	// DALK ヒントディスク
 #define ADISK_DRSTOP		0x73fa86c4	// Dr. STOP!
 #define ADISK_PROSTUDENTG_FD	0x5ffbfee7	// Prostudent -G- (FD)
@@ -60,7 +60,7 @@
 #define BDISK_SDPS_KAIZOKU	0xf81829e3	//	Super D.P.S - うれしたのし海賊稼業
 #define ADISK_YAKATA2		0x2df591ff	// ALICEの館II
 #define ADISK_RANCE4		0xebcfaff1	// Rance 4
-#define ADISK_RANCE4_OPT    0xbe91c161  // Rance 4 オプションディスク
+#define ADISK_RANCE4_OPT	0xbe91c161	// Rance 4 オプションディスク
 #define ADISK_AMBIVALENZ_FD	0xa6b48dfe	// AmbivalenZ (FD)
 #define ADISK_AMBIVALENZ_CD	0x4b10db69	// AmbivalenZ (CD)
 #define ADISK_DPSALL		0xd48b4ec6	// DPS全部
@@ -93,80 +93,82 @@
 static const struct GameTable {
 	const char* name;
 	GameId id;
+	uint32_t adisk_crc;
+	uint32_t bdisk_crc;
 } game_table[] = {
 	{"system1_generic", SYSTEM1_GENERIC},
-	{"bunkasai", BUNKASAI},
-	{"crescent", CRESCENT},
-	{"rance", RANCE},
-	{"ranec2", RANCE2},
-	{"rance2_hint", RANCE2_HINT},
-	{"dps", DPS},
-	{"dps_sg_fahren", DPS_SG_FAHREN},
-	{"dps_sg_katei", DPS_SG_KATEI},
-	{"dps_sg_nobunaga", DPS_SG_NOBUNAGA},
-	{"dps_sg2_antique", DPS_SG2_ANTIQUE},
-	{"dps_sg2_ikenai", DPS_SG2_IKENAI},
-	{"dps_sg2_akai", DPS_SG2_AKAI},
-	{"dps_sg3_rabbit", DPS_SG3_RABBIT},
-	{"dps_sg3_shinkon", DPS_SG3_SHINKON},
-	{"dps_sg3_sotsugyou", DPS_SG3_SOTSUGYOU},
-	{"fukei", FUKEI},
-	{"intruder", INTRUDER},
-	{"tengu", TENGU},
-	{"toushin", TOUSHIN},
-	{"toushin_hint", TOUSHIN_HINT},
-	{"little_vampire", LITTLE_VAMPIRE},
-	{"little_vampire_eng", LITTLE_VAMPIRE_ENG},
-	{"yakata", YAKATA},
-	{"gakuen", GAKUEN},
-	{"gakuen_eng", GAKUEN_ENG},
+	{"bunkasai", BUNKASAI, ADISK_BUNKASAI},
+	{"crescent", CRESCENT, ADISK_CRESCENT},
+	{"rance", RANCE, ADISK_RANCE},
+	{"ranec2", RANCE2, ADISK_RANCE2},
+	{"rance2_hint", RANCE2_HINT, ADISK_RANCE2_HINT},
+	{"dps", DPS, ADISK_DPS},
+	{"dps_sg_fahren", DPS_SG_FAHREN, ADISK_DPS_SG, BDISK_DPS_SG_FAHREN},
+	{"dps_sg_katei", DPS_SG_KATEI, ADISK_DPS_SG, BDISK_DPS_SG_KATEI},
+	{"dps_sg_nobunaga", DPS_SG_NOBUNAGA, ADISK_DPS_SG, BDISK_DPS_SG_NOBUNAGA},
+	{"dps_sg2_antique", DPS_SG2_ANTIQUE, ADISK_DPS_SG, BDISK_DPS_SG2_ANTIQUE},
+	{"dps_sg2_ikenai", DPS_SG2_IKENAI, ADISK_DPS_SG, BDISK_DPS_SG2_IKENAI},
+	{"dps_sg2_akai", DPS_SG2_AKAI, ADISK_DPS_SG, BDISK_DPS_SG2_AKAI},
+	{"dps_sg3_rabbit", DPS_SG3_RABBIT, ADISK_DPS_SG3, BDISK_DPS_SG3_RABBIT},
+	{"dps_sg3_shinkon", DPS_SG3_SHINKON, ADISK_DPS_SG3, BDISK_DPS_SG3_SHINKON},
+	{"dps_sg3_sotsugyou", DPS_SG3_SOTSUGYOU, ADISK_DPS_SG3, BDISK_DPS_SG3_SOTSUGYOU},
+	{"fukei", FUKEI, ADISK_FUKEI},
+	{"intruder", INTRUDER, ADISK_INTRUDER},
+	{"tengu", TENGU, ADISK_TENGU},
+	{"toushin", TOUSHIN, ADISK_TOUSHIN},
+	{"toushin_hint", TOUSHIN_HINT, ADISK_TOUSHIN_HINT},
+	{"little_vampire", LITTLE_VAMPIRE, ADISK_VAMPIRE},
+	{"little_vampire_eng", LITTLE_VAMPIRE_ENG, ADISK_VAMPIRE_ENG},
+	{"yakata", YAKATA, ADISK_YAKATA},
+	{"gakuen", GAKUEN, ADISK_GAKUEN},
+	{"gakuen_eng", GAKUEN_ENG, ADISK_GAKUEN_ENG},
 
 	{"system2_generic", SYSTEM2_GENERIC},
-	{"ayumi_fd", AYUMI_FD},
-	{"ayumi_hint", AYUMI_HINT},
-	{"ayumi_proto", AYUMI_PROTO},
-	{"dalk", DALK},
-	{"dalk_hint", DALK_HINT},
-	{"drstop", DRSTOP},
-	{"prog_fd", PROG_FD},
-	{"rance3", RANCE3},
-	{"rance3_hint", RANCE3_HINT},
-	{"sdps_maria", SDPS_MARIA},
-	{"sdps_tono", SDPS_TONO},
-	{"sdps_kaizoku", SDPS_KAIZOKU},
-	{"yakata2", YAKATA2},
-	{"rance4", RANCE4},
-	{"rance4_opt", RANCE4_OPT},
+	{"ayumi_fd", AYUMI_FD, ADISK_AYUMI_FD},
+	{"ayumi_hint", AYUMI_HINT, ADISK_AYUMI_HINT},
+	{"ayumi_proto", AYUMI_PROTO, ADISK_AYUMI_PROTO},
+	{"dalk", DALK, ADISK_DALK},
+	{"dalk_hint", DALK_HINT, ADISK_DALK_HINT},
+	{"drstop", DRSTOP, ADISK_DRSTOP},
+	{"prog_fd", PROG_FD, ADISK_PROSTUDENTG_FD},
+	{"rance3", RANCE3, ADISK_RANCE3},
+	{"rance3_hint", RANCE3_HINT, ADISK_RANCE3_HINT},
+	{"sdps_maria", SDPS_MARIA, ADISK_SDPS, BDISK_SDPS_MARIA},
+	{"sdps_tono", SDPS_TONO, ADISK_SDPS, BDISK_SDPS_TONO},
+	{"sdps_kaizoku", SDPS_KAIZOKU, ADISK_SDPS, BDISK_SDPS_KAIZOKU},
+	{"yakata2", YAKATA2, ADISK_YAKATA2},
+	{"rance4", RANCE4, ADISK_RANCE4},
+	{"rance4_opt", RANCE4_OPT, ADISK_RANCE4_OPT},
 
 	{"system3_generic", SYSTEM3_GENERIC},
-	{"ambivalenz_fd", AMBIVALENZ_FD},
-	{"ambivalenz_cd", AMBIVALENZ_CD},
-	{"dps_all", DPS_ALL},
-	{"funnybee_cd", FUNNYBEE_CD},
-	{"funnybee_fd", FUNNYBEE_FD},
-	{"onlyyou", ONLYYOU},
-	{"onlyyou_demo", ONLYYOU_DEMO},
-	{"prog_cd", PROG_CD},
-	{"prog_omake", PROG_OMAKE},
-	{"rance41", RANCE41},
-	{"rance41_eng", RANCE41_ENG},
-	{"rance42", RANCE42},
-	{"rance42_eng", RANCE42_ENG},
-	{"ayumi_cd", AYUMI_CD},
-	{"ayumi_live_256", AYUMI_LIVE_256},
-	{"ayumi_live_full", AYUMI_LIVE_FULL},
-	{"yakata3_cd", YAKATA3_CD},
-	{"yakata3_fd", YAKATA3_FD},
-	{"hashirionna2", HASHIRIONNA2},
-	{"toushin2_gd", TOUSHIN2_GD},
-	{"toushin2_sp", TOUSHIN2_SP},
-	{"otome", OTOME},
-	{"ningyo", NINGYO},
-	{"mugen", MUGEN},
+	{"ambivalenz_fd", AMBIVALENZ_FD, ADISK_AMBIVALENZ_FD},
+	{"ambivalenz_cd", AMBIVALENZ_CD, ADISK_AMBIVALENZ_CD},
+	{"dps_all", DPS_ALL, ADISK_DPSALL},
+	{"funnybee_cd", FUNNYBEE_CD, ADISK_FUNNYBEE_CD},
+	{"funnybee_fd", FUNNYBEE_FD, ADISK_FUNNYBEE_FD},
+	{"onlyyou", ONLYYOU, ADISK_ONLYYOU},
+	{"onlyyou_demo", ONLYYOU_DEMO, ADISK_ONLYYOU_DEMO},
+	{"prog_cd", PROG_CD, ADISK_PROSTUDENTG_CD},
+	{"prog_omake", PROG_OMAKE, ADISK_PROG_OMAKE},
+	{"rance41", RANCE41, ADISK_RANCE41},
+	{"rance41_eng", RANCE41_ENG, ADISK_RANCE41_ENG},
+	{"rance42", RANCE42, ADISK_RANCE42},
+	{"rance42_eng", RANCE42_ENG, ADISK_RANCE42_ENG},
+	{"ayumi_cd", AYUMI_CD, ADISK_AYUMI_CD},
+	{"ayumi_live_256", AYUMI_LIVE_256, ADISK_AYUMI_JISSHA_256},
+	{"ayumi_live_full", AYUMI_LIVE_FULL, ADISK_AYUMI_JISSHA_FULL},
+	{"yakata3_cd", YAKATA3_CD, ADISK_YAKATA3_CD},
+	{"yakata3_fd", YAKATA3_FD, ADISK_YAKATA3_FD},
+	{"hashirionna2", HASHIRIONNA2, ADISK_HASHIRIONNA2},
+	{"toushin2_gd", TOUSHIN2_GD, ADISK_TOUSHIN2_GD},
+	{"toushin2_sp", TOUSHIN2_SP, ADISK_TOUSHIN2_SP},
+	{"otome", OTOME, ADISK_OTOMESENKI},
+	{"ningyo", NINGYO, ADISK_NINGYO},
+	{"mugen", MUGEN, ADISK_MUGENHOUYOU},
 
-	{"toushin2", TOUSHIN2},
-	{"nise_naguri", NISE_NAGURI},
-	{"gakuen_king", GAKUEN_KING},
+	{"toushin2", TOUSHIN2, ADISK_TOUSHIN2},
+	{"nise_naguri", NISE_NAGURI, ADISK_NISE_NAGURI},
+	{"gakuen_king", GAKUEN_KING, ADISK_GAKUEN_KING},
 	{NULL},
 };
 
@@ -214,86 +216,12 @@ uint32_t calc_crc32(const char* fname) {
 }
 
 GameId detect_game_id(uint32_t adisk_crc, uint32_t bdisk_crc) {
-	switch (adisk_crc) {
-	case ADISK_BUNKASAI: return BUNKASAI;
-	case ADISK_CRESCENT: return CRESCENT;
-	case ADISK_RANCE: return RANCE;
-	case ADISK_RANCE2: return RANCE2;
-	case ADISK_RANCE2_HINT: return RANCE2_HINT;
-	case ADISK_DPS: return DPS;
-	case ADISK_DPS_SG:
-		switch (bdisk_crc) {
-		case BDISK_DPS_SG_FAHREN: return DPS_SG_FAHREN;
-		case BDISK_DPS_SG_KATEI: return DPS_SG_KATEI;
-		case BDISK_DPS_SG_NOBUNAGA: return DPS_SG_NOBUNAGA;
-		case BDISK_DPS_SG2_ANTIQUE: return DPS_SG2_ANTIQUE;
-		case BDISK_DPS_SG2_IKENAI: return DPS_SG2_IKENAI;
-		case BDISK_DPS_SG2_AKAI: return DPS_SG2_AKAI;
+	for (const struct GameTable *p = game_table; p->name; p++) {
+		if (p->adisk_crc == adisk_crc) {
+			if (!p->bdisk_crc || p->bdisk_crc == bdisk_crc) {
+				return p->id;
+			}
 		}
-		break;
-	case ADISK_DPS_SG3:
-		switch (bdisk_crc) {
-		case BDISK_DPS_SG3_RABBIT: return DPS_SG3_RABBIT;
-		case BDISK_DPS_SG3_SHINKON: return DPS_SG3_SHINKON;
-		case BDISK_DPS_SG3_SOTSUGYOU: return DPS_SG3_SOTSUGYOU;
-		}
-		break;
-	case ADISK_FUKEI: return FUKEI;
-	case ADISK_INTRUDER: return INTRUDER;
-	case ADISK_TENGU: return TENGU;
-	case ADISK_TOUSHIN: return TOUSHIN;
-	case ADISK_TOUSHIN_HINT: return TOUSHIN_HINT;
-	case ADISK_VAMPIRE: return LITTLE_VAMPIRE;
-	case ADISK_VAMPIRE_ENG: return LITTLE_VAMPIRE_ENG;
-	case ADISK_YAKATA: return YAKATA;
-	case ADISK_GAKUEN: return GAKUEN;
-	case ADISK_GAKUEN_ENG: return GAKUEN_ENG;
-	case ADISK_AYUMI_FD: return AYUMI_FD;
-	case ADISK_AYUMI_HINT: return AYUMI_HINT;
-	case ADISK_AYUMI_PROTO: return AYUMI_PROTO;
-	case ADISK_DALK: return DALK;
-	case ADISK_DALK_HINT: return DALK_HINT;
-	case ADISK_DRSTOP: return DRSTOP;
-	case ADISK_PROSTUDENTG_FD: return PROG_FD;
-	case ADISK_RANCE3: return RANCE3;
-	case ADISK_RANCE3_HINT: return RANCE3_HINT;
-	case ADISK_SDPS:
-		switch (bdisk_crc) {
-		case BDISK_SDPS_MARIA: return SDPS_MARIA;
-		case BDISK_SDPS_TONO: return SDPS_TONO;
-		case BDISK_SDPS_KAIZOKU: return SDPS_KAIZOKU;
-		}
-		break;
-	case ADISK_YAKATA2: return YAKATA2;
-	case ADISK_RANCE4: return RANCE4;
-	case ADISK_RANCE4_OPT: return RANCE4_OPT;
-	case ADISK_AMBIVALENZ_FD: return AMBIVALENZ_FD;
-	case ADISK_AMBIVALENZ_CD: return AMBIVALENZ_CD;
-	case ADISK_DPSALL: return DPS_ALL;
-	case ADISK_FUNNYBEE_CD: return FUNNYBEE_CD;
-	case ADISK_FUNNYBEE_FD: return FUNNYBEE_FD;
-	case ADISK_ONLYYOU: return ONLYYOU;
-	case ADISK_ONLYYOU_DEMO: return ONLYYOU_DEMO;
-	case ADISK_PROSTUDENTG_CD: return PROG_CD;
-	case ADISK_PROG_OMAKE: return PROG_OMAKE;
-	case ADISK_RANCE41: return RANCE41;
-	case ADISK_RANCE41_ENG: return RANCE41_ENG;
-	case ADISK_RANCE42: return RANCE42;
-	case ADISK_RANCE42_ENG: return RANCE42_ENG;
-	case ADISK_AYUMI_CD: return AYUMI_CD;
-	case ADISK_AYUMI_JISSHA_256: return AYUMI_LIVE_256;
-	case ADISK_AYUMI_JISSHA_FULL: return AYUMI_LIVE_FULL;
-	case ADISK_YAKATA3_CD: return YAKATA3_CD;
-	case ADISK_YAKATA3_FD: return YAKATA3_FD;
-	case ADISK_HASHIRIONNA2: return HASHIRIONNA2;
-	case ADISK_TOUSHIN2_GD: return TOUSHIN2_GD;
-	case ADISK_TOUSHIN2_SP: return TOUSHIN2_SP;
-	case ADISK_OTOMESENKI: return OTOME;
-	case ADISK_NINGYO: return NINGYO;
-	case ADISK_MUGENHOUYOU: return MUGEN;
-	case ADISK_TOUSHIN2: return TOUSHIN2;
-	case ADISK_NISE_NAGURI: return NISE_NAGURI;
-	case ADISK_GAKUEN_KING: return GAKUEN_KING;
 	}
 	return UNKNOWN_GAME;
 }
