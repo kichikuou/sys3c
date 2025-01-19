@@ -159,8 +159,12 @@ static const void *decompile_string_arg(const char *s) {
 	const char *end = strchr(s, ':');
 	if (!end)
 		error_at((const uint8_t *)s, "missing colon");
-	for (const char *p = s; p < end; p++) {
-		if ((p == s && *p == ' ') || *p == ',') {
+	for (const char *p = s; p < end; p = (const char *)advance_char((const uint8_t *)p)) {
+		if ((p == s && *p == ' ') ||
+			*p == ',' ||
+			(config.utf8_output && is_sjis_byte1(p[0]) && !is_unicode_safe(p[0], p[1])))
+		{
+			// needs escaping
 			dc_putc('"');
 			dc_put_string(s, end - s, STRING_ESCAPE);
 			dc_putc('"');
