@@ -211,7 +211,8 @@ static void build(Vector *src_paths, Vector *variables, Vector *verbs, Vector *o
 			.uk1 = config.ag00_uk1,
 			.uk2 = config.ag00_uk2,
 		};
-		ag00_write(&ag00, path_join(dirname_utf8(adisk_name), "AG00.DAT"));
+		const char* ag00_name = config.game_id == RANCE2_HINT ? "GG00.DAT" : "AG00.DAT";
+		ag00_write(&ag00, path_join(dirname_utf8(adisk_name), ag00_name));
 	}
 
 	if (config.debug) {

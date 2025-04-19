@@ -233,7 +233,7 @@ static void verb_obj(void) {
 	uint8_t verb = *dc.p++;
 	uint8_t obj = *dc.p++;
 	if (!dc.ag00)
-		error("AG00.DAT is required to decompile this file");
+		error("%cG00.DAT is required to decompile this file", config.game_id == RANCE2_HINT ? 'G' : 'A');
 	if (verb >= dc.ag00->verbs->len)
 		error("invalid verb %d", verb);
 	if (obj >= dc.ag00->objs->len)

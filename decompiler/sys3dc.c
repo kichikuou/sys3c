@@ -102,6 +102,19 @@ static bool is_directory(const char *path) {
 }
 
 static void find_input_files(const char *dir, int *argc, char ***argv) {
+	if (config.game_id == RANCE2_HINT) {
+		*argc = 2;
+		*argv = calloc(2, sizeof(char *));
+		(*argv)[0] = path_join(dir, "GDISK.DAT");
+		(*argv)[1] = path_join(dir, "GG00.DAT");
+		return;
+	}
+	if (config.game_id == PROG_OMAKE) {
+		*argc = 1;
+		*argv = calloc(1, sizeof(char *));
+		(*argv)[0] = path_join(dir, "AGAME.DAT");
+		return;
+	}
 	Vector *files = new_vec();
 	DIR *dp = opendir(dir);
 	if (!dp)
@@ -110,7 +123,12 @@ static void find_input_files(const char *dir, int *argc, char ***argv) {
 	while ((d = readdir(dp))) {
 		if ((isalpha(d->d_name[0]) && !strcasecmp(d->d_name + 1, "DISK.DAT")) ||
 				!strcasecmp(d->d_name, "AG00.DAT")) {
-			vec_push(files, path_join(dir, d->d_name));
+			if (config.game_id != RANCE2 || toupper(d->d_name[0]) != 'G')
+				vec_push(files, path_join(dir, d->d_name));
+		}
+		if (!strcasecmp(d->d_name, "GG00.DAT") && config.game_id != RANCE2) {
+			fprintf(stderr, "Warning: GG00.DAT is found but no game ID is specified.\n");
+			fprintf(stderr, "         Please specify --game=rance2 or --game=rance2_hint.\n");
 		}
 	}
 	closedir(dp);
@@ -188,7 +206,7 @@ int main(int argc, char *argv[]) {
 	uint32_t adisk_crc = 0, bdisk_crc = 0;
 	for (int i = 0; i < argc; i++) {
 		char *basename = basename_utf8(argv[i]);
-		if (!strcasecmp(basename, "AG00.DAT")) {
+		if (!strcasecmp(basename, config.game_id == RANCE2_HINT ? "GG00.DAT" : "AG00.DAT")) {
 			ag00 = ag00_read(argv[i]);
 			continue;
 		}
