@@ -25,7 +25,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-static const char short_options[] = "adE:g:ho:uVv";
+static const char short_options[] = "aE:G:ho:uVv";
 static const struct option long_options[] = {
 	{ "address",  no_argument,       NULL, 'a' },
 	{ "encoding", required_argument, NULL, 'E' },
