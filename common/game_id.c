@@ -100,7 +100,7 @@ static const struct GameTable {
 	{"bunkasai", BUNKASAI, ADISK_BUNKASAI},
 	{"crescent", CRESCENT, ADISK_CRESCENT},
 	{"rance", RANCE, ADISK_RANCE},
-	{"ranec2", RANCE2, ADISK_RANCE2},
+	{"rance2", RANCE2, ADISK_RANCE2},
 	{"rance2_hint", RANCE2_HINT, ADISK_RANCE2_HINT},
 	{"dps", DPS, ADISK_DPS},
 	{"dps_sg_fahren", DPS_SG_FAHREN, ADISK_DPS_SG, BDISK_DPS_SG_FAHREN},
