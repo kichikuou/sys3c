@@ -59,8 +59,8 @@ void load_config(FILE *fp, const char *cfg_dir) {
 			config.obj_list = path_join(cfg_dir, val);
 		} else if (sscanf(line, "ag00_uk1 = %d", &config.ag00_uk1)) {
 		} else if (sscanf(line, "ag00_uk2 = %d", &config.ag00_uk2)) {
-		} else if (sscanf(line, "quoted_strings = %s", val)) {
-			config.quoted_strings = to_bool(val);
+		} else if (sscanf(line, "allow_ascii = %s", val)) {
+			config.allow_ascii = to_bool(val);
 		} else if (sscanf(line, "rev_marker = %s", val)) {
 			config.rev_marker = to_bool(val);
 		} else if (sscanf(line, "sys0dc_offby1_error = %s", val)) {

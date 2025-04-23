@@ -34,7 +34,7 @@ typedef struct {
 	bool debug;
 	bool unicode;
 	bool utf8;
-	bool quoted_strings;
+	bool allow_ascii;
 	bool rev_marker;
 	bool sys0dc_offby1_error;
 } Config;

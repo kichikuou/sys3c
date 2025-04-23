@@ -41,7 +41,7 @@ typedef struct {
 	const uint8_t *p;  // Points inside scos->data[page]->data
 	int indent;
 
-	bool quoted_strings;
+	bool allow_ascii;
 	bool rev_marker;
 } Decompiler;
 
@@ -300,7 +300,7 @@ static void arguments(const char *sig) {
 			break;
 		case 's':
 			if (*dc.p == '\'') {  // SysEng-style string
-				dc.quoted_strings = true;
+				dc.allow_ascii = true;
 				dc.p++;
 				dc_putc('"');
 				dc.p = decompile_syseng_string((const char *)dc.p);
@@ -489,7 +489,7 @@ static void decompile_page(int page) {
 			break;
 
 		case '\'':  // SysEng-style message
-			dc.quoted_strings = true;
+			dc.allow_ascii = true;
 			dc.p = decompile_syseng_string((const char *)dc.p);
 			dc_putc('\'');
 			break;
@@ -554,8 +554,8 @@ static void write_config(const char *path, const char *adisk_name) {
 		fprintf(fp, "ag00_uk1 = %d\n", dc.ag00->uk1);
 		fprintf(fp, "ag00_uk2 = %d\n", dc.ag00->uk2);
 	}
-	if (dc.quoted_strings)
-		fputs("quoted_strings = true\n", fp);
+	if (dc.allow_ascii)
+		fputs("allow_ascii = true\n", fp);
 	if (dc.rev_marker)
 		fputs("rev_marker = true\n", fp);
 	if (sys0dc_offby1_error)
