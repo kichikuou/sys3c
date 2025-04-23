@@ -60,7 +60,7 @@ sys3c --project=src/sys3c.cfg --outdir=.
 ## Unicode mode
 Using the "Unicode mode" of [system3-sdl2](https://github.com/kichikuou/system3-sdl2),
 you can translate games into any languages that are not supported by original
-System 1-3. See [docs/unicode.adoc](docs/unicode.adoc) for more information.
+System 1-3. See [docs/translating.adoc](docs/translating.adoc) for more information.
 
 ## Command Documentations
 Here are the manuals for the commands:

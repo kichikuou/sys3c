@@ -1,0 +1,94 @@
+= Translating System 1-3 Games
+
+This document explains how to translate System 1-3 games into languages other
+than Japanese. To run translated games,
+https://github.com/kichikuou/system3-sdl2[system3-sdl2] is required.
+
+== English Translation
+
+If you want to translate a game to English, you can use the `allow_ascii`
+option:
+
+1. Decompile the game with xref:sys3dc.adoc[`sys3dc`].
+2. Open `sys3c.cfg` file in the `src` folder, and add the following line:
+
+   allow_ascii = true
+
+3. Build the scenario file with xref:sys3c.adoc[`sys3c`].
+4. Overwrite the original scenario file (`*DISK.DAT`) with the generated one
+   (don't forget to back up the original file).
+5. Run the game with system3-sdl2.
+6. Now you can put English strings in the source files. Modify the source files
+   and repeat the steps 3-5.
+
+== Unicode Mode for Other Languages
+
+To translate games into languages other than Japanese or English, you'll need
+to use the Unicode mode:
+
+1. Decompile the game with xref:sys3dc.adoc[`sys3dc`].
+2. Open `sys3c.cfg` file in the `src` folder, and add the following line:
+
+     unicode = true
+
+3. Modify the source files as you like. You can use any language, but make sure
+   to save the files in UTF-8 encoding.
+4. Build the scenario file with xref:sys3c.adoc[`sys3c`].
+5. Overwrite the original scenario file (`*DISK.DAT`) with the generated one
+   (don't forget to back up the original file).
+6. To run the game with system3-sdl2, you need to tell system3-sdl2 to use
+   UTF-8 encoding. To do this, create a configuration file named `system3.ini`
+   in the game folder (where `*.DAT` files are) with the following contents:
+
+     [config]
+     encoding = utf-8
+
+7. Run the game with system3-sdl2. It should now work with the UTF-8 encoding.
+
+== Fonts
+
+The fonts come with system3-sdl2 only cover Japanese and English, so you may
+need to prepare a font for your language. Even when translating into English,
+you may want to replace the font with one that is not fixed-width.
+
+To change the font in system3-sdl2, put the font files (`.ttf` or `.otf`) in the
+game folder, and add the following line to the `system3.ini` file, after the
+`encoding` line:
+
+  fontfile = your-font.ttf
+
+== Troubleshooting
+
+=== Compile Error in `$` Command
+
+Syntactically, you can put any command between the second and third `$`. So,
+instead of:
+
+   $L_0147d$Rance 3 Hints$
+
+You have to write:
+
+   $L_0147d$'Rance 3 Hints'$
+
+Single quotes are required if the string contains ASCII characters, so that
+the compiler can distinguish between the string and the command.
+
+=== Scenario Size Limitation
+
+When compiling with Unicode mode, you might encounter the following error:
+
+   Maximum page size exceeded. Consider splitting the source file.
+
+This error occurs when the compiled scenario file exceeds the 64KB size limit.
+In the original AliceSoft games, strings are stored in Shift_JIS encoding,
+where Japanese characters use 2 bytes per character. In Unicode mode, Japanese
+characters typically require 3 bytes per character, resulting in larger file
+sizes. This size increase can cause larger scenario files to exceed the 64KB
+limit when compiled in Unicode mode.
+
+Depending on the target language, your translation might naturally be smaller
+than the original Japanese text, which could solve the problem automatically.
+
+If the error persists, you'll need to split the source file into multiple
+smaller files, or remove some less important text to keep the file size under
+the limit.

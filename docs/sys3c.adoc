@@ -59,8 +59,8 @@ sys3c - System 1-3 compiler
   a list of supported games.
 
 *-u, --unicode*::
-  Generate output in UTF-8 character encoding. See xref:unicode.adoc[Unicode
-  Mode document] for details.
+  Generate output in UTF-8 character encoding. See the
+  xref:translating.adoc[translation document] for details.
 
 *-V, --variables*=_file_::
   Read list of variables from _file_.

@@ -87,7 +87,7 @@ dri = executable('dri', ['tools/dri.c'], dependencies : common, install : true)
 
 docs = [
   ['docs/dri.adoc', ['dri.1']],
-  ['docs/unicode.adoc', []],
+  ['docs/translating.adoc', []],
   ['docs/sys3c.adoc', ['sys3c.1']],
   ['docs/sys3dc.adoc', ['sys3dc.1']],
 ]
