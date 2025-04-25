@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.0 - 2025-04-26
+- Rewrote the translation guide document.
+- compiler: Renamed `quoted_strings` config to `allow_ascii`.
+- compiler: Now `encoding = utf-8` implies `allow_ascii = true`.
+- compiler: Fixed compile error for Only You and Funny Bee in Unicode mode.
+
 ## 0.3.1 - 2025-04-20
 - Added special filename handling for `rance2_hint` and `prog_omake` (#1)
 - Fixed typo in game_id (`ranec2` -> `rance2`)
