@@ -57,6 +57,12 @@ Once you've finished editing the source files, you can compile them back to the
 sys3c --project=src/sys3c.cfg --outdir=.
 ```
 
+### Using with Visual Studio Code
+
+Alternatively, you can use `sys3c` and `sys3dc` with
+[Visual Studio Code](https://code.visualstudio.com/). For more information, see
+[`vscode-system3x`](https://github.com/kichikuou/vscode-system3x).
+
 ## Unicode mode
 Using the "Unicode mode" of [system3-sdl2](https://github.com/kichikuou/system3-sdl2),
 you can translate games into any languages that are not supported by original
