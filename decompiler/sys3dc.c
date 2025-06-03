@@ -225,8 +225,10 @@ int main(int argc, char *argv[]) {
 		printf("adisk_crc = %08x, bdisk_crc = %08x\n", adisk_crc, bdisk_crc);
 	if (config.game_id == UNKNOWN_GAME) {
 		config.game_id = detect_game_id(adisk_crc, bdisk_crc);
-		if (config.game_id == UNKNOWN_GAME)
-			error("Cannot detect game ID. Please specify --game.");
+		if (config.game_id == UNKNOWN_GAME) {
+			fputs("Cannot detect game ID. Please specify --game.\n", stderr);
+			exit(EXIT_UNKNOWN_GAME);
+		}
 		config.sys_ver = get_sysver(config.game_id);
 	}
 

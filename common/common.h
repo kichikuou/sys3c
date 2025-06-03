@@ -23,6 +23,8 @@
 
 #define VERSION "0.4.0"
 
+#define EXIT_UNKNOWN_GAME 2
+
 static inline uint32_t le16(const uint8_t *p) {
 	return p[0] | p[1] << 8;
 }

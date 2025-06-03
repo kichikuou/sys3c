@@ -1,5 +1,8 @@
 # Changelog
 
+## Unreleased
+- decompiler: Exit with code 2 when the game cannot be determined.
+
 ## 0.4.0 - 2025-04-26
 - Rewrote the translation guide document.
 - compiler: Renamed `quoted_strings` config to `allow_ascii`.
