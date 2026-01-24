@@ -5,6 +5,8 @@ supported by system3-sdl2.
 
 For System 3.5 - 3.9 games, check out [xsys35c](https://github.com/kichikuou/xsys35c).
 
+For System 4 games, check out [sys4lang](https://github.com/kichikuou/sys4lang).
+
 ## Download
 Prebuilt Windows executables are available from the
 [release page](https://github.com/kichikuou/sys3c/releases). The 64-bit version
