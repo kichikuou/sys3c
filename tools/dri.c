@@ -234,7 +234,7 @@ static int do_create(int argc, char *argv[]) {
 		}
 	} else {
 		for (int i = 1; i < argc; i++)
-			add_file(entries, 1, i, argv[i]);
+			add_file(entries, 1 << 1, i, argv[i]);
 		FILE *fp = checked_fopen(dri_path, "wb");
 		dri_write(entries, 1, fp);
 		fclose(fp);

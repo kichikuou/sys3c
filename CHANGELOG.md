@@ -2,6 +2,7 @@
 
 ## Unreleased
 - decompiler: Exit with code 2 when the game cannot be determined.
+- dri: Fixed `dri create <drifile> <file>...` always creating an empty archive.
 
 ## 0.4.0 - 2025-04-26
 - Rewrote the translation guide document.
