@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.4.1 - 2026-02-07
 - decompiler: Exit with code 2 when the game cannot be determined.
 - dri: Fixed `dri create <drifile> <file>...` always creating an empty archive.
 

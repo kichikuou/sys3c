@@ -1,7 +1,7 @@
 project('sys3c', 'c')
 fs = import('fs')
 
-sys3c_version = '0.4.0'
+sys3c_version = '0.4.1'
 
 if host_machine.system() == 'emscripten'
   common_link_args = [
