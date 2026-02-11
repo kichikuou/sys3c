@@ -45,6 +45,7 @@
 #define ADISK_YAKATA		0x8cef6fa6	// ALICEの館
 #define ADISK_GAKUEN		0xe4d6ec66	// 学園戦記 (unofficial system1 port) 1.0JP
 #define ADISK_GAKUEN_ENG	0x6ba8c102	// Gakuen Senki (English) 1.0
+#define ADISK_GAKUEN_MSX	0x3e0a4597	// 学園戦記 (MSX2) A-DISK
 #define ADISK_AYUMI_FD		0x4e2fed2a	// あゆみちゃん物語 (FD)
 #define ADISK_AYUMI_HINT	0xf6bd963a	// あゆみちゃん物語 ヒントディスク
 #define ADISK_AYUMI_PROTO	0x4e2f5678	// あゆみちゃん物語 PROTO
@@ -122,6 +123,7 @@ static const struct GameTable {
 	{"yakata", YAKATA, ADISK_YAKATA},
 	{"gakuen", GAKUEN, ADISK_GAKUEN},
 	{"gakuen_eng", GAKUEN_ENG, ADISK_GAKUEN_ENG},
+	{"gakuen_msx", GAKUEN_MSX, ADISK_GAKUEN_MSX},
 
 	{"system2_generic", SYSTEM2_GENERIC},
 	{"ayumi_fd", AYUMI_FD, ADISK_AYUMI_FD},

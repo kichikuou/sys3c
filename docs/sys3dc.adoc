@@ -50,6 +50,7 @@ scenarios.
 	`gakuen_eng`,
 	`gakuen_king`,
 	`gakuen`,
+	`gakuen_msx`,
 	`hashirionna2`,
 	`intruder`,
 	`little_vampire_eng`,

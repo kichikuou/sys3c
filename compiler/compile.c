@@ -309,7 +309,7 @@ static void arguments(const char *sig) {
 				input++;  // Do not consume full-width spaces here
 			if (*input == '"') {
 				expect('"');
-				if (config.allow_ascii || config.unicode) {
+				if (config.allow_ascii || config.output_encoding == UTF8) {
 					emit(out, '\'');
 					compile_string(out, '"', STRING_ESCAPE_SQUOTE);
 					emit(out, '\'');
@@ -420,7 +420,7 @@ static bool command(void) {
 		break;
 
 	case '\'': // Message
-		if (config.allow_ascii || config.unicode) {
+		if (config.allow_ascii || config.output_encoding == UTF8) {
 			emit(out, cmd);
 			compile_string(out, '\'', STRING_ESCAPE_SQUOTE);
 			emit(out, cmd);

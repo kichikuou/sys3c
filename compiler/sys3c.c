@@ -199,11 +199,21 @@ static void build(Vector *src_paths, Vector *variables, Vector *verbs, Vector *o
 	}
 
 	if (verbs) {
-		if (!config.unicode) {
+		switch (config.output_encoding) {
+		case SJIS:
 			for (int i = 0; i < verbs->len; i++)
 				verbs->data[i] = utf2sjis(verbs->data[i]);
 			for (int i = 0; i < objs->len; i++)
 				objs->data[i] = utf2sjis(objs->data[i]);
+			break;
+		case UTF8:
+			break;
+		case MSX:
+			for (int i = 0; i < verbs->len; i++)
+				verbs->data[i] = utf2msx_data(verbs->data[i]);
+			for (int i = 0; i < objs->len; i++)
+				objs->data[i] = utf2msx_data(objs->data[i]);
+			break;
 		}
 		AG00 ag00 = {
 			.verbs = verbs,
@@ -268,7 +278,7 @@ int main(int argc, char *argv[]) {
 			project = optarg;
 			break;
 		case 'u':
-			config.unicode = true;
+			config.output_encoding = UTF8;
 			break;
 		case 'V':
 			var_list = optarg;
@@ -297,6 +307,11 @@ int main(int argc, char *argv[]) {
 			usage();
 			return 1;
 		}
+	}
+	if (config.game_id == GAKUEN_MSX) {
+		if (config.output_encoding == UTF8)
+			error("gakuen_msx cannot be compiled with UTF-8 encoding.");
+		config.output_encoding = MSX;
 	}
 	if (!hed && config.hed)
 		hed = config.hed;

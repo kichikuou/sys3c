@@ -32,7 +32,7 @@ typedef struct {
 	int ag00_uk1, ag00_uk2;
 
 	bool debug;
-	bool unicode;
+	enum encoding output_encoding;
 	bool utf8;
 	bool allow_ascii;
 	bool rev_marker;
@@ -41,10 +41,6 @@ typedef struct {
 extern Config config;
 
 void load_config(FILE *fp, const char *cfg_dir);
-
-static inline const char *to_output_encoding(const char *str_utf8) {
-	return config.unicode ? str_utf8 : utf2sjis_sub(str_utf8, '?');
-}
 
 // sco.c
 

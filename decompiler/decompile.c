@@ -66,12 +66,25 @@ static uint8_t *mark_at(int page, int addr) {
 	return &sco->mark[addr];
 }
 
+static inline bool is_message(uint8_t c) {
+	if (config.input_encoding == MSX)
+		return is_msx_message_char(c);
+	else
+		return c == 0x20 || c > 0x80;
+}
+
 static const uint8_t *advance_char(const uint8_t *s) {
-	if (config.utf8_input) {
+	switch (config.input_encoding) {
+	case SJIS:
+		s += is_sjis_byte1(*s) ? 2 : 1;
+		break;
+	case UTF8:
 		while (UTF8_TRAIL_BYTE(*++s))
 			;
-	} else {
-		s += is_sjis_byte1(*s) ? 2 : 1;
+		break;
+	case MSX:
+		s++;
+		break;
 	}
 	return s;
 }
@@ -104,6 +117,11 @@ static void dc_put_string(const char *s, int len, unsigned flags) {
 	if (!dc.out)
 		return;
 
+	if (config.input_encoding == MSX) {
+		dc_puts(msx2sjis_msg(s, len));
+		return;
+	}
+
 	const char *end = s + len;
 	while (s < end) {
 		uint8_t c = *s++;
@@ -115,7 +133,7 @@ static void dc_put_string(const char *s, int len, unsigned flags) {
 				dc_putc('\\');
 			}
 			dc_putc(c);
-		} else if (config.utf8_input) {
+		} else if (config.input_encoding == UTF8) {
 			dc_putc(c);
 			while (UTF8_TRAIL_BYTE(*s))
 				dc_putc(*s++);
@@ -155,24 +173,23 @@ static const void *decompile_syseng_string(const char *s) {
 	return end + 1;
 }
 
-static const void *decompile_string_arg(const char *s) {
-	const char *end = strchr(s, ':');
-	if (!end)
-		error_at((const uint8_t *)s, "missing colon");
-	for (const char *p = s; p < end; p = (const char *)advance_char((const uint8_t *)p)) {
-		if ((p == s && *p == ' ') ||
-			*p == ',' ||
-			(config.utf8_output && is_sjis_byte1(p[0]) && !is_unicode_safe(p[0], p[1])))
-		{
-			// needs escaping
-			dc_putc('"');
-			dc_put_string(s, end - s, STRING_ESCAPE);
-			dc_putc('"');
-			return end + 1;
+static void decompile_string_arg(const char *s, const char *end) {
+	if (config.input_encoding != MSX) {
+		for (const char *p = s; p < end; p = (const char *)advance_char((const uint8_t *)p)) {
+			if ((p == s && *p == ' ') ||
+				*p == ',' ||
+				(config.input_encoding == SJIS && config.utf8_output &&
+					is_sjis_byte1(p[0]) && !is_unicode_safe(p[0], p[1])))
+			{
+				// needs escaping
+				dc_putc('"');
+				dc_put_string(s, end - s, STRING_ESCAPE);
+				dc_putc('"');
+				return;
+			}
 		}
 	}
 	dc_put_string(s, end - s, 0);
-	return end + 1;
 }
 
 static void print_address(void) {
@@ -306,7 +323,13 @@ static void arguments(const char *sig) {
 				dc.p = decompile_syseng_string((const char *)dc.p);
 				dc_putc('"');
 			} else {
-				dc.p = decompile_string_arg((const char *)dc.p);
+				const char *end = config.input_encoding == MSX
+					? memchr(dc.p, ':', current_sco()->filesize - dc_addr())
+					: strchr((const char *)dc.p, ':');
+				if (!end)
+					error_at(dc.p, "missing colon");
+				decompile_string_arg((const char *)dc.p, end);
+				dc.p = (const uint8_t *)end + 1;
 			}
 			break;
 		default:
@@ -331,7 +354,7 @@ static int get_command(void) {
 
 static bool inline_menu_string(void) {
 	const uint8_t *end = dc.p;
-	while (*end == 0x20 || *end > 0x80)
+	while (is_message(*end))
 		end = advance_char(end);
 	if (*end != '$')
 		return false;
@@ -380,11 +403,11 @@ static void decompile_page(int page) {
 		if (*dc.p == '>' || *dc.p == '}')
 			dc.indent--;
 		indent();
-		if (*dc.p == 0x20 || *dc.p > 0x80) {
+		if (is_message(*dc.p)) {
 			sco->mark[dc.p - sco->data] |= CODE;
 			dc_putc('\'');
 			const uint8_t *begin = dc.p;
-			while (*dc.p == 0x20 || *dc.p > 0x80) {
+			while (is_message(*dc.p)) {
 				dc.p = advance_char(dc.p);
 				if (dc.p >= sco->data + sco->filesize || *mark_at(dc.page, dc_addr()) != 0)
 					break;
@@ -562,7 +585,7 @@ static void write_config(const char *path, const char *adisk_name) {
 		fputs("sys0dc_offby1_error = true\n", fp);
 
 	fprintf(fp, "encoding = %s\n", config.utf8_output ? "utf8" : "sjis");
-	if (config.utf8_input)
+	if (config.input_encoding == UTF8)
 		fprintf(fp, "unicode = true\n");
 
 	fclose(fp);
@@ -574,9 +597,6 @@ static void write_hed(const char *path) {
 		Sco *sco = dc.scos->data[i];
 		fprintf(fp, "%s\n", sco ? sco->src_name : "");
 	}
-
-	if (!config.utf8_input && config.utf8_output)
-		convert_to_utf8(fp);
 	fclose(fp);
 }
 
@@ -586,7 +606,7 @@ static void write_txt(const char *path, Vector *lines) {
 		const char *s = lines->data[i];
 		fprintf(fp, "%s\n", s ? s : "");
 	}
-	if (!config.utf8_input && config.utf8_output)
+	if (config.input_encoding != UTF8 && config.utf8_output)
 		convert_to_utf8(fp);
 	fclose(fp);
 }
@@ -673,7 +693,7 @@ void decompile(Vector *scos, AG00 *ag00, const char *outdir, const char *adisk_n
 			continue;
 		if (config.verbose)
 			printf("Decompiling %s (page %d)...\n", sjis2utf(sco->sco_name), i);
-		dc.out = checked_fopen(path_join(outdir, to_utf8(sco->src_name)), "w+");
+		dc.out = checked_fopen(path_join(outdir, sco->src_name), "w+");
 		if (sco->volume_bits != 1 << 1) {
 			fputs("pragma dri_volume ", dc.out);
 			for (int v = 1; v <= DRI_MAX_VOLUME; v++) {
@@ -683,7 +703,7 @@ void decompile(Vector *scos, AG00 *ag00, const char *outdir, const char *adisk_n
 			fputs(":\n", dc.out);
 		}
 		decompile_page(i);
-		if (!config.utf8_input && config.utf8_output)
+		if (config.input_encoding != UTF8 && config.utf8_output)
 			convert_to_utf8(dc.out);
 		fclose(dc.out);
 	}

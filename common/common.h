@@ -49,14 +49,25 @@ extern void fputdw(uint32_t n, FILE *fp);
 
 // sjisutf.c
 
+enum encoding {
+	SJIS,
+	UTF8,
+	MSX,  // 1-byte encoding used in Gakuen Senki and Little Vampire (MSX2 version)
+};
+
 #define sjis2utf(s) sjis2utf_sub((s), -1)
 #define utf2sjis(s) utf2sjis_sub((s), -1)
 char *sjis2utf_sub(const char *str, int substitution_char);
 char *utf2sjis_sub(const char *str, int substitution_char);
+char *msx2sjis_msg(const char *str, int len);
+char *msx2sjis_data(const char *str);
+char *utf2msx_msg(const char *str, int *out_len);
+char *utf2msx_data(const char *str);
 uint8_t compact_sjis(uint8_t c1, uint8_t c2);
 uint16_t expand_sjis(uint8_t c);
 bool is_valid_sjis(uint8_t c1, uint8_t c2);
 bool is_unicode_safe(uint8_t c1, uint8_t c2);
+bool is_msx_message_char(uint8_t c);
 
 // Returns NULL if s is a valid UTF-8 string. Otherwise, returns the first
 // invalid character.
@@ -190,6 +201,7 @@ typedef enum {
 	YAKATA,
 	GAKUEN,
 	GAKUEN_ENG,
+	GAKUEN_MSX,
 
 	SYSTEM2_GENERIC,
 	AYUMI_FD,

@@ -59,7 +59,7 @@ typedef struct {
 	SysVer sys_ver;
 	GameId game_id;
 	bool address;
-	bool utf8_input;
+	enum encoding input_encoding;
 	bool utf8_output;
 	bool verbose;
 } Config;
@@ -72,4 +72,3 @@ void warning_at(const uint8_t *pos, char *fmt, ...);
 
 // sys3dc.c
 void convert_to_utf8(FILE *fp);
-const char *to_utf8(const char *s);

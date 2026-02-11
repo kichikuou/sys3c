@@ -70,7 +70,8 @@ void load_config(FILE *fp, const char *cfg_dir) {
 		} else if (sscanf(line, "outdir = %s", val)) {
 			config.outdir = path_join(cfg_dir, val);
 		} else if (sscanf(line, "unicode = %s", val)) {
-			config.unicode = to_bool(val);
+			if (to_bool(val))
+				config.output_encoding = UTF8;
 		} else if (sscanf(line, "debug = %s", val)) {
 			config.debug = to_bool(val);
 		}

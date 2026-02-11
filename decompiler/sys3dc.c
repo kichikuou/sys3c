@@ -90,12 +90,6 @@ void convert_to_utf8(FILE *fp) {
 	// No truncation needed because UTF-8 encoding is no shorter than SJIS.
 }
 
-const char *to_utf8(const char *s) {
-	if (config.utf8_input)
-		return s;
-	return sjis2utf(s);
-}
-
 static bool is_directory(const char *path) {
 	struct stat st;
 	return stat(path, &st) == 0 && S_ISDIR(st.st_mode);
@@ -169,7 +163,7 @@ int main(int argc, char *argv[]) {
 			outdir = optarg;
 			break;
 		case 'u':
-			config.utf8_input = true;
+			config.input_encoding = UTF8;
 			break;
 		case 'V':
 			config.verbose = true;
@@ -231,6 +225,19 @@ int main(int argc, char *argv[]) {
 		}
 		config.sys_ver = get_sysver(config.game_id);
 	}
+	if (config.game_id == GAKUEN_MSX) {
+		if (config.input_encoding == UTF8)
+			error("gakuen_msx cannot be decompiled with UTF-8 encoding.");
+		config.input_encoding = MSX;
+		if (ag00) {
+			for (int i = 0; i < ag00->verbs->len; i++) {
+				ag00->verbs->data[i] = msx2sjis_data(ag00->verbs->data[i]);
+			}
+			for (int i = 0; i < ag00->objs->len; i++) {
+				ag00->objs->data[i] = msx2sjis_data(ag00->objs->data[i]);
+			}
+		}
+	}
 
 	for (int i = 0; i < scos->len; i++) {
 		DriEntry *e = scos->data[i];
@@ -239,7 +246,7 @@ int main(int argc, char *argv[]) {
 		Sco *sco = sco_new(i + 1, e->data, e->size, e->volume_bits);
 		scos->data[i] = sco;
 	}
-	if (config.utf8_input && !config.utf8_output)
+	if (config.input_encoding == UTF8 && !config.utf8_output)
 		error("Unicode game data cannot be decompiled with -Es.");
 
 	if (outdir && make_dir(outdir) != 0 && errno != EEXIST)

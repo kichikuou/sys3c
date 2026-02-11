@@ -197,7 +197,7 @@ int get_number(void) {
 }
 
 static void compile_multibyte_string(Buffer *b, bool compact) {
-	if (config.unicode) {
+	if (config.output_encoding == UTF8) {
 		while (!isascii(*input))
 			echo(b);
 		return;
@@ -211,6 +211,14 @@ static void compile_multibyte_string(Buffer *b, bool compact) {
 	char *buf = alloca(input - top + 1);
 	strncpy(buf, top, input - top);
 	buf[input - top] = '\0';
+	if (config.output_encoding == MSX) {
+		int len;
+		char *msx = utf2msx_msg(buf, &len);
+		for (int i = 0; i < len; i++)
+			emit(b, (uint8_t)msx[i]);
+		return;
+	}
+
 	char *sjis = utf2sjis(buf);
 	if (!compact) {
 		emit_string(b, sjis);
@@ -237,13 +245,20 @@ void compile_sjis_codepoint(Buffer *b) {
 	const char *top = input;
 	expect('<');
 	int code = get_number();
-	if (config.unicode) {
-		char buf[3] = { code >> 8, code & 0xff, 0 };
-		if (!is_valid_sjis(buf[0], buf[1]))
-			error_at(top, "Invalid SJIS code 0x%x", code);
-		emit_string(b, sjis2utf(buf));
-	} else {
+	switch (config.output_encoding) {
+	case SJIS:
 		emit_word_be(b, code);
+		break;
+	case UTF8:
+		{
+			char buf[3] = { code >> 8, code & 0xff, 0 };
+			if (!is_valid_sjis(buf[0], buf[1]))
+				error_at(top, "Invalid SJIS code 0x%x", code);
+			emit_string(b, sjis2utf(buf));
+		}
+		break;
+	case MSX:
+		error_at(top, "MSX encoding does not support codepoint notation");
 	}
 	expect('>');
 }

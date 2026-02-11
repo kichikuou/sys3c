@@ -20,6 +20,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
+#include <uchar.h>
 
 static const uint8_t hankaku81[] = {
 	0x20, 0xa4, 0xa1, 0x00, 0x00, 0xa5, 0x00, 0x00,
@@ -334,4 +335,180 @@ uint16_t expand_sjis(uint8_t c) {
 	if (c == ' ')
 		return 0x8140; // full-width space
 	return kanatbl[c - 0xa0];
+}
+
+// 1-byte encoding used in the scenario files of Gakuen Senki and
+// Little Vampire (MSX2). Note that \0 is a valid character here.
+static const char16_t msx_msg_table[256] =
+	// 0x00 - 0x1F
+	u"　！＂＃＄％＆＇（）＊＋，－．／０１２３４５６７８９［］＜＝＞？"
+	// 0x20 - 0x3F (ACT commands)
+	u"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
+	// 0x40 - 0x5F (ACT commands)
+	u"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
+	// 0x60 - 0x7F
+	u"＠ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ\0＼\0＾\0"
+	// 0x80 - 0x9F
+	u"\0\0\0\0\0\0をぁぃぅぇぉゃゅょっ\0あいうえおかきくけこさしすせそ"
+	// 0xA0 - 0xBF
+	u"\0。「」、・ヲァィゥェォャュョッーアイウエオカキクケコサシスセソ"
+	// 0xC0 - 0xDF
+	u"タチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワン゛゜"
+	// 0xE0 - 0xFF
+	u"たちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわん\0\0";
+
+// A different 1-byte encoding used in the verbs / objects listing of
+// Gakuen Senki and Little Vampire (MSX2). JIS X 0201 + hiragana.
+static const char16_t msx_ag00_table[256] =
+	// 0x00 - 0x1F
+	u"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
+	// 0x20 - 0x3F
+	u"　！＂＃＄％＆＇（）＊＋，－．／０１２３４５６７８９：；＜＝＞？"
+	// 0x40 - 0x5F
+	u"＠ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ［＼］＾＿"
+	// 0x60 - 0x7F
+	u"｀ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ｛｜｝～\0"
+	// 0x80 - 0x9F
+	u"\0\0\0\0\0\0をぁぃぅぇぉゃゅょっ\0あいうえおかきくけこさしすせそ"
+	// 0xA0 - 0xBF
+	u"\0。「」、・ヲァィゥェォャュョッーアイウエオカキクケコサシスセソ"
+	// 0xC0 - 0xDF
+	u"タチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワン゛゜"
+	// 0xE0 - 0xFF
+	u"たちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわん\0\0";
+
+#define JIS_DAKUTEN 0xDE
+#define JIS_HANDAKUTEN 0xDF
+
+static char16_t combine_msx(char16_t base, uint8_t mark) {
+	if (mark == JIS_DAKUTEN) {
+		if (base == u'う') return u'ゔ';
+		if (base >= u'か' && base <= u'ち' && (base % 2 != 0)) return base + 1;
+		if (base >= u'つ' && base <= u'と' && (base % 2 == 0)) return base + 1;
+		if (base >= u'は' && base <= u'ほ' && (base - u'は') % 3 == 0) return base + 1;
+		if (base == u'ウ') return u'ヴ';
+		if (base >= u'カ' && base <= u'チ' && (base % 2 != 0)) return base + 1;
+		if (base >= u'ツ' && base <= u'ト' && (base % 2 == 0)) return base + 1;
+		if (base >= u'ハ' && base <= u'ホ' && (base - u'ハ') % 3 == 0) return base + 1;
+	} else if (mark == JIS_HANDAKUTEN) {
+		if (base >= u'は' && base <= u'ほ' && (base - u'は') % 3 == 0) return base + 2;
+		if (base >= u'ハ' && base <= u'ホ' && (base - u'ハ') % 3 == 0) return base + 2;
+	}
+	return 0;
+}
+
+static char *msx2sjis(const uint8_t *src, int len, const char16_t table[256]) {
+	uint8_t *dst = malloc(len * 2 + 1);
+	uint8_t *dstp = dst;
+	const uint8_t *end = src + len;
+	char16_t last_c = 0;
+
+	while (src < end) {
+		uint8_t b = *src++;
+		char16_t c = table[b];
+		if (c == 0)
+			error("Invalid MSX byte %02x", b);
+
+		if (last_c && (b == JIS_DAKUTEN || b == JIS_HANDAKUTEN)) {
+			char16_t combined = combine_msx(last_c, b);
+			if (combined) {
+				dstp -= 2;
+				c = combined;
+			}
+		}
+		last_c = c;
+
+		c = unicode_to_sjis(c);
+		if (c <= 0xff) {
+			*dstp++ = (uint8_t)c;
+		} else {
+			*dstp++ = (uint8_t)(c >> 8);
+			*dstp++ = (uint8_t)(c & 0xff);
+		}
+	}
+	*dstp = '\0';
+	return (char *)dst;
+}
+
+char *msx2sjis_msg(const char *str, int len) {
+	return msx2sjis((const uint8_t*)str, len, msx_msg_table);
+}
+
+char *msx2sjis_data(const char *str) {
+	return msx2sjis((const uint8_t*)str, strlen(str), msx_ag00_table);
+}
+
+static int unicode_to_msx(uint16_t u, const char16_t table[256]) {
+	for (int i = 0; i < 256; i++) {
+		if (table[i] == u)
+			return i;
+	}
+	return -1;
+}
+
+static char *utf2msx(const char *str, const char16_t table[256], int *out_len) {
+	const uint8_t *src = (uint8_t *)str;
+	uint8_t *dst = malloc(strlen(str) + 1);
+	uint8_t *dstp = dst;
+
+	while (*src) {
+		int u;
+		if (*src <= 0x7f) {
+			u = *src++;
+		} else if (*src <= 0xdf) {
+			u = (src[0] & 0x1f) << 6 | (src[1] & 0x3f);
+			src += 2;
+		} else if (*src <= 0xef) {
+			u = (src[0] & 0xf) << 12 | (src[1] & 0x3f) << 6 | (src[2] & 0x3f);
+			src += 3;
+		} else {
+			error("Unsupported UTF-8 sequence");
+		}
+
+		// Try splitting
+		uint16_t base = 0;
+		uint8_t mark = 0;
+		if (u == u'ゔ') { base = u'う'; mark = JIS_DAKUTEN; }
+		else if (u >= u'が' && u <= u'ぢ' && (u % 2 == 0)) { base = u - 1; mark = JIS_DAKUTEN; }
+		else if (u >= u'づ' && u <= u'ど' && (u % 2 != 0)) { base = u - 1; mark = JIS_DAKUTEN; }
+		else if (u >= u'ば' && u <= u'ぽ' && (u - u'は') % 3 == 1) { base = u - 1; mark = JIS_DAKUTEN; }
+		else if (u >= u'ば' && u <= u'ぽ' && (u - u'は') % 3 == 2) { base = u - 2; mark = JIS_HANDAKUTEN; }
+		else if (u == u'ヴ') { base = u'ウ'; mark = JIS_DAKUTEN; }
+		else if (u >= u'ガ' && u <= u'ヂ' && (u % 2 == 0)) { base = u - 1; mark = JIS_DAKUTEN; }
+		else if (u >= u'ヅ' && u <= u'ド' && (u % 2 != 0)) { base = u - 1; mark = JIS_DAKUTEN; }
+		else if (u >= u'バ' && u <= u'ポ' && (u - u'ハ') % 3 == 1) { base = u - 1; mark = JIS_DAKUTEN; }
+		else if (u >= u'バ' && u <= u'ポ' && (u - u'ハ') % 3 == 2) { base = u - 2; mark = JIS_HANDAKUTEN; }
+
+		if (base) {
+			int b_base = unicode_to_msx(base, table);
+			if (b_base != -1) {
+				*dstp++ = (uint8_t)b_base;
+				*dstp++ = mark;
+				continue;
+			}
+		} else {
+			int b = unicode_to_msx(u, table);
+			if (b != -1) {
+				*dstp++ = (uint8_t)b;
+				continue;
+			}
+		}
+		error("Codepoint U+%04X cannot be converted to MSX", u);
+	}
+	*dstp = '\0';
+	if (out_len)
+		*out_len = dstp - dst;
+	return (char *)dst;
+}
+
+char *utf2msx_msg(const char *str, int *out_len) {
+	return utf2msx(str, msx_msg_table, out_len);
+}
+
+char *utf2msx_data(const char *str) {
+	return utf2msx(str, msx_ag00_table, NULL);
+}
+
+bool is_msx_message_char(uint8_t c) {
+	return msx_msg_table[c] != 0;
 }

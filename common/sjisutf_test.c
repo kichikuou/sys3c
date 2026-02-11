@@ -18,6 +18,63 @@
 #include "common.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+static void test_msx(void) {
+	const char *msg_utf8 = "あいうえおかきくけこがぎぐげごぱぴぷぺぽヴＡＢＣ";
+	int len;
+	char *msx = utf2msx_msg(msg_utf8, &len);
+	char *sjis = msx2sjis_msg(msx, len);
+	char *utf8_back = sjis2utf(sjis);
+	if (strcmp(msg_utf8, utf8_back) != 0) {
+		printf("[FAIL] msx2sjis_msg/utf2msx_msg roundtrip failed\n");
+		printf("  Expected: %s\n", msg_utf8);
+		printf("  Got:      %s\n", utf8_back);
+		exit(1);
+	}
+	free(msx);
+	free(sjis);
+	free(utf8_back);
+
+	const char *data_utf8 = "あいうえおＡＢＣ";
+	char *msx_data = utf2msx_data(data_utf8);
+	char *sjis_data = msx2sjis_data(msx_data);
+	char *utf8_data_back = sjis2utf(sjis_data);
+	if (strcmp(data_utf8, utf8_data_back) != 0) {
+		printf("[FAIL] msx2sjis_data/utf2msx_data roundtrip failed\n");
+		printf("  Expected: %s\n", data_utf8);
+		printf("  Got:      %s\n", utf8_data_back);
+		exit(1);
+	}
+	free(msx_data);
+	free(sjis_data);
+	free(utf8_data_back);
+
+	// Test dakuten/handakuten specifically
+	// 'が' is 'か' (0x96 in msg table) + dakuten (0xDE)
+	char *msx_ga = utf2msx_msg("が", &len);
+	if (len != 2 || (uint8_t)msx_ga[0] != 0x96 || (uint8_t)msx_ga[1] != 0xde) {
+		printf("[FAIL] utf2msx_msg('が') failed: len=%d, bytes=%02x %02x\n", len, (uint8_t)msx_ga[0], (uint8_t)msx_ga[1]);
+		exit(1);
+	}
+	char *sjis_ga = msx2sjis_msg(msx_ga, len);
+	// SJIS for 'が' is 0x82AA.
+	if ((uint8_t)sjis_ga[0] != 0x82 || (uint8_t)sjis_ga[1] != 0xaa) {
+		printf("[FAIL] msx2sjis_msg('が') failed: bytes=%02x %02x\n", (uint8_t)sjis_ga[0], (uint8_t)sjis_ga[1]);
+		exit(1);
+	}
+	free(msx_ga);
+	free(sjis_ga);
+
+	if (!is_msx_message_char(0x91)) { // 'あ'
+		printf("[FAIL] is_msx_message_char(0x91) should be true\n");
+		exit(1);
+	}
+	if (is_msx_message_char(0x20)) { // Invalid (ACT command area)
+		printf("[FAIL] is_msx_message_char(0x20) should be false\n");
+		exit(1);
+	}
+}
 
 static void test_compaction(void) {
 	for (int c = 0; c < 256; c++) {
@@ -55,4 +112,5 @@ static void test_compaction(void) {
 
 void sjisutf_test(void) {
 	test_compaction();
+	test_msx();
 }
