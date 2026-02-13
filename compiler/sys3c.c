@@ -189,9 +189,8 @@ static void build(Vector *src_paths, Vector *variables, Vector *verbs, Vector *o
 		if (i != 1) {
 			char *base = strrchr(dri_path, '/');
 			base = base ? base + 1 : dri_path;
-			if (toupper(*base) != 'A')
+			if (!dri_filename(base, i))
 				error("cannot determine output filename");
-			*base += i - 1;
 		}
 		FILE *fp = checked_fopen(dri_path, "wb");
 		dri_write(dri, i, fp);

@@ -151,6 +151,8 @@ typedef struct {
 
 void dri_write(Vector *entries, int volume, FILE *fp);
 Vector *dri_read(Vector *entries, const char *path);
+int dri_volume_number(const char *fname);
+bool dri_filename(char *adisk_name, int volume);
 
 // ag00.c
 

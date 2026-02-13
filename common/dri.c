@@ -155,8 +155,39 @@ Vector *dri_read(Vector *entries, const char *path) {
 	}
 	close(fd);
 
-	int volume = toupper(basename_utf8(path)[0]) - 'A' + 1;
+	char *basename = basename_utf8(path);
+	int volume = dri_volume_number(basename);
+	if (!volume)
+		error("cannot determine volume number from filename: %s", basename);
 	dri_read_entries(entries, volume, p, size);
 
 	return entries;
+}
+
+int dri_volume_number(const char *fname) {
+	// ADISK.DAT, BDISK.DAT, ...
+	char *ext = strrchr(fname, '.');
+	if (ext && !strcasecmp(ext, ".DAT") && isalpha(fname[0]))
+		return toupper(fname[0]) - 'A' + 1;
+	// DISK-A, DISK-B, ...
+	char *hyphen = strrchr(fname, '-');
+	if (hyphen && isalpha(hyphen[1]) && hyphen[2] == '\0')
+		return toupper(hyphen[1]) - 'A' + 1;
+	return 0;
+}
+
+bool dri_filename(char *adisk_name, int volume) {
+	// A*.DAT
+	char *ext = strrchr(adisk_name, '.');
+	if (ext && !strcasecmp(ext, ".DAT") && toupper(adisk_name[0]) == 'A') {
+		adisk_name[0] += volume - 1;
+		return true;
+	}
+	// *-A
+	char *hyphen = strrchr(adisk_name, '-');
+	if (hyphen && toupper(hyphen[1]) == 'A' && hyphen[2] == '\0') {
+		hyphen[1] += volume - 1;
+		return true;
+	}
+	return false;
 }

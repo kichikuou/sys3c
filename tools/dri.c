@@ -41,6 +41,18 @@ static void usage(void) {
 	puts("Run 'dri help <command>' for more information about a specific command.");
 }
 
+static bool is_archive_filename(const char *path) {
+	// *.DAT
+	const char *dot = strrchr(path, '.');
+	if (dot && !strcasecmp(dot, ".DAT"))
+		return true;
+	// *-?
+	const char *hyphen = strrchr(path, '-');
+	if (hyphen && isalpha(hyphen[1]) && hyphen[2] == '\0')
+		return true;
+	return false;
+}
+
 static Vector *read_dris(int *pargc, char **pargv[]) {
 	int argc = *pargc;
 	char **argv = *pargv;
@@ -58,8 +70,7 @@ static Vector *read_dris(int *pargc, char **pargv[]) {
 
 	Vector *dri = NULL;
 	for (int i = 0; i < argc; i++) {
-		const char *dot = strrchr(argv[i], '.');
-		if (!dot || strcasecmp(dot, ".dat"))
+		if (!is_archive_filename(argv[i]))
 			break;
 		dri = dri_read(dri, argv[i]);
 		*pargc -= 1;
@@ -219,16 +230,15 @@ static int do_create(int argc, char *argv[]) {
 	if (manifest) {
 		char *dirname = dirname_utf8(dri_path);
 		char *basename = basename_utf8(dri_path);
-		if (toupper(basename[0]) != 'A')
-			error("dri: output filename must begin with 'A'");
-		char base = basename[0] - 1;
 
 		uint32_t vol_bits = add_files_from_manifest(entries, manifest);
 		for (int vol = 1; vol <= DRI_MAX_VOLUME; vol++) {
 			if ((vol_bits & 1 << vol) == 0)
 				continue;
-			basename[0] = base + vol;
-			FILE *fp = checked_fopen(path_join(dirname, basename), "wb");
+			char *dri_fname = strdup(basename);
+			if (!dri_filename(dri_fname, vol))
+				error("dri: cannot determine output filename");
+			FILE *fp = checked_fopen(path_join(dirname, dri_fname), "wb");
 			dri_write(entries, vol, fp);
 			fclose(fp);
 		}

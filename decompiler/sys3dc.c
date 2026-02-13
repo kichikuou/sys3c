@@ -95,6 +95,11 @@ static bool is_directory(const char *path) {
 	return stat(path, &st) == 0 && S_ISDIR(st.st_mode);
 }
 
+static bool is_scenario_archive(const char *fname) {
+	return (isalpha(fname[0]) && !strcasecmp(fname + 1, "DISK.DAT")) ||
+		(!strncasecmp(fname, "DISK-", 5) && isalpha(fname[5]) && fname[6] == '\0');
+}
+
 static void find_input_files(const char *dir, int *argc, char ***argv) {
 	if (config.game_id == RANCE2_HINT) {
 		*argc = 2;
@@ -115,8 +120,7 @@ static void find_input_files(const char *dir, int *argc, char ***argv) {
 		error("%s: %s", dir, strerror(errno));
 	struct dirent *d;
 	while ((d = readdir(dp))) {
-		if ((isalpha(d->d_name[0]) && !strcasecmp(d->d_name + 1, "DISK.DAT")) ||
-				!strcasecmp(d->d_name, "AG00.DAT")) {
+		if (is_scenario_archive(d->d_name) || !strcasecmp(d->d_name, "AG00.DAT")) {
 			if (config.game_id != RANCE2 || toupper(d->d_name[0]) != 'G')
 				vec_push(files, path_join(dir, d->d_name));
 		}
@@ -205,16 +209,18 @@ int main(int argc, char *argv[]) {
 			continue;
 		}
 		scos = dri_read(scos, argv[i]);
-		switch (toupper(basename[0])) {
-		case 'A':
+		switch (dri_volume_number(basename)) {
+		case 1:
 			adisk_name = basename;
 			adisk_crc = calc_crc32(argv[i]);
 			break;
-		case 'B':
+		case 2:
 			bdisk_crc = calc_crc32(argv[i]);
 			break;
 		}
 	}
+	if (!scos)
+		error("No input files found");
 	if (config.verbose)
 		printf("adisk_crc = %08x, bdisk_crc = %08x\n", adisk_crc, bdisk_crc);
 	if (config.game_id == UNKNOWN_GAME) {
