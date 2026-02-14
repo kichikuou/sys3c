@@ -161,6 +161,7 @@ typedef struct {
 	Vector *objs;
 	int uk1;
 	int uk2;
+	const char *filename;
 } AG00;
 
 AG00 *ag00_read(const char *path);

@@ -214,14 +214,15 @@ static void build(Vector *src_paths, Vector *variables, Vector *verbs, Vector *o
 				objs->data[i] = utf2msx_data(objs->data[i]);
 			break;
 		}
+		const char* ag00_path = config.verbobj_file ? config.verbobj_file : path_join(dirname_utf8(adisk_name), "AG00.DAT");
 		AG00 ag00 = {
 			.verbs = verbs,
 			.objs = objs,
 			.uk1 = config.ag00_uk1,
 			.uk2 = config.ag00_uk2,
+			.filename = basename_utf8(ag00_path),
 		};
-		const char* ag00_name = config.game_id == RANCE2_HINT ? "GG00.DAT" : "AG00.DAT";
-		ag00_write(&ag00, path_join(dirname_utf8(adisk_name), ag00_name));
+		ag00_write(&ag00, ag00_path);
 	}
 
 	if (config.debug) {

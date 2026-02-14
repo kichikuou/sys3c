@@ -67,6 +67,8 @@ void load_config(FILE *fp, const char *cfg_dir) {
 			config.sys0dc_offby1_error = to_bool(val);
 		} else if (sscanf(line, "adisk_name = %s", val)) {
 			config.adisk_name = path_join(cfg_dir, val);
+		} else if (sscanf(line, "verbobj_file = %s", val)) {
+			config.verbobj_file = path_join(cfg_dir, val);
 		} else if (sscanf(line, "outdir = %s", val)) {
 			config.outdir = path_join(cfg_dir, val);
 		} else if (sscanf(line, "unicode = %s", val)) {

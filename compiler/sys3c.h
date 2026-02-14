@@ -21,6 +21,7 @@
 
 typedef struct {
 	const char *adisk_name;
+	const char *verbobj_file;
 
 	SysVer sys_ver;
 	GameId game_id;

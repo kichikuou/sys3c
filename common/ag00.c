@@ -68,6 +68,7 @@ AG00 *ag00_read(const char *path) {
 	ag00->objs = objs;
 	ag00->uk1 = uk1;
 	ag00->uk2 = uk2;
+	ag00->filename = basename_utf8(path);
 	return ag00;
 }
 

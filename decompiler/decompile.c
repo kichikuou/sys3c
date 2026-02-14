@@ -561,13 +561,15 @@ static void decompile_page(int page) {
 		dc_printf("pragma default_address 0x%04x:\n", sco->default_addr);
 }
 
-static void write_config(const char *path, const char *adisk_name) {
+static void write_config(const char *path, const char *adisk_name, const char *ag00_name) {
 	if (dc.scos->len == 0)
 		return;
 	FILE *fp = checked_fopen(path, "w+");
 	fprintf(fp, "game = %s\n", game_id_to_name(config.game_id));
 	if (adisk_name)
 		fprintf(fp, "adisk_name = %s\n", adisk_name);
+	if (ag00_name)
+		fprintf(fp, "verbobj_file = %s\n", ag00_name);
 
 	fputs("hed = sys3dc.hed\n", fp);
 	fputs("variables = variables.txt\n", fp);
@@ -711,7 +713,7 @@ void decompile(Vector *scos, AG00 *ag00, const char *outdir, const char *adisk_n
 	if (config.verbose)
 		puts("Generating config files...");
 
-	write_config(path_join(outdir, "sys3c.cfg"), adisk_name);
+	write_config(path_join(outdir, "sys3c.cfg"), adisk_name, ag00 ? ag00->filename : NULL);
 	write_hed(path_join(outdir, "sys3dc.hed"));
 	write_txt(path_join(outdir, "variables.txt"), dc.variables);
 	if (ag00) {

@@ -460,8 +460,10 @@ static int do_compare(int argc, char *argv[]) {
 	}
 	const char *drifile1 = argv[1];
 	const char *drifile2 = argv[2];
-	if (!strcasecmp(basename_utf8(drifile1) + 1, "G00.DAT") &&
-	    !strcasecmp(basename_utf8(drifile2) + 1, "G00.DAT")) {
+	if ((!strcasecmp(basename_utf8(drifile1) + 1, "G00.DAT") &&
+	     !strcasecmp(basename_utf8(drifile2) + 1, "G00.DAT")) ||
+	    (!strcasecmp(basename_utf8(drifile1), "AO00.ASC") &&
+	     !strcasecmp(basename_utf8(drifile2), "AO00.ASC"))) {
 		return compare_ag00(drifile1, drifile2);
 	}
 

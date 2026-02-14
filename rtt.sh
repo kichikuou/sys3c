@@ -49,7 +49,7 @@ $bin/sys3c -p "$out"/sys3c.cfg || Exit 1
 for file in "$@"; do
 	[[ "$file" == -* ]] && continue
 	base=$(basename "$file")
-	if [[ "$file" == *.DAT ]]; then
+	if [[ "$base" == *.DAT || "$base" == DISK-? || "$base" == *.ASC ]]; then
 		$bin/dri compare "$file" "$out"/"$base" || Exit 1
 	else
 		cmp "$file" "$out"/"$base" || Exit 1

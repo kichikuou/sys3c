@@ -100,6 +100,12 @@ static bool is_scenario_archive(const char *fname) {
 		(!strncasecmp(fname, "DISK-", 5) && isalpha(fname[5]) && fname[6] == '\0');
 }
 
+static bool is_verbobj_file(const char *fname) {
+	if (config.game_id == RANCE2_HINT)
+		return !strcasecmp(fname, "GG00.DAT");
+	return !strcasecmp(fname, "AG00.DAT") || !strcasecmp(fname, "AO00.ASC");
+}
+
 static void find_input_files(const char *dir, int *argc, char ***argv) {
 	if (config.game_id == RANCE2_HINT) {
 		*argc = 2;
@@ -120,7 +126,7 @@ static void find_input_files(const char *dir, int *argc, char ***argv) {
 		error("%s: %s", dir, strerror(errno));
 	struct dirent *d;
 	while ((d = readdir(dp))) {
-		if (is_scenario_archive(d->d_name) || !strcasecmp(d->d_name, "AG00.DAT")) {
+		if (is_scenario_archive(d->d_name) || is_verbobj_file(d->d_name)) {
 			if (config.game_id != RANCE2 || toupper(d->d_name[0]) != 'G')
 				vec_push(files, path_join(dir, d->d_name));
 		}
@@ -204,7 +210,7 @@ int main(int argc, char *argv[]) {
 	uint32_t adisk_crc = 0, bdisk_crc = 0;
 	for (int i = 0; i < argc; i++) {
 		char *basename = basename_utf8(argv[i]);
-		if (!strcasecmp(basename, config.game_id == RANCE2_HINT ? "GG00.DAT" : "AG00.DAT")) {
+		if (is_verbobj_file(basename)) {
 			ag00 = ag00_read(argv[i]);
 			continue;
 		}
