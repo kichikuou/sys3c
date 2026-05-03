@@ -28,7 +28,7 @@ jobs:
           asciidoctor:p
 
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: Build
       run: |
@@ -50,7 +50,7 @@ jobs:
         cp build/*.html artifacts/docs
 
     - name: Upload artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: sys3c${{ matrix.archive-suffix }}
         path: artifacts
