@@ -73,9 +73,9 @@
 #define ADISK_PROSTUDENTG_CD	0xfb0e4a63	// Prostudent -G- (CD)
 #define ADISK_PROG_OMAKE	0x8ba18bff	// Prostudent G おまけ (CRC32 of AGAME.DAT)
 #define ADISK_RANCE41		0xa43fb4b6	// Rance 4.1
-#define CRC32_RANCE41_ENG	0xc39ca9e6	// Rance 4.1 (English) 2.0
-#define CRC32_RANCE42		0x04d24d1e	// Rance 4.2
-#define CRC32_RANCE42_ENG	0x7e46c85	// Rance 4.2 (English) 2.0
+#define ADISK_RANCE41_ENG	0xc39ca9e6	// Rance 4.1 (English) 2.0
+#define ADISK_RANCE42		0x04d24d1e	// Rance 4.2
+#define ADISK_RANCE42_ENG	0x7e46c85	// Rance 4.2 (English) 2.0
 #define ADISK_AYUMI_CD		0xd2bed9ee	// あゆみちゃん物語 (CD)
 #define ADISK_AYUMI_JISSHA_256	0x00d15a2b	// あゆみちゃん物語 実写版
 #define ADISK_AYUMI_JISSHA_FULL	0x5f66ff1d	// あゆみちゃん物語 フルカラー実写版
