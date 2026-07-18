@@ -41,10 +41,10 @@
 #define ADISK_TOUSHIN		0x62327908	// 闘神都市
 #define ADISK_TOUSHIN_HINT	0xac337537	// 闘神都市 ヒントディスク
 #define ADISK_VAMPIRE		0x957bcfbf	// Little Vampire
-#define ADISK_VAMPIRE_ENG	0x61985a7f	// Little Vampire (English) Patch 1.5
+#define ADISK_VAMPIRE_ENG	0x61985a7f	// Little Vampire (English) Patch 2.0
 #define ADISK_YAKATA		0x8cef6fa6	// ALICEの館
 #define ADISK_GAKUEN		0xe4d6ec66	// 学園戦記 (unofficial system1 port) 1.0JP
-#define ADISK_GAKUEN_ENG	0x6ba8c102	// Gakuen Senki (English) 1.0
+#define ADISK_GAKUEN_ENG	0x6ba8c102	// Gakuen Senki (English) 1.2
 #define ADISK_GAKUEN_MSX	0x3e0a4597	// 学園戦記 (MSX2) A-DISK
 #define ADISK_AYUMI_FD		0x4e2fed2a	// あゆみちゃん物語 (FD)
 #define ADISK_AYUMI_HINT	0xf6bd963a	// あゆみちゃん物語 ヒントディスク
@@ -73,9 +73,9 @@
 #define ADISK_PROSTUDENTG_CD	0xfb0e4a63	// Prostudent -G- (CD)
 #define ADISK_PROG_OMAKE	0x8ba18bff	// Prostudent G おまけ (CRC32 of AGAME.DAT)
 #define ADISK_RANCE41		0xa43fb4b6	// Rance 4.1
-#define ADISK_RANCE41_ENG	0x811f4ff3	// Rance 4.1 (English) 1.5 Beta
+#define ADISK_RANCE41_ENG	0xc39ca9e6	// Rance 4.1 (English) 2.0
 #define ADISK_RANCE42		0x04d24d1e	// Rance 4.2
-#define ADISK_RANCE42_ENG	0xa97cc370	// Rance 4.2 (English) 1.5 Beta
+#define ADISK_RANCE42_ENG	0x7e46c85	// Rance 4.2 (English) 2.0
 #define ADISK_AYUMI_CD		0xd2bed9ee	// あゆみちゃん物語 (CD)
 #define ADISK_AYUMI_JISSHA_256	0x00d15a2b	// あゆみちゃん物語 実写版
 #define ADISK_AYUMI_JISSHA_FULL	0x5f66ff1d	// あゆみちゃん物語 フルカラー実写版
