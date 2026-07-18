@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.0 - 2026-07-18
+- Added support for original (MSX2) Gakuen Senki.
+- Added automatic detection of Rance 4.1 and 4.2 English Patch 2.0.
+- The decompiler now reads the game ID from `system3.ini` when it cannot detect
+  the game from the `ADISK.DAT` file.
+
 ## 0.4.1 - 2026-02-07
 - decompiler: Exit with code 2 when the game cannot be determined.
 - dri: Fixed `dri create <drifile> <file>...` always creating an empty archive.

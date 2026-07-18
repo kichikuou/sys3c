@@ -21,7 +21,7 @@
 #include <stdnoreturn.h>
 #include <time.h>
 
-#define VERSION "0.4.1"
+#define VERSION "0.5.0"
 
 #define EXIT_UNKNOWN_GAME 2
 
