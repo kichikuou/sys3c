@@ -18,9 +18,12 @@
 #include "common.h"
 #include "s2utbl.h"
 #include <errno.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <uchar.h>
+
+// Since macOS lacks uchar.h, we define char16_t ourselves in accordance with the C Standard.
+typedef uint_least16_t char16_t;
 
 static const uint8_t hankaku81[] = {
 	0x20, 0xa4, 0xa1, 0x00, 0x00, 0xa5, 0x00, 0x00,
