@@ -95,6 +95,54 @@ static bool is_directory(const char *path) {
 	return stat(path, &st) == 0 && S_ISDIR(st.st_mode);
 }
 
+static char *trim(char *s) {
+	while (isspace((unsigned char)*s))
+		s++;
+	char *end = s + strlen(s);
+	while (end > s && isspace((unsigned char)end[-1]))
+		end--;
+	*end = '\0';
+	return s;
+}
+
+static GameId game_id_from_ini(const char *dir) {
+	char *path = path_join(dir, "system3.ini");
+	FILE *fp = fopen(path, "r");
+	free(path);
+	if (!fp)
+		return UNKNOWN_GAME;
+
+	bool config_section = false;
+	char line[256];
+	for (int lineno = 1; fgets(line, sizeof(line), fp); lineno++) {
+		char section[256];
+		if (line[0] == ';')
+			continue;
+		if (sscanf(line, "[%255[^]]]", section) == 1) {
+			config_section = !strcasecmp(section, "config");
+			continue;
+		}
+		if (!config_section)
+			continue;
+
+		char *eq = strchr(line, '=');
+		if (!eq)
+			continue;
+		*eq = '\0';
+		if (strcasecmp(trim(line), "game"))
+			continue;
+
+		char *name = trim(eq + 1);
+		GameId game_id = game_id_from_name(name);
+		if (game_id == UNKNOWN_GAME)
+			error("system3.ini:%d: Unknown game ID '%s'", lineno, name);
+		fclose(fp);
+		return game_id;
+	}
+	fclose(fp);
+	return UNKNOWN_GAME;
+}
+
 static bool is_scenario_archive(const char *fname) {
 	return (isalpha(fname[0]) && !strcasecmp(fname + 1, "DISK.DAT")) ||
 		(!strncasecmp(fname, "DISK-", 5) && isalpha(fname[5]) && fname[6] == '\0');
@@ -146,6 +194,7 @@ int main(int argc, char *argv[]) {
 	init(&argc, &argv);
 
 	const char *outdir = NULL;
+	const char *game_dir = NULL;
 
 	int opt;
 	while ((opt = getopt_long(argc, argv, short_options, long_options, NULL)) != -1) {
@@ -196,6 +245,7 @@ int main(int argc, char *argv[]) {
 
 	if (argc == 1 && is_directory(argv[0])) {
 		const char *dir = argv[0];
+		game_dir = dir;
 		find_input_files(dir, &argc, &argv);
 		if (argc == 0) {
 			if (!strcmp(dir, "."))
@@ -231,6 +281,8 @@ int main(int argc, char *argv[]) {
 		printf("adisk_crc = %08x, bdisk_crc = %08x\n", adisk_crc, bdisk_crc);
 	if (config.game_id == UNKNOWN_GAME) {
 		config.game_id = detect_game_id(adisk_crc, bdisk_crc);
+		if (config.game_id == UNKNOWN_GAME && game_dir)
+			config.game_id = game_id_from_ini(game_dir);
 		if (config.game_id == UNKNOWN_GAME) {
 			fputs("Cannot detect game ID. Please specify --game.\n", stderr);
 			exit(EXIT_UNKNOWN_GAME);
