@@ -114,8 +114,13 @@ static char *read_file(const char *path) {
 }
 
 static char *trim_right(char *str) {
-	for (char *p = str + strlen(str) - 1; p >= str && isspace(*p); p--)
-		*p = '\0';
+	char *end = strchr(str, ';');
+	if (end)
+		*end = '\0';
+	else
+		end = str + strlen(str);
+	while (end > str && isspace((unsigned char)end[-1]))
+		*--end = '\0';
 	return str;
 }
 
